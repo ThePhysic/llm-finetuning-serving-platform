@@ -50,7 +50,7 @@ targets, audits duplicates and near duplicates, and creates immutable manifests.
 Connected scenario/family/near-duplicate groups remain together. Category-stratified
 allocation preserves class coverage when at least three independent groups exist
 per category signature; insufficient groups cause a visible error. The primary
-`triage-v2` test includes eight independent unseen families, with five correlated
+`triage-v3` test includes eight independent unseen families, with five correlated
 renderings each. General-instruction regression data is never a training input.
 
 `training.py` uses a visible PyTorch optimization loop and PEFT adapters. Prompt

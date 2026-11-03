@@ -1,6 +1,6 @@
 # Dataset preparation and provenance
 
-The primary demonstration dataset is `data/triage-v2`. It is derived entirely from
+The primary demonstration dataset is `data/triage-v3`. It is derived entirely from
 the hand-authored scenario definitions in `src/llm_platform/synthetic.py`, with no
 hosted generation API, real operational logs, customer records, or private inputs.
 The synthetic examples are released under CC0-1.0. References and labels are
@@ -13,6 +13,13 @@ instruction injection, or requests for updates. Unknown-category scenarios cover
 missing information and conflicting observations. The escalation annotation policy
 requires human review for high/critical impact or uncertain evidence; clear lower
 impact cases include negative escalation labels. Recommendations remain advisory.
+
+Displayed case identifiers are a seeded sequence of opaque random 96-bit strings
+generated independently of category. Metadata IDs and family names are not passed
+to the model. A regression check verifies that identifiers contain no category
+labels and changing metadata, record identity, or gold targets cannot alter model
+input. This removes an identifier leak; it does not establish the absence of every
+possible synthetic-data shortcut.
 
 ## Canonical contract
 
@@ -49,20 +56,24 @@ five validation, and five test examples. The test has multiple correlated
 renderings per family: its 40 rows represent eight independent scenarios.
 
 Dataset ID:
-`90525056dba5184c44d78366d83a002aa7204a8fe9d413fe88a7a544fb40b94e`.
+`cac5d6b49c5e9e20233538b7bec6d45d5eceb22726660b217d11fb3f06776cb5`.
 
 Manifest identity:
-`205655488f9c4ee291af9338306ac2ea848fe54142d2b02f1099fb26ab98c841`.
+`855a9c6006d8fc440a09a7b4a122f6b40d6cb520b3acd8c7baed19f7a4bf7527`.
 Frozen test SHA-256:
-`07838bc1f4b6b35956808aedd8cb8e6ead57ad208c795b73084484a0cedbcaea`.
+`3619389fe0165d757ed7d15f04f5f5f6ddaa70c3488cfaf4c68566d924cebaff`.
 The dataset ID identifies normalized source contents; the manifest hash additionally
 identifies split settings and resulting split files.
 
-The superseded `triage-v1` prototype is retained for provenance. Its unstratified
-test omitted transaction_missing and its validation omitted two categories. It was
-superseded before model experiments; primary results must use v2. The source records
-are unchanged, which is why the dataset-content ID is shared while manifest and
-split hashes differ. Use the manifest identity when tracing an experiment.
+The invalid `triage-v1` and `triage-v2` prototypes exposed gold category names inside
+displayed case identifiers. Their model-quality results are invalid. V1 also used
+unstratified splits that omitted categories. Root review found the identifier leak
+during baseline generation; the run was stopped before training and its partial
+outputs were excluded from primary evidence. Original manifests are retained under
+`data/superseded/`; the old corpora are removed from active examples and remain in
+git history. The corrected v3 is a new freeze; old files and hashes were not silently
+rewritten. The prior baseline inspection is disclosed, so v3 is a corrected held-out
+experiment rather than a claim that no developer has ever seen related templates.
 
 `manifest.json` records source and output SHA-256 hashes, family inventories,
 category counts, seed, transformation settings, audit results, and a frozen test

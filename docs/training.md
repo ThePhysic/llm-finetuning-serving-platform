@@ -15,8 +15,8 @@ responses first. Then run from the repository root:
 ```bash
 python -m llm_platform.training \
   --config configs/train-4060.json \
-  --train data/triage-v2/train.jsonl \
-  --validation data/triage-v2/validation.jsonl \
+  --train data/triage-v3/train.jsonl \
+  --validation data/triage-v3/validation.jsonl \
   --output runs/sft-001
 ```
 

@@ -16,6 +16,6 @@
   "gradient_checkpointing": true,
   "validation_every": 20,
   "checkpoint_every": 40,
-  "dataset_id": "90525056dba5184c44d78366d83a002aa7204a8fe9d413fe88a7a544fb40b94e",
+  "dataset_id": "cac5d6b49c5e9e20233538b7bec6d45d5eceb22726660b217d11fb3f06776cb5",
   "experiment_id": "qwen05b-lora-sft-4060"
 }

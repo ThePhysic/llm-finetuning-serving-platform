@@ -57,12 +57,18 @@ logged by default. Generated recommendations have no action-execution pathway.
 
 ## Bounds, cancellation, and lifecycle
 
-Defaults: 2,048 input tokens, 512 output tokens, 128 KiB request body, one active
+Defaults: 2,048 input tokens, 512 output tokens, 128 KiB request body, a 15-second
+body-upload deadline, one active
 execution, eight waiting requests, a 30-second queue deadline, and a 120-second
 generation deadline. Configure these through `Settings`/the CLI. `max_concurrency`
 is a gateway admission bound; the Transformers backend serializes generation to
 avoid shared RNG races. vLLM handles its own engine batching. This project does
 not implement vLLM scheduling or attention kernels.
+
+The body-size and upload-time bounds apply to every POST/PUT/PATCH request before
+JSON parsing and authorization dependencies, including administrative endpoints.
+Oversized bodies return `413`; slow uploads return `408` without admitting inference
+or changing deployment. Malformed/non-ASCII bearer headers reliably return `401`.
 
 Each admitted request pins its deployment until backend cancellation and iterator
 cleanup complete. Queue cancellation, generation timeout, and client disconnect

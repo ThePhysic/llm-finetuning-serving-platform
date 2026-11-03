@@ -45,7 +45,7 @@ async def evaluate(package, records, variant, destination, metadata, generation)
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--dataset", type=Path, default=Path("data/triage-v2"))
+    parser.add_argument("--dataset", type=Path, default=Path("data/triage-v3"))
     parser.add_argument("--config", type=Path, default=Path("configs/train-4060.json"))
     parser.add_argument("--work", type=Path, default=Path("runtime/quality-001"))
     parser.add_argument("--evidence", type=Path, default=Path("evidence"))

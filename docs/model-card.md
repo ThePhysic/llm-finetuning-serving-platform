@@ -26,7 +26,7 @@ diagnostic action, ordinal confidence, and a human-review flag.
 
 ## Training data and method
 
-The primary frozen `data/triage-v2` dataset contains 240 training, 40 validation,
+The primary frozen `data/triage-v3` dataset contains 240 training, 40 validation,
 40 test, and eight general-instruction regression records. The 320 triage rows
 represent 64 hand-authored families, with five correlated variants each. Every
 category has 30 training, five validation, and five test rows. All held-out test
@@ -34,9 +34,15 @@ families are unseen during training. General-instruction regression examples are
 excluded from weight fitting and hyperparameter selection.
 
 Dataset content ID:
-`90525056dba5184c44d78366d83a002aa7204a8fe9d413fe88a7a544fb40b94e`.
+`cac5d6b49c5e9e20233538b7bec6d45d5eceb22726660b217d11fb3f06776cb5`.
 Frozen split-manifest identity:
-`205655488f9c4ee291af9338306ac2ea848fe54142d2b02f1099fb26ab98c841`.
+`855a9c6006d8fc440a09a7b4a122f6b40d6cb520b3acd8c7baed19f7a4bf7527`.
+
+Earlier v1/v2 prototypes leaked category labels through displayed case identifiers
+and are invalid for ML comparisons. Review stopped that baseline before training.
+V3 replaces those identifiers with opaque values and freezes new hashes. Superseded
+manifests and this correction remain visible; the corrected experiment is not a
+claim of an untouched real-world dataset or unseen authored templates.
 
 The configured core method is supervised LoRA with completion-only loss on a
 pretrained instruction model. The checked configuration specifies rank, alpha,

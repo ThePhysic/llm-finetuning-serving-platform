@@ -14,7 +14,7 @@ operational actions.
 
 | Component | Implementation | Evidence or documentation |
 |---|---|---|
-| JSON/JSONL validation, grouping and frozen splits | `src/llm_platform/data.py` | [Dataset](docs/dataset.md), `data/triage-v2/manifest.json` |
+| JSON/JSONL validation, grouping and frozen splits | `src/llm_platform/data.py` | [Dataset](docs/dataset.md), `data/triage-v3/manifest.json` |
 | Completion-only GPU LoRA SFT, checkpointing, export | `src/llm_platform/training.py` | [Training](docs/training.md), `configs/train-4060.json` |
 | Controlled baselines, held-out scoring, blinded review | `src/llm_platform/evaluation.py` | [Evaluation](docs/evaluation.md), `evidence/evaluation/` |
 | Immutable packages and promotion history | `src/llm_platform/registry.py` | [Registry](docs/registry.md) |
@@ -34,7 +34,7 @@ python -m pip install --require-hashes -r requirements/cpu.lock
 python -m pip install --no-deps -e .
 pytest -q
 ruff check src tests
-llm-platform data verify data/triage-v2
+llm-platform data verify data/triage-v3
 llm-platform doctor
 ```
 
@@ -56,7 +56,7 @@ python -m pip install --require-hashes -r requirements/cpu.lock
 python -m pip install -r requirements/train.txt
 python -m pip install --no-deps -e .
 python scripts/run_quality_experiment.py \
-  --dataset data/triage-v2 --config configs/train-4060.json \
+  --dataset data/triage-v3 --config configs/train-4060.json \
   --work runtime/quality-001 --evidence evidence
 ```
 

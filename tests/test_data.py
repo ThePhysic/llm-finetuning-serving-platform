@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import copy
 import json
+import re
 import pytest
 
-from llm_platform.data import (audit_records, load_records, normalize_record,
+from llm_platform.data import (CATEGORIES, audit_records, load_records, normalize_record,
                                prepare_dataset, verify_dataset, write_jsonl)
 from llm_platform.synthetic import generate_records
 
@@ -110,3 +111,26 @@ def test_stratification_rejects_rare_categories_instead_of_silent_missing_covera
     write_jsonl(source, rows)
     with pytest.raises(ValueError, match="three independent groups"):
         prepare_dataset(source, tmp_path / "rare")
+
+
+def test_display_ids_and_prompt_inputs_do_not_leak_gold_metadata():
+    from llm_platform.prompts import messages_for
+
+    cases = set()
+    rows = [row for row in generate_records() if row["kind"] == "triage"]
+    for row in rows:
+        report = row["messages"][0]["content"]
+        match = re.search(r"synthetic case ([0-9a-f]{24}):", report)
+        assert match, "displayed case identifiers must be neutral opaque text"
+        cases.add(match[1])
+        assert not any(category in match[1] for category in CATEGORIES)
+        # 'unknown' can legitimately describe an observed processor status.
+        assert not any(category in report for category in CATEGORIES if category != "unknown")
+        assert row["id"] not in report and row["family"] not in report
+        # Modifying gold labels, metadata, and IDs cannot change model input.
+        altered = copy.deepcopy(row)
+        altered.update(id="sensitive-label", scenario_id="different-scenario", family="different-family")
+        altered["metadata"] = {"secret_gold_label": "do-not-leak"}
+        altered["target"] = {"category": "different-gold-label"}
+        assert messages_for(altered, "lora") == messages_for(row, "lora")
+    assert len(cases) == len(rows)

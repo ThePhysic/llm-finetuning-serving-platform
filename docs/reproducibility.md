@@ -32,14 +32,15 @@ remote model code to work around a compatibility error.
 ## Verify and reproduce the frozen dataset
 
 ```bash
-llm-platform data verify data/triage-v2
+llm-platform data verify data/triage-v3
 llm-platform data generate runtime/reproduced-source.jsonl
 llm-platform data prepare runtime/reproduced-source.jsonl runtime/reproduced-data
 ```
 
-The reproduced manifest must match `data/triage-v2/manifest.json`. `triage-v1` is a
-superseded unstratified prototype, preserved for provenance; it is not the primary
-experiment. The checked v2 manifest explicitly records no pre-split tokenizer
+The reproduced manifest must match `data/triage-v3/manifest.json`. `triage-v1` and
+`triage-v2` are invalid prototypes with leaked category identifiers; superseded
+manifests are retained for provenance, and neither is a primary experiment.
+The checked v3 manifest explicitly records no pre-split tokenizer
 validation. Training additionally validates exact tokenizer/chat-template lengths
 and rejects oversized conversations. Never silently truncate gold targets.
 
@@ -58,10 +59,10 @@ config = json.loads(Path('configs/train-4060.json').read_text())
 config['revision'] = base['base_model']['revision']
 Path('runtime/train-pinned.json').write_text(json.dumps(config, indent=2) + '\n')
 PY
-llm-platform evaluate runtime/base data/triage-v2 runtime/baseline-zero --variant zero_shot
-llm-platform evaluate runtime/base data/triage-v2 runtime/baseline-prompted --variant prompted
-llm-platform train runtime/train-pinned.json data/triage-v2 runtime/train-4060
-llm-platform evaluate runtime/train-4060/package data/triage-v2 runtime/adapted --variant lora
+llm-platform evaluate runtime/base data/triage-v3 runtime/baseline-zero --variant zero_shot
+llm-platform evaluate runtime/base data/triage-v3 runtime/baseline-prompted --variant prompted
+llm-platform train runtime/train-pinned.json data/triage-v3 runtime/train-4060
+llm-platform evaluate runtime/train-4060/package data/triage-v3 runtime/adapted --variant lora
 ```
 
 Keep the committed prompts and configuration frozen before the final test. Use
@@ -133,7 +134,7 @@ Prepare the blinded review with a JSON mapping of run names to their outputs:
 ```
 
 ```bash
-llm-platform review prepare data/triage-v2 runtime/review-runs.json runtime/blinded-review
+llm-platform review prepare data/triage-v3 runtime/review-runs.json runtime/blinded-review
 llm-platform review import runtime/human-annotated.jsonl runtime/blinded-review/review_key.json runtime/human-results.json
 ```
 
