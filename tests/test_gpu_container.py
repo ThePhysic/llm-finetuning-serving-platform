@@ -102,6 +102,22 @@ def test_recorder_redacts_process_output_and_argv(monkeypatch, tmp_path):
     assert "[REDACTED]" in saved
 
 
+def test_image_inspection_filters_environment_before_recording(monkeypatch, tmp_path):
+    seen = []
+    def fake_run(args, **kwargs):
+        seen.append(args)
+        assert args[:3] == ["docker", "image", "inspect"]
+        template = args[args.index("--format") + 1]
+        assert ".Config.Env" not in template and "{{json .}}" not in template
+        assert ".Id" in template and ".RepoDigests" in template and ".Config.User" in template
+        return subprocess.CompletedProcess(args, 0, '{"Id":"sha256:abc","RepoDigests":[],"User":"platform"}', "")
+    monkeypatch.setattr(subprocess, "run", fake_run)
+    result = harness.image_inventory(harness.Recorder(tmp_path), "owned-image", "image")
+    assert result["User"] == "platform"
+    assert len(seen) == 1
+    assert "Config.Env" not in (tmp_path / "commands.json").read_text()
+
+
 def test_preserved_build_inventory_rejects_tampering(tmp_path):
     for folder in ("source", "build-context"):
         (tmp_path / folder).mkdir()

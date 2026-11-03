@@ -1,6 +1,9 @@
 """Offline advisory identity tests do not establish security or exploitability."""
 import importlib.util
+import os
 from pathlib import Path
+import subprocess
+import sys
 
 import pytest
 
@@ -45,3 +48,13 @@ def test_empty_findings_preserve_skips_instead_of_claiming_a_clean_inventory():
 def test_malformed_identity_cannot_silently_change_audit_counts(bad):
     with pytest.raises(ValueError):
         MODULE.deduplicate({"one": report("p", "1", [bad])})
+
+
+def test_dependency_gpu_probe_refuses_hidden_cuda_before_any_artifact_write(tmp_path):
+    script = Path(__file__).resolve().parents[1] / "scripts" / "polish_training_smoke.py"
+    work, output = tmp_path / "work", tmp_path / "result.json"
+    result = subprocess.run([sys.executable, str(script), "--gpu", "--work", str(work), "--output", str(output)],
+                            env={**os.environ, "CUDA_VISIBLE_DEVICES": ""}, capture_output=True, text=True, timeout=20)
+    assert result.returncode != 0
+    assert "required before importing Torch" in result.stderr
+    assert not work.exists() and not output.exists()

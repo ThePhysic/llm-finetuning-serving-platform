@@ -99,6 +99,12 @@ def stage_build_context(root: Path, output: Path) -> dict:
             "context_files_sha256": hashes, "security_scope": SECURITY_SCOPE}
 
 
+def image_inventory(recorder: Recorder, reference: str, label: str) -> dict:
+    # Filter in Docker itself: Recorder must never receive image Config.Env.
+    template = '{"Id":{{json .Id}},"RepoDigests":{{json .RepoDigests}},"User":{{json .Config.User}}}'
+    return json.loads(recorder.run(["docker", "image", "inspect", reference, "--format", template], label=label))
+
+
 def build(root: Path, output: Path) -> dict:
     output = fresh_output(output)
     recorder = Recorder(output)
@@ -109,8 +115,7 @@ def build(root: Path, output: Path) -> dict:
         recorder.run(["docker", "version", "--format", "{{json .}}"], label="docker-version")
         dockerfile = (output / "build-context/docker/Dockerfile.gpu").read_text(encoding="utf-8")
         base_image = next(line.split()[1] for line in dockerfile.splitlines() if line.upper().startswith("FROM "))
-        base_inventory = json.loads(recorder.run(["docker", "image", "inspect", base_image,
-                                                 "--format", "{{json .}}"], label="base-image-inspect"))
+        base_inventory = image_inventory(recorder, base_image, "base-image-inspect")
         status["base_image"] = {"reference": base_image, "image_id": base_inventory["Id"],
                                 "repo_digests": base_inventory.get("RepoDigests") or []}
         tag = "llm-platform-gpu-verify:" + uuid.uuid4().hex
@@ -118,10 +123,9 @@ def build(root: Path, output: Path) -> dict:
         recorder.run(["docker", "build", "--pull=false", "--progress=plain", "--tag", tag,
                       "--file", str(output / "build-context/docker/Dockerfile.gpu"),
                       str(output / "build-context")], timeout=3600, label="build")
-        image = json.loads(recorder.run(["docker", "image", "inspect", tag, "--format",
-                                       "{{json .}}"], label="image-inspect"))
+        image = image_inventory(recorder, tag, "image-inspect")
         status.update(status="built", image_id=image["Id"], repo_digests=image.get("RepoDigests") or [],
-                      configured_user=image["Config"]["User"])
+                      configured_user=image["User"])
         if status["configured_user"] in {"", "root", "0"}:
             raise ValueError("Built image is configured as root")
         return status
@@ -237,6 +241,7 @@ def smoke(root: Path, build_output: Path, output: Path, base: Path, adapter: Pat
               "adapter_artifact_id": adapter_info["artifact_id"], "synthetic_inputs_only": True,
               "limitations": ["Functional HTTP smoke; no throughput, dependency security or quality certification."]}
     container_id = None
+    facts: dict = {}
     try:
         # Copy and validate the captured bootstrap, never a later live file.
         snapshot = validate_build_inventory(build_output, built)
@@ -259,7 +264,7 @@ def smoke(root: Path, build_output: Path, output: Path, base: Path, adapter: Pat
         url = "http://127.0.0.1:" + bindings[0]["HostPort"]
         auth = {"Authorization": "Bearer " + api_key}
         admin = {"Authorization": "Bearer " + admin_key}
-        facts: dict = {"url": url}
+        facts["url"] = url
         started = time.monotonic()
         with httpx.Client(base_url=url, timeout=180, trust_env=False) as client:
             while True:
@@ -368,6 +373,8 @@ def smoke(root: Path, build_output: Path, output: Path, base: Path, adapter: Pat
         status.update(error_type=type(exc).__name__, error=recorder.redact(str(exc)))
         raise
     finally:
+        # Retain successful intermediate checks when a later HTTP check fails.
+        write_json(output / "http-smoke.json", facts)
         if container_id is not None:
             # Only this exact ID returned by our docker run is ever stopped.
             try:

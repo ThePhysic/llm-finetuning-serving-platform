@@ -99,6 +99,9 @@ async def api_smoke(base_package: Path, adapter_package: Path, candidate_package
                         if line.startswith("data:") and line[5:].strip() != "[DONE]":
                             event = json.loads(line[5:])
                             if any(choice.get("delta", {}).get("content") for choice in event.get("choices", [])):
+                                active_state = (await admin.get("/admin/status")).json()["engine"]
+                                result["active_requests_before_disconnect"] = active_state["active_requests"]
+                                assert active_state["active_requests"] > 0
                                 received = True
                                 break
                     assert received
@@ -195,9 +198,8 @@ def main() -> None:
         record["steps"].append({"name": "real_two_step_lora_training_and_export", "status": "passed"})
         gc.collect()
         torch.cuda.empty_cache()
-        # New serving smoke reuses the actual historical adapter without changing
-        # its bytes. HfApi.model_info above was real metadata resolution, not mocked.
-        os.environ["HF_HUB_OFFLINE"] = "1"
+        # Serving reuses the actual historical adapter and cached immutable base
+        # revision. Hub metadata resolution is real and is never mocked here.
         record["http"] = asyncio.run(api_smoke(args.base_package, args.adapter_package, Path(trained["package"]), args.work))
         record["steps"].append({"name": "real_tcp_sync_sse_auth_cancel_identity_promotion_rollback", "status": "passed"})
         record["status"] = "passed"
