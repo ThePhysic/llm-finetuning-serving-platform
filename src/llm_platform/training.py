@@ -63,52 +63,74 @@ class TrainConfig:
                      "rank", "alpha", "validation_every", "checkpoint_every"):
             if type(getattr(self, name)) is not int or getattr(self, name) <= 0:
                 raise ValueError(f"{name} must be a positive integer")
-        if self.max_seq_length < 16 or self.warmup_steps < 0:
+        if self.max_seq_length < 16 or type(self.warmup_steps) is not int or self.warmup_steps < 0:
             raise ValueError("Invalid sequence length or warmup")
-        if not 0 <= self.dropout < 1 or not math.isfinite(self.learning_rate) or self.learning_rate <= 0:
+        if type(self.seed) is not int or not 0 <= self.seed <= 2**32 - 1:
+            raise ValueError("Seed must be an integer in [0, 2**32 - 1]")
+        if (type(self.dropout) not in {int, float} or not math.isfinite(self.dropout) or not 0 <= self.dropout < 1
+                or type(self.learning_rate) not in {int, float} or not math.isfinite(self.learning_rate) or self.learning_rate <= 0):
             raise ValueError("Invalid dropout or learning rate")
-        if not self.target_modules or any(not isinstance(x, str) or not x for x in self.target_modules):
+        if (type(self.weight_decay) not in {int, float} or not math.isfinite(self.weight_decay) or self.weight_decay < 0
+                or type(self.max_grad_norm) not in {int, float} or not math.isfinite(self.max_grad_norm) or self.max_grad_norm <= 0):
+            raise ValueError("Weight decay must be finite and nonnegative; gradient clipping must be finite and positive")
+        if (not isinstance(self.target_modules, (list, tuple)) or not self.target_modules
+                or any(not isinstance(x, str) or not x.strip() for x in self.target_modules)):
             raise ValueError("target_modules must contain nonempty module names")
-        if self.dtype not in {"float16", "bfloat16", "float32"}:
+        object.__setattr__(self, "target_modules", tuple(self.target_modules))
+        if not isinstance(self.dtype, str) or self.dtype not in {"float16", "bfloat16", "float32"}:
             raise ValueError("Unsupported dtype")
-        if self.device not in {"cpu", "cuda"}:
+        if not isinstance(self.device, str) or self.device not in {"cpu", "cuda"}:
             raise ValueError("device must be cpu or cuda")
+        if type(self.qlora) is not bool or type(self.gradient_checkpointing) is not bool:
+            raise ValueError("Quantization and gradient checkpointing flags must be booleans")
         if self.device == "cpu" and self.dtype != "float32":
             raise ValueError("CPU validation uses float32; it is not GPU training evidence")
         if self.qlora and self.device != "cuda":
             raise ValueError("QLoRA requires CUDA")
-        if not self.dataset_id or not self.experiment_id:
+        if any(not isinstance(value, str) or not value.strip()
+               for value in (self.model_id, self.revision, self.dataset_id, self.experiment_id)):
             raise ValueError("Dataset and experiment identities are required")
+        if self.resume_from is not None and (not isinstance(self.resume_from, str) or not self.resume_from.strip()):
+            raise ValueError("resume_from must be a nonempty checkpoint path string")
 
     @classmethod
     def from_json(cls, path: Path | str) -> "TrainConfig":
-        payload = json.loads(Path(path).read_text(encoding="utf-8"))
+        from llm_platform.data import strict_json_loads
+
+        payload = strict_json_loads(Path(path).read_text(encoding="utf-8"))
+        if not isinstance(payload, dict):
+            raise ValueError("Training configuration must be an object")
         unknown = set(payload) - {f.name for f in fields(cls)}
         if unknown:
             raise ValueError(f"Unknown training settings: {sorted(unknown)}")
         if "target_modules" in payload:
+            if not isinstance(payload["target_modules"], list):
+                raise ValueError("target_modules must be a list of module names")
             payload["target_modules"] = tuple(payload["target_modules"])
         return cls(**payload)
 
 
-def read_records(path: Path | str) -> list[dict[str, Any]]:
-    from llm_platform.data import normalize_record
+def read_records(path: Path | str, max_chars: int = 16000) -> list[dict[str, Any]]:
+    from llm_platform.data import normalize_record, strict_json_loads
 
-    text = Path(path).read_text(encoding="utf-8")
+    text = Path(path).read_text(encoding="utf-8-sig")
     if text.lstrip().startswith("["):
-        records = json.loads(text)
+        records = strict_json_loads(text)
     else:
-        records = [json.loads(line) for line in text.splitlines() if line.strip()]
+        records = [strict_json_loads(line) for line in text.splitlines() if line.strip()]
     if not isinstance(records, list) or not records:
         raise ValueError("A nonempty training/validation dataset is required")
+    normalized = []
     for record in records:
         if not isinstance(record, dict) or "messages" not in record or "target" not in record:
             raise ValueError("Training records require messages and target")
-        if record.get("kind", "triage") != "triage":
+        record = normalize_record(record, max_chars=max_chars)
+        if record["kind"] != "triage":
             raise ValueError("General-instruction regression data must not be used to train this task adapter")
         if record.get("metadata", {}).get("split") == "test":
             raise ValueError("Frozen test data cannot be used for training or validation")
-    return [normalize_record(record) for record in records]
+        normalized.append(record)
+    return normalized
 
 
 def completion_example(tokenizer: Any, record: dict[str, Any], max_length: int) -> dict[str, list[int]]:
@@ -158,13 +180,43 @@ def _code_identity() -> tuple[str, bool]:
     return revision, dirty
 
 
+def _checkpoint_history(state: dict[str, Any]) -> list[dict[str, Any]]:
+    step, history = state.get("step"), state.get("history")
+    if type(step) is not int or step < 1 or not isinstance(history, list) or len(history) != step:
+        raise ValueError("Checkpoint step history is incomplete")
+    previous_elapsed = 0.0
+    for index, event in enumerate(history, 1):
+        if not isinstance(event, dict) or type(event.get("step")) is not int or event["step"] != index:
+            raise ValueError("Checkpoint history contains missing or duplicate steps")
+        for key in ("train_loss", "elapsed_seconds", "validation_loss"):
+            if key not in event and key == "validation_loss":
+                continue
+            value = event.get(key)
+            if type(value) not in {int, float} or not math.isfinite(value) or value < 0:
+                raise ValueError(f"Checkpoint history has invalid {key}")
+        if event["elapsed_seconds"] < previous_elapsed:
+            raise ValueError("Checkpoint elapsed time moves backwards")
+        previous_elapsed = event["elapsed_seconds"]
+    return history
+
+
 def train(config: TrainConfig, train_path: Path | str, validation_path: Path | str,
           output_dir: Path | str) -> dict[str, Any]:
     """Train on real tensors and export a registry-compatible adapter package.
 
     ``output_dir/package`` is immutable export; checkpoints and raw events are
-    kept beside it. Existing output directories are rejected except explicit resume.
+    kept beside it. Resume reads its old checkpoint into a fresh output directory;
+    earlier raw observations and completed exports are never overwritten.
     """
+    train_path, validation_path, output_dir = Path(train_path), Path(validation_path), Path(output_dir)
+    if output_dir.exists():
+        if not output_dir.is_dir():
+            raise ValueError("Training output must be a directory")
+        if ((output_dir / "package").exists() or (output_dir / "result.json").exists()
+                or (output_dir / "export-source" / "training_metrics.json").exists()):
+            raise ValueError("Completed training export already exists; use a fresh output directory")
+        if any(output_dir.iterdir()):
+            raise ValueError("Use a fresh output directory, including when resuming an earlier checkpoint")
     import numpy as np
     import torch
     from huggingface_hub import HfApi
@@ -173,7 +225,6 @@ def train(config: TrainConfig, train_path: Path | str, validation_path: Path | s
 
     from llm_platform.registry import create_package
 
-    train_path, validation_path, output_dir = Path(train_path), Path(validation_path), Path(output_dir)
     if train_path.resolve() == validation_path.resolve():
         raise ValueError("Training and validation datasets must differ")
     dataset_manifest = None
@@ -186,15 +237,15 @@ def train(config: TrainConfig, train_path: Path | str, validation_path: Path | s
             raise ValueError("Frozen dataset training must use its train and validation splits")
         if config.dataset_id != dataset_manifest["dataset_id"]:
             raise ValueError("Configured dataset identity differs from verified frozen dataset")
-    records, validation_records = read_records(train_path), read_records(validation_path)
+    max_chars = dataset_manifest["settings"]["max_chars"] if dataset_manifest else 16000
+    records = read_records(train_path, max_chars=max_chars)
+    validation_records = read_records(validation_path, max_chars=max_chars)
     train_scenarios = {r.get("scenario_id", r.get("id")) for r in records}
     validation_scenarios = {r.get("scenario_id", r.get("id")) for r in validation_records}
     if (train_scenarios & validation_scenarios) - {None}:
         raise ValueError("Training and validation scenario leakage")
     if {r["family"] for r in records} & {r["family"] for r in validation_records}:
         raise ValueError("Training and validation family leakage")
-    if output_dir.exists() and any(output_dir.iterdir()) and not config.resume_from:
-        raise ValueError("Output directory must be empty; use a new immutable experiment directory")
     output_dir.mkdir(parents=True, exist_ok=True)
     if config.device == "cuda" and not torch.cuda.is_available():
         raise RuntimeError("CUDA requested but unavailable; refusing to substitute CPU training")
@@ -213,8 +264,8 @@ def train(config: TrainConfig, train_path: Path | str, validation_path: Path | s
     if not re.fullmatch(r"[0-9a-f]{40,64}", revision or ""):
         raise ValueError("Could not resolve immutable base revision")
     tokenizer = AutoTokenizer.from_pretrained(config.model_id, revision=revision, trust_remote_code=False)
-    if not tokenizer.chat_template:
-        raise ValueError("Instruction model tokenizer must define a chat template")
+    if not isinstance(tokenizer.chat_template, str) or not tokenizer.chat_template.strip():
+        raise ValueError("Instruction model tokenizer must define one nonempty string chat template; named templates are unsupported")
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token = tokenizer.eos_token
     examples = [completion_example(tokenizer, r, config.max_seq_length) for r in records]
@@ -247,8 +298,6 @@ def train(config: TrainConfig, train_path: Path | str, validation_path: Path | s
     config_hash = hashlib.sha256(json.dumps(config_dict, sort_keys=True).encode()).hexdigest()
     train_hash, validation_hash = sha256_file(train_path), sha256_file(validation_path)
     source = output_dir / "export-source"
-    source.mkdir(exist_ok=True)
-    _json(source / "training_config.json", config_dict)
     order_rng = random.Random(config.seed)
     order = list(range(len(examples)))
     order_rng.shuffle(order)
@@ -277,12 +326,17 @@ def train(config: TrainConfig, train_path: Path | str, validation_path: Path | s
         first_step = state["step"] + 1
         if first_step > config.max_steps:
             raise ValueError("Resume max_steps must exceed the completed checkpoint step")
-        history = state["history"]
+        history = _checkpoint_history(state)
+    source.mkdir(exist_ok=True)
+    _json(source / "training_config.json", config_dict)
     started = time.perf_counter()
     previous_elapsed = history[-1]["elapsed_seconds"] if history else 0.0
     model.train()
     log_path = output_dir / "events.jsonl"
-    with log_path.open("a" if config.resume_from else "w", encoding="utf-8") as events:
+    with log_path.open("w", encoding="utf-8") as events:
+        for event in history:
+            events.write(json.dumps(event) + "\n")
+        events.flush()
         for step in range(first_step, config.max_steps + 1):
             optimizer.zero_grad(set_to_none=True)
             losses = []

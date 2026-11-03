@@ -35,6 +35,12 @@ operators, source review, and live external verification remain necessary.
 | HTTP lifecycle and recovery | Actual recorded response identities/usage, sync/SSE completion, access-control status codes, generation limit rejection, promotion, rollback, corruption refusal, disconnect cleanup, overload refusal/recovery, metrics, and owned-process graceful shutdown records satisfy the documented assertions. |
 | Blinded human review | Completion requires `evidence/human-review/annotated.jsonl`, validated against its separate review key using the actual importer. A `complete` flag without annotations fails. All three variants must be reviewed. Original human replies and reviewer provenance accompany the completed two-case subset. |
 
+Human blind-ID mappings are additionally bound to each frozen example and the
+actual stored generation for its named variant. Swapping run labels in a review
+key cannot pass by recomputing the aggregate report while leaving ratings and
+packet contents unchanged. This validates attribution; it does not attest the
+humanity of a supplied reviewer identity.
+
 Historical training and scoring source hashes must match this checkout or the raw
 bytes at the exact recorded immutable Git revision and path. Branch names,
 unavailable objects, and unverifiable uncommitted bytes do not satisfy historical

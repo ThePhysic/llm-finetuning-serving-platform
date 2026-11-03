@@ -18,7 +18,7 @@ from typing import Any, Callable
 
 from llm_platform.benchmark import compare_reports, summarize
 from llm_platform.contracts import serving_decoding_policy
-from llm_platform.data import canonical_json, content_hash, file_hash, load_records, verify_dataset
+from llm_platform.data import canonical_json, content_hash, file_hash, load_records, strict_json_loads, verify_dataset
 from llm_platform.evaluation import evaluate_records, import_human_review
 from llm_platform.prompts import prompt_identity
 from llm_platform.registry import verify_package
@@ -42,15 +42,7 @@ def _positive(value: Any, label: str, allow_zero: bool = False) -> None:
 
 
 def _read(path: Path) -> Any:
-    def unique(pairs):
-        result = {}
-        for key, value in pairs:
-            if key in result:
-                raise ValueError("Duplicate JSON key in evidence")
-            result[key] = value
-        return result
-    return json.loads(path.read_text(encoding="utf-8"), object_pairs_hook=unique,
-                      parse_constant=lambda _: (_ for _ in ()).throw(ValueError("Nonfinite evidence value")))
+    return strict_json_loads(path.read_text(encoding="utf-8"))
 
 
 def _within(root: Path, name: str) -> Path:
@@ -811,6 +803,24 @@ def _human(root: Path) -> dict[str, Any]:
     result = import_human_review(annotated, key)
     _require(set(result["runs"]) == set(VARIANTS), "Human review omits one comparison variant")
     _require(_read(directory / "report.json") == result, "Imported human report differs from actual annotated packet")
+    key_data = _read(key)
+    _require(file_hash(packet) == key_data["packet_sha256"], "Original blinded human packet changed")
+    records = {row["id"]: row for row in load_records(root / "data" / "triage-v3" / "test.jsonl")}
+    outputs = {}
+    for variant in VARIANTS:
+        rows = load_records(root / "evidence" / "evaluation" / variant / "outputs.jsonl")
+        outputs[variant] = {row["id"]: row for row in rows}
+        _require(len(outputs[variant]) == len(rows), "Human review source run has duplicate output IDs")
+    for row in load_records(annotated):
+        binding = key_data["mapping"][row["blind_id"]]
+        variant, identity = binding["run"], binding["id"]
+        _require(variant in VARIANTS and identity in records and identity in outputs[variant],
+                 "Human blind mapping does not identify a frozen example and model output")
+        record, output = records[identity], outputs[variant][identity]
+        expected = {"blind_id": row["blind_id"], "messages": record["messages"], "reference": record["target"],
+                    "output": output.get("output", ""), "error": output.get("error")}
+        _require({name: value for name, value in row.items() if name != "annotation"} == expected,
+                 "Human blind mapping differs from the actual frozen record or per-model generation")
     return {"status": "complete", "result": result,
             "trust_boundary": "Importer checks contents and annotations, not humanity; operator must retain genuine human provenance."}
 

@@ -43,8 +43,38 @@ def file_hash(path: Path) -> str:
     return digest.hexdigest()
 
 
+def strict_json_loads(text: str) -> Any:
+    """Reject duplicate keys, nonfinite literals, and finite-syntax float overflow."""
+    def unique(pairs):
+        result = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError(f"duplicate JSON key: {key}")
+            result[key] = value
+        return result
+
+    def finite_float(value):
+        result = float(value)
+        if not math.isfinite(result):
+            raise ValueError(f"invalid nonfinite JSON number: {value}")
+        return result
+
+    return json.loads(text, object_pairs_hook=unique, parse_float=finite_float,
+                      parse_constant=lambda value: (_ for _ in ()).throw(ValueError(f"invalid number {value}")))
+
+
 def normalized_text(text: str) -> str:
     return " ".join(re.findall(r"\w+", text.casefold()))
+
+
+def normalized_quote_supported(quote: str, source: str) -> bool:
+    """Match a nonempty contiguous normalized token sequence, never part of a word."""
+    quoted = normalized_text(quote).split()
+    tokens = normalized_text(source).split()
+    if not quoted:
+        return False
+    width = len(quoted)
+    return any(tokens[index:index + width] == quoted for index in range(len(tokens) - width + 1))
 
 
 def validate_target(target: Any, input_text: str | None = None) -> dict[str, Any]:
@@ -63,9 +93,9 @@ def validate_target(target: Any, input_text: str | None = None) -> dict[str, Any
     if not isinstance(target["evidence"], list) or len(target["evidence"]) > 20:
         raise ValueError("evidence must be a bounded list of strings")
     for evidence in target["evidence"]:
-        if not isinstance(evidence, str) or not evidence.strip() or len(evidence) > 1000:
+        if not isinstance(evidence, str) or not normalized_text(evidence) or len(evidence) > 1000:
             raise ValueError("evidence entries must be nonempty strings of at most 1000 characters")
-        if input_text is not None and normalized_text(evidence) not in normalized_text(input_text):
+        if input_text is not None and not normalized_quote_supported(evidence, input_text):
             raise ValueError("gold evidence is not a quote supported by the input")
     return target
 
@@ -107,6 +137,8 @@ def _messages(raw: dict[str, Any]) -> tuple[list[dict[str, str]], Any]:
 
 
 def normalize_record(raw: dict[str, Any], max_chars: int = 16000) -> dict[str, Any]:
+    if type(max_chars) is not int or max_chars < 1:
+        raise ValueError("max_chars must be a positive integer")
     if not isinstance(raw, dict):
         raise ValueError("record must be an object")
     messages, target = _messages(raw)
@@ -119,9 +151,9 @@ def normalize_record(raw: dict[str, Any], max_chars: int = 16000) -> dict[str, A
     if kind == "triage":
         if isinstance(target, str):
             try:
-                target = json.loads(target)
-            except json.JSONDecodeError as exc:
-                raise ValueError("triage target must be a JSON object") from exc
+                target = strict_json_loads(target)
+            except ValueError as exc:
+                raise ValueError(f"triage target must be a strict JSON object: {exc}") from exc
         validate_target(target, input_text)
     elif not isinstance(target, str) or not target.strip():
         raise ValueError("regression target must be nonempty text")
@@ -143,29 +175,17 @@ def normalize_record(raw: dict[str, Any], max_chars: int = 16000) -> dict[str, A
 
 def load_records(path: Path) -> list[dict[str, Any]]:
     """Read strict JSON/JSONL; duplicate JSON keys and non-finite numbers are errors."""
-    def unique(pairs):
-        result = {}
-        for key, value in pairs:
-            if key in result:
-                raise ValueError(f"duplicate JSON key: {key}")
-            result[key] = value
-        return result
-
-    def parse(text):
-        return json.loads(text, object_pairs_hook=unique,
-                          parse_constant=lambda value: (_ for _ in ()).throw(ValueError(f"invalid number {value}")))
-
     path = Path(path)
     if path.suffix.lower() == ".jsonl":
         rows = []
         for line_no, line in enumerate(path.read_text(encoding="utf-8-sig").splitlines(), 1):
             if line.strip():
                 try:
-                    rows.append(parse(line))
+                    rows.append(strict_json_loads(line))
                 except (ValueError, json.JSONDecodeError) as exc:
                     raise ValueError(f"line {line_no}: {exc}") from exc
     else:
-        rows = parse(path.read_text(encoding="utf-8-sig"))
+        rows = strict_json_loads(path.read_text(encoding="utf-8-sig"))
         if isinstance(rows, dict) and "records" in rows:
             rows = rows["records"]
     if not isinstance(rows, list):
@@ -214,8 +234,8 @@ def prepare_dataset(source: Path, output: Path, seed: int = 42, max_chars: int =
     Families and scenarios are connected before seeded assignment. Any malformed
     record aborts preparation with indexed diagnostics instead of silently dropping it.
     """
-    if max_tokens < 1 or max_chars < 1:
-        raise ValueError("length limits must be positive")
+    if type(max_tokens) is not int or type(max_chars) is not int or max_tokens < 1 or max_chars < 1:
+        raise ValueError("length limits must be positive integers")
     output = Path(output)
     if output.exists() and any(output.iterdir()):
         raise FileExistsError("dataset destination must be empty; frozen splits cannot be overwritten")
@@ -334,19 +354,22 @@ def prepare_dataset(source: Path, output: Path, seed: int = 42, max_chars: int =
 
 def verify_dataset(output: Path) -> dict[str, Any]:
     output = Path(output)
-    manifest = json.loads((output / "manifest.json").read_text(encoding="utf-8"))
+    manifest = strict_json_loads((output / "manifest.json").read_text(encoding="utf-8"))
     expected = manifest.pop("manifest_sha256")
     if content_hash(manifest) != expected:
         raise ValueError("dataset manifest integrity failure")
     manifest["manifest_sha256"] = expected
     if set(manifest["files"]) != {"train.jsonl", "validation.jsonl", "test.jsonl", "regressions.jsonl"}:
         raise ValueError("invalid dataset file inventory")
+    max_chars = manifest["settings"]["max_chars"]
+    if type(max_chars) is not int or max_chars < 1:
+        raise ValueError("manifest max_chars must be a positive integer")
     families, scenarios, identities = set(), set(), set()
     for filename, info in manifest["files"].items():
         path = output / filename
         if file_hash(path) != info["sha256"]:
             raise ValueError(f"dataset integrity failure: {filename}")
-        rows = [normalize_record(row) for row in load_records(path)]
+        rows = [normalize_record(row, max_chars=max_chars) for row in load_records(path)]
         if len(rows) != info["count"]:
             raise ValueError("dataset count mismatch")
         new_families = {row["family"] for row in rows}

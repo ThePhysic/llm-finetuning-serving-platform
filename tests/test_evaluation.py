@@ -215,3 +215,42 @@ async def test_historical_runtime_error_is_not_a_semantic_judgment(tmp_path):
     assert report["classification"]["accuracy"] == 1
     assert report["scores"][0]["error"] is None
     assert report["metadata"]["backend_health"]["last_error"] == "PreviousOutOfMemoryError"
+
+
+@pytest.mark.parametrize("claim,source", [("paid", "The invoice is unpaid."),
+                                           ("available", "The stock is unavailable."), (".", "No stock count was provided.")])
+def test_quote_precision_rejects_word_fragments_and_punctuation(claim, source):
+    row = copy.deepcopy(generate_records()[0])
+    row["messages"] = [{"role": "user", "content": source}]
+    row["target"]["evidence"] = [source]
+    prediction = copy.deepcopy(row["target"])
+    prediction["evidence"] = [claim]
+    result = score_example(row, json.dumps(prediction))
+    assert result["evidence_precision"] == 0
+    assert result["unsupported_evidence_claims"] == 1
+    assert result["evidence_recall"] == 0
+
+
+def test_uppercase_instruction_is_not_satisfied_by_lowercase_output():
+    row = next(row for row in generate_records() if row["target"] == "BLUE")
+    assert score_example(row, "BLUE")["regression_correct"] is True
+    assert score_example(row, "blue")["regression_correct"] is False
+
+
+def test_float_overflow_cannot_count_as_valid_strict_json():
+    row = generate_records()[0]
+    output = json.dumps(row["target"])[:-1] + ',"extra":1e999}'
+    assert score_example(row, output)["json_valid"] is False
+
+
+def test_hardened_scorer_preserves_all_frozen_reference_scores():
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parents[1]
+    records = load_records(root / "data/triage-v3/test.jsonl") + load_records(root / "data/triage-v3/regressions.jsonl")
+    for variant in ("zero_shot", "prompted", "lora"):
+        directory = root / "evidence/evaluation" / variant
+        stored = json.loads((directory / "report.json").read_text(encoding="utf-8"))
+        current = evaluate_records(records, load_records(directory / "outputs.jsonl"), stored["metadata"])
+        for key in ("classification", "quality", "uncertainty", "counts", "failure_categories", "failure_examples", "slices", "scores"):
+            assert current[key] == stored[key], (variant, key)

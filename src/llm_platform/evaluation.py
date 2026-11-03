@@ -21,7 +21,7 @@ from typing import Any
 
 from llm_platform.contracts import Backend, GenerationConfig
 from llm_platform.data import (CATEGORIES, canonical_json, content_hash, file_hash,
-                               normalized_text, validate_target, write_jsonl)
+                               normalized_quote_supported, normalized_text, strict_json_loads, validate_target, write_jsonl)
 from llm_platform.prompts import messages_for, prompt_identity
 
 
@@ -56,22 +56,14 @@ def wilson_interval(successes: int, n: int, z: float = 1.959963984540054) -> lis
 
 
 def _strict_json(text: str) -> Any:
-    def unique(pairs):
-        result = {}
-        for key, value in pairs:
-            if key in result:
-                raise ValueError("duplicate JSON key")
-            result[key] = value
-        return result
-    return json.loads(text, object_pairs_hook=unique,
-                      parse_constant=lambda _: (_ for _ in ()).throw(ValueError("nonfinite JSON number")))
+    return strict_json_loads(text)
 
 
 def _equivalent_regression(expected: str, actual: str) -> bool:
     try:
         return canonical_json(_strict_json(expected)) == canonical_json(_strict_json(actual))
     except (ValueError, json.JSONDecodeError):
-        return actual.strip().casefold() == expected.strip().casefold()
+        return actual.strip() == expected.strip()
 
 
 def score_example(record: dict[str, Any], output: str, error: str | None = None) -> dict[str, Any]:
@@ -124,7 +116,7 @@ def score_example(record: dict[str, Any], output: str, error: str | None = None)
         predicted = set(normalized_text(claim) for claim in evidence)
         source = normalized_text("\n".join(message["content"] for message in record["messages"]
                                           if message["role"] == "user"))
-        supported = sum(bool(claim) and claim in source for claim in predicted)
+        supported = sum(normalized_quote_supported(claim, source) for claim in predicted)
         references = set(normalized_text(claim) for claim in gold["evidence"])
         matched = len(predicted & references)
         result["predicted_evidence_claims"] = len(predicted)

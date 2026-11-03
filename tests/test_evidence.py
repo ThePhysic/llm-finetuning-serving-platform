@@ -13,7 +13,7 @@ import pytest
 from llm_platform.data import file_hash, load_records, write_jsonl
 from llm_platform.contracts import serving_decoding_policy
 from llm_platform.evaluation import make_blinded_review
-from llm_platform.evidence import (PendingEvidence, _adapter_precision, _execution_snapshot, _graceful_shutdown, _isolated_samples,
+from llm_platform.evidence import (PendingEvidence, _adapter_precision, _execution_snapshot, _graceful_shutdown, _human, _isolated_samples,
                                    _pacing, _runtime_memory, _serving_policy, _shutdown_inventory,
                                    _source_hashes, _startup_summary, _tree_hashes, _within, validate_evidence)
 from llm_platform.provenance import capture_source_snapshot
@@ -406,3 +406,37 @@ def test_empty_shutdown_file_cannot_count_as_recorded_graceful_process_exit(tmp_
         _graceful_shutdown(path)
     path.write_text(json.dumps([{"forced_shutdown": False, "exit_code": -15, "shutdown_seconds": 0.25}]), encoding="utf-8")
     _graceful_shutdown(path)
+
+
+def copy_actual_human_sources(destination):
+    repository = Path(__file__).resolve().parents[1]
+    copy_primary_data(destination)
+    shutil.copytree(repository / "evidence/human-review", destination / "evidence/human-review")
+    for variant in ("zero_shot", "prompted", "lora"):
+        directory = destination / "evidence/evaluation" / variant
+        directory.mkdir(parents=True)
+        shutil.copy2(repository / "evidence/evaluation" / variant / "outputs.jsonl", directory / "outputs.jsonl")
+
+
+def test_genuine_original_human_annotations_match_frozen_records_and_model_outputs(tmp_path):
+    copy_actual_human_sources(tmp_path)
+    result = _human(tmp_path)
+    assert result["status"] == "complete"
+    assert sum(run["reviewed_examples"] for run in result["result"]["runs"].values()) == 6
+
+
+def test_human_key_cannot_swap_model_labels_even_if_imported_report_is_recomputed(tmp_path):
+    from llm_platform.evaluation import import_human_review
+
+    copy_actual_human_sources(tmp_path)
+    directory = tmp_path / "evidence/human-review"
+    key_path = directory / "review_key.json"
+    key = json.loads(key_path.read_text(encoding="utf-8"))
+    for binding in key["mapping"].values():
+        if binding["run"] in {"zero_shot", "lora"}:
+            binding["run"] = {"zero_shot": "lora", "lora": "zero_shot"}[binding["run"]]
+    key_path.write_text(json.dumps(key), encoding="utf-8")
+    rebound = import_human_review(directory / "annotated.jsonl", key_path)
+    (directory / "report.json").write_text(json.dumps(rebound), encoding="utf-8")
+    with pytest.raises(ValueError, match="actual frozen record or per-model generation"):
+        _human(tmp_path)

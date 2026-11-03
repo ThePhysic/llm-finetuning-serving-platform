@@ -6,7 +6,7 @@ import re
 from pathlib import Path
 import pytest
 
-from llm_platform.data import (CATEGORIES, audit_records, load_records, normalize_record,
+from llm_platform.data import (CATEGORIES, audit_records, load_records, normalize_record, normalized_quote_supported,
                                prepare_dataset, verify_dataset, write_jsonl)
 from llm_platform.synthetic import generate_records, write_synthetic
 
@@ -150,3 +150,44 @@ def test_frozen_v3_reproduces_exact_source_splits_and_manifest_bytes_on_every_ho
         raw = (output / filename).read_bytes()
         assert raw == (repository / "data" / "triage-v3" / filename).read_bytes()
         assert b"\n" not in raw.replace(b"\r\n", b""), "v3 serialization must use explicit CRLF, including on Linux"
+
+
+@pytest.mark.parametrize("quote,source", [("paid", "The invoice is unpaid."),
+                                           ("available", "The stock is unavailable."), (".", "The invoice is unpaid.")])
+def test_gold_evidence_requires_full_nonempty_token_sequences(quote, source):
+    row = copy.deepcopy(generate_records()[0])
+    row["messages"] = [{"role": "user", "content": source}]
+    row["target"]["evidence"] = [quote]
+    assert not normalized_quote_supported(quote, source)
+    with pytest.raises(ValueError, match="evidence|quote"):
+        normalize_record(row)
+
+
+def test_normalized_quote_matches_complete_tokens_with_case_and_punctuation_variants():
+    assert normalized_quote_supported("PAYMENT FAILED", "An alert says: payment failed.")
+    assert normalized_quote_supported("invoice is unpaid", "The invoice is unpaid.")
+
+
+def test_serialized_target_cannot_hide_duplicate_keys_inside_jsonl_string():
+    row = copy.deepcopy(generate_records()[0])
+    row["target"] = '{"category":"unknown",' + json.dumps(row["target"])[1:]
+    with pytest.raises(ValueError, match="duplicate JSON key"):
+        normalize_record(row)
+
+
+def test_strict_record_loader_rejects_exponent_overflow(tmp_path):
+    path = tmp_path / "overflow.jsonl"
+    path.write_text('{"value":1e999}\n', encoding="utf-8")
+    with pytest.raises(ValueError, match="nonfinite JSON number"):
+        load_records(path)
+
+
+def test_custom_character_budget_survives_prepare_and_verify(tmp_path):
+    rows = copy.deepcopy(generate_records())
+    for row in rows:
+        if row["kind"] == "triage":
+            row["messages"][0]["content"] += " z" * 8200
+    source = tmp_path / "long.jsonl"
+    write_jsonl(source, rows)
+    prepared = prepare_dataset(source, tmp_path / "prepared", max_chars=20000, near_threshold=1)
+    assert verify_dataset(tmp_path / "prepared") == prepared

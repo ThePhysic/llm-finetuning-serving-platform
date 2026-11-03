@@ -30,13 +30,13 @@ dropped to improve accuracy. Output destinations cannot overwrite previous runs.
 | Category accuracy / macro F1 | Exact authored-category match; macro F1 includes reference and predicted categories present in this evaluation. A malformed prediction is an incorrect classification. Per-category support, precision, recall, and F1 are included. |
 | JSON validity | Entire output parses as strict JSON, without fences, duplicate keys, or nonfinite numbers. |
 | Required-field compliance | Parsed object has exactly the seven supported fields with valid types and enumerated values. |
-| Evidence quote precision | Fraction of unique predicted evidence strings that occur in normalized user text. It tests extractive support, not the truth of untrusted reported facts. |
+| Evidence quote precision | Fraction of unique predicted evidence strings matching a nonempty contiguous normalized token sequence in user text. A word fragment such as paid inside unpaid is unsupported. It tests extractive support, not the truth of untrusted reported facts. |
 | Evidence reference recall | Fraction of unique authored evidence strings matched exactly after case/punctuation normalization. Valid paraphrases can score poorly. |
 | Unsupported evidence claim rate | Unsupported unique evidence strings divided by all predicted evidence strings. Missing evidence has zero recall; absent evidence has no claim-rate denominator. This metric does not cover summary/action claims. |
 | Action keyword coverage | Mean fraction of authored action keyword groups covered. Synonyms within a group are alternatives. This lexical proxy does not establish semantic correctness or operational safety. |
 | Escalation accuracy | Exact boolean match against the authored human-review policy. |
 | Required-abstention accuracy | On designated unknown/insufficient cases, predicts unknown, low confidence, and human review. |
-| General-instruction accuracy | Exact case-insensitive text or parsed-JSON equality on the separately frozen regression set. |
+| General-instruction accuracy | Exact case-sensitive text after outer whitespace removal, or strict parsed-JSON equality on the separately frozen regression set. An explicit uppercase instruction is not satisfied by lowercase text. |
 | Confidence-label accuracy | Exact match to an ordinal label. Labels are not calibrated probability estimates. |
 
 The report includes failure categories and examples, and raw scores support any
@@ -48,6 +48,14 @@ Classification accuracy has a seeded 1,000-resample family-cluster bootstrap 95%
 interval so correlated renderings move together. JSON validity also has a Wilson
 interval explicitly labeled descriptive: that interval assumes independent rows.
 Small family counts make uncertainty wide and category estimates unstable.
+
+Post-release scorer hardening rejects word-fragment/empty evidence quotes,
+duplicate keys inside serialized target strings, and numeric overflow such as
+`1e999`, and preserves case-sensitive instruction checks. A regression rescores all
+144 stored outputs and compares every per-example and aggregate score section:
+the original three reference reports remain exactly unchanged, including 4/8
+general-instruction results. Their original source identities and raw files remain
+immutable; current scorer source hashes identify the corrected implementation.
 
 ## Blinded human rubric
 
