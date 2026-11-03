@@ -1,10 +1,14 @@
 import hashlib
 import json
+import shutil
+import subprocess
+import sys
+import threading
 from pathlib import Path
 
 import pytest
 
-from llm_platform.registry import ArtifactError, Registry, create_package, verify_package
+from llm_platform.registry import ArtifactError, Registry, canonical_json, create_package, sha256_file, verify_package
 
 
 def make_package(tmp_path: Path, name="one", *, kind="base", backend="transformers"):
@@ -157,3 +161,114 @@ def test_symlinks_rejected(tmp_path):
         pytest.skip("Windows symlink creation requires a host privilege")
     with pytest.raises(ArtifactError, match="Symlinks"):
         create_package(source, tmp_path / "destination", {})
+
+
+@pytest.mark.parametrize("field,value", [
+    ("base_model", []), ("tokenizer", 1), ("runtime", None), ("provenance", []),
+    ("evaluation", "invalid"), ("adapter", []), ("adapter_config", []),
+    ("adapter_config", 1), ("adapter_config", None), ("tokenizer_config", []),
+    ("tokenizer_config", True), ("template", {"default": "{{ messages }}"}),
+])
+def test_malformed_container_artifact_cannot_break_healthy_registry_listing(tmp_path, field, value):
+    package, original = make_package(tmp_path, kind="adapter")
+    registry = Registry(tmp_path / "registry")
+    registry.register(package)
+    corrupt = tmp_path / "corrupt"
+    shutil.copytree(package, corrupt)
+    manifest = json.loads((corrupt / "manifest.json").read_text())
+    if field == "adapter_config":
+        manifest["adapter"]["config"] = value
+        (corrupt / "adapter" / "adapter_config.json").write_text(json.dumps(value))
+    elif field == "tokenizer_config":
+        (corrupt / "tokenizer" / "tokenizer_config.json").write_text(json.dumps(value))
+    elif field == "template":
+        (corrupt / "tokenizer" / "tokenizer_config.json").write_text(json.dumps({"chat_template": value}))
+        manifest["tokenizer"]["chat_template_sha256"] = hashlib.sha256(canonical_json(value)).hexdigest()
+    else:
+        manifest[field] = value
+    manifest["files"] = {path.relative_to(corrupt).as_posix(): sha256_file(path) for path in corrupt.rglob("*")
+                         if path.is_file() and path.name != "manifest.json"}
+    manifest.pop("artifact_id")
+    identity = hashlib.sha256(canonical_json(manifest)).hexdigest()
+    manifest["artifact_id"] = identity
+    (corrupt / "manifest.json").write_bytes(canonical_json(manifest))
+    corrupt.rename(registry.packages / identity)
+    with pytest.raises(ArtifactError):
+        registry.verify(identity)
+    assert [item["artifact_id"] for item in registry.list()] == [original["artifact_id"]]
+    assert registry.deployment()["current"] is None
+
+
+def test_deeply_nested_corrupt_manifest_is_omitted_without_breaking_discovery(tmp_path):
+    package, original = make_package(tmp_path)
+    registry = Registry(tmp_path / "registry")
+    registry.register(package)
+    corrupt = registry.packages / ("e" * 64)
+    corrupt.mkdir()
+    (corrupt / "manifest.json").write_text('{"bad":' + "[" * 1500 + "0" + "]" * 1500 + "}")
+    assert [item["artifact_id"] for item in registry.list()] == [original["artifact_id"]]
+
+
+def test_registry_rollback_selection_is_inside_the_exclusive_writer_transaction(tmp_path, monkeypatch):
+    registry = Registry(tmp_path / "registry")
+    identities = []
+    for name in ("one", "two", "three"):
+        package, manifest = make_package(tmp_path, name)
+        identities.append(registry.register(package))
+    registry.promote(identities[0])
+    registry.promote(identities[1])
+    observed, release = threading.Event(), threading.Event()
+    original = registry.deployment
+    results, errors = [], []
+
+    def gated_read():
+        state = original()
+        if threading.current_thread().name == "registry-rollback-audit":
+            observed.set()
+            if not release.wait(2):
+                raise RuntimeError("Test rollback release deadline exceeded")
+        return state
+
+    def rollback():
+        try:
+            results.append(registry.rollback())
+        except Exception as exc:
+            errors.append(exc)
+
+    monkeypatch.setattr(registry, "deployment", gated_read)
+    worker = threading.Thread(target=rollback, name="registry-rollback-audit")
+    worker.start()
+    try:
+        assert observed.wait(1)
+        with pytest.raises(ArtifactError, match="writer"):
+            registry.promote(identities[2])
+    finally:
+        release.set()
+        worker.join(2)
+    assert not worker.is_alive() and not errors
+    assert results[0]["current"] == registry.deployment()["current"] == identities[0]
+    assert registry.promote(identities[2])["previous"] == identities[0]
+
+
+def test_registry_package_container_cannot_redirect_writes_through_an_alias(tmp_path):
+    root, outside = tmp_path / "registry", tmp_path / "unrelated-storage"
+    root.mkdir()
+    outside.mkdir()
+    (outside / "keep.txt").write_text("unchanged")
+    alias = root / "packages"
+    try:
+        alias.symlink_to(outside, target_is_directory=True)
+    except OSError:
+        if sys.platform != "win32":
+            pytest.skip("Host cannot create a directory alias")
+        # NTFS junctions need no symlink privilege and are a separate reparse
+        # type: Path.is_symlink alone does not protect this storage boundary.
+        path_arg, target_arg = str(alias).replace("'", "''"), str(outside).replace("'", "''")
+        result = subprocess.run(["powershell", "-NoProfile", "-Command",
+            f"New-Item -ItemType Junction -Path '{path_arg}' -Target '{target_arg}' | Out-Null"],
+            capture_output=True, text=True, timeout=10)
+        assert result.returncode == 0, result.stderr
+    with pytest.raises(ArtifactError, match="storage"):
+        Registry(root)
+    assert sorted(path.name for path in outside.iterdir()) == ["keep.txt"]
+    assert (outside / "keep.txt").read_text() == "unchanged"

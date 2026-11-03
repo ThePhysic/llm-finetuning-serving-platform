@@ -13,6 +13,8 @@ import time
 from typing import Any, Callable, Literal
 import uuid
 
+import anyio
+
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse, Response, StreamingResponse
@@ -134,7 +136,7 @@ class ModelManager:
         if artifact_id:
             await self.switch(artifact_id)
 
-    async def switch(self, artifact_id: str) -> dict[str, Any]:
+    async def switch(self, artifact_id: str | None, *, _rollback: bool = False) -> dict[str, Any]:
         """Stage with the old deployment resident; commit only after a successful load.
 
         This trades temporary double residency for failure isolation. A small GPU
@@ -145,6 +147,10 @@ class ModelManager:
                 raise InferenceFailure(503, "shutting_down", "Gateway is shutting down")
             if self.commit_uncertain:
                 raise InferenceFailure(503, "deployment_state_uncertain", "Deployment state requires operator reconciliation")
+            if _rollback:
+                artifact_id = (await asyncio.to_thread(self.registry.deployment))["previous"]
+                if artifact_id is None:
+                    raise InferenceFailure(409, "no_previous_deployment", "No prior verified deployment exists")
             package, manifest = await asyncio.to_thread(self.registry.verify, artifact_id)
             if self.current and self.current.manifest["artifact_id"] == artifact_id:
                 return self._switch_result(self.registry.deployment())
@@ -235,6 +241,10 @@ class ModelManager:
                     async with self._condition:
                         self.switching = False
                         self._condition.notify_all()
+
+    async def rollback(self) -> dict[str, Any]:
+        """Choose the previous identity inside the same transaction as switching."""
+        return await self.switch(None, _rollback=True)
 
     def cleanup_status(self) -> list[dict[str, Any]]:
         return [{"artifact_id": record["deployment"].manifest["artifact_id"],
@@ -416,6 +426,11 @@ def create_app(settings: Settings | None = None, registry: Registry | None = Non
         return JSONResponse({"error": {"code": exc.code, "message": exc.message,
                                        "request_id": request.state.request_id}}, status_code=exc.status)
 
+    @app.exception_handler(ArtifactError)
+    async def unavailable_registry(request: Request, exc: ArtifactError):
+        return JSONResponse({"error": {"code": "registry_unavailable", "message": "Registry state could not be verified",
+                                       "request_id": request.state.request_id}}, status_code=503)
+
     @app.exception_handler(RequestValidationError)
     async def invalid_request(request: Request, exc: RequestValidationError):
         # Pydantic's default response contains raw `input` and validator context.
@@ -526,9 +541,9 @@ def create_app(settings: Settings | None = None, registry: Registry | None = Non
                 "shutdown_warning": manager.shutdown_warning,
                 "engine": manager.current.backend.health() if manager.current else {"ready": False}}
 
-    async def perform_switch(artifact_id: str):
+    async def perform_switch(artifact_id: str | None = None, *, rollback: bool = False):
         try:
-            return await manager.switch(artifact_id)
+            return await manager.rollback() if rollback else await manager.switch(artifact_id)
         except InferenceFailure:
             raise
         except ArtifactError as exc:
@@ -544,10 +559,7 @@ def create_app(settings: Settings | None = None, registry: Registry | None = Non
 
     @app.post("/admin/rollback", dependencies=[Depends(admin)])
     async def rollback():
-        previous = registry.deployment()["previous"]
-        if previous is None:
-            raise InferenceFailure(409, "no_previous_deployment", "No prior verified deployment exists")
-        return await perform_switch(previous)
+        return await perform_switch(rollback=True)
 
     @app.post("/v1/chat/completions", dependencies=[Depends(authorize)])
     async def chat(body: ChatRequest, request: Request):
@@ -611,8 +623,10 @@ def create_app(settings: Settings | None = None, registry: Registry | None = Non
             status = "ok"
             observed_first = False
             token_total = 0
+            terminal = False
+            deadline = asyncio.timeout(settings.request_timeout_seconds)
             try:
-                async with asyncio.timeout(settings.request_timeout_seconds):
+                async with deadline:
                     iterator = backend.stream(messages, config, request_id).__aiter__()
                     try:
                         while True:
@@ -637,8 +651,16 @@ def create_app(settings: Settings | None = None, registry: Registry | None = Non
                                         await next_chunk
                                     except (asyncio.CancelledError, StopAsyncIteration):
                                         pass
-                            if chunk.token_count < 0:
+                            if terminal:
+                                raise RuntimeError("Backend emitted a chunk after its terminal finish")
+                            if type(chunk.token_count) is not int or chunk.token_count < 0:
                                 raise RuntimeError("Backend returned invalid token count")
+                            if not isinstance(chunk.text, str):
+                                raise RuntimeError("Backend returned non-text content")
+                            if chunk.finish_reason is not None:
+                                if chunk.finish_reason not in {"stop", "length"}:
+                                    raise RuntimeError("Backend returned unsupported finish reason")
+                                terminal = True
                             token_total += chunk.token_count
                             if token_total > body.max_tokens:
                                 raise RuntimeError("Backend exceeded generation token limit")
@@ -647,6 +669,8 @@ def create_app(settings: Settings | None = None, registry: Registry | None = Non
                                 observed_first = True
                             output_tokens.inc(chunk.token_count)
                             yield chunk
+                        if not terminal:
+                            raise RuntimeError("Backend stream omitted a terminal finish")
                     finally:
                         close = getattr(iterator, "aclose", None)
                         if close:
@@ -659,6 +683,9 @@ def create_app(settings: Settings | None = None, registry: Registry | None = Non
                 raise
             except asyncio.CancelledError:
                 status = "cancelled"
+                raise
+            except GeneratorExit:
+                status = "generation_timeout" if deadline.expired() else "cancelled"
                 raise
             except Exception as exc:
                 status = "engine_error"
@@ -719,8 +746,29 @@ def create_app(settings: Settings | None = None, registry: Registry | None = Non
                 try:
                     await super().__call__(scope, receive, send)
                 finally:
-                    # Also handles disconnects before the events generator starts.
-                    await release("cancelled")
+                    async def close_owned_stream():
+                        try:
+                            await self.body_iterator.aclose()
+                        finally:
+                            # Also handles disconnects before events() starts.
+                            await release("cancelled")
+
+                    cleanup = asyncio.create_task(close_owned_stream(), name=f"stream-cleanup-{request_id}")
+                    interrupted = False
+                    # Socket errors/cancellation can occur during transport send,
+                    # while both event and backend generators are suspended at a
+                    # yield. Own and close the whole chain before releasing its
+                    # deployment lease. Shield AnyIO's level cancellation as well
+                    # as explicit asyncio task cancellation until ownership settles.
+                    with anyio.CancelScope(shield=True):
+                        while not cleanup.done():
+                            try:
+                                await asyncio.shield(cleanup)
+                            except asyncio.CancelledError:
+                                interrupted = True
+                        cleanup.result()
+                    if interrupted:
+                        raise asyncio.CancelledError
 
         return ManagedStreamingResponse(events(), media_type="text/event-stream",
                                  headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no",

@@ -600,3 +600,134 @@ async def test_gpu_metrics_distinguish_explicit_zero_and_invalid_provider_values
         assert "llm_gpu_memory_bytes 0.0\n" in metrics
         assert "llm_gpu_peak_allocated_bytes NaN\n" in metrics
         assert "llm_gpu_reserved_bytes NaN\n" in metrics
+
+
+async def test_concurrent_promote_then_rollback_selects_the_latest_previous_version(tmp_path, monkeypatch):
+    registry = Registry(tmp_path / "registry")
+    identities = []
+    for name in ("one", "two", "three"):
+        package, manifest = make_package(tmp_path, name)
+        identities.append(registry.register(package))
+    app = create_app(Settings(initial_model=identities[0], admin_key="admin-fixture"), registry,
+                     lambda manifest: FixtureBackend())
+    async with app.router.lifespan_context(app):
+        manager = app.state.manager
+        await manager.switch(identities[1])
+        original = manager.switch
+        promotion_queued, rollback_queued = asyncio.Event(), asyncio.Event()
+
+        async def observed_switch(artifact_id, **kwargs):
+            (rollback_queued if kwargs.get("_rollback") else promotion_queued).set()
+            return await original(artifact_id, **kwargs)
+
+        monkeypatch.setattr(manager, "switch", observed_switch)
+        async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://fixture",
+                                    headers={"Authorization": "Bearer admin-fixture"}) as client:
+            async with manager._switch_lock:
+                promotion = asyncio.create_task(client.post("/admin/promote", json={"artifact_id": identities[2]}))
+                await asyncio.wait_for(promotion_queued.wait(), 1)
+                rollback = asyncio.create_task(client.post("/admin/rollback"))
+                await asyncio.wait_for(rollback_queued.wait(), 1)
+            selected, restored = await asyncio.gather(promotion, rollback)
+            assert selected.status_code == restored.status_code == 200
+            assert selected.json()["current"] == identities[2]
+            assert restored.json()["current"] == registry.deployment()["current"] == identities[1]
+            assert manager.current.manifest["artifact_id"] == identities[1]
+
+
+@pytest.mark.parametrize("failure", ["socket", "deadline"])
+async def test_backpressured_sse_closes_backend_before_releasing_deployment(tmp_path, failure):
+    class EagerIterator:
+        def __init__(self):
+            self.number = 0
+            self.closed = False
+            self.lease_during_close = None
+
+        def __aiter__(self):
+            return self
+
+        async def __anext__(self):
+            self.number += 1
+            if self.number <= 8:
+                return TokenChunk("audit-content", 1)
+            raise StopAsyncIteration
+
+        async def aclose(self):
+            self.lease_during_close = app.state.manager.leases
+            await asyncio.sleep(0.01)  # closure is asynchronous and must be owned
+            self.closed = True
+
+    class EagerBackend(FixtureBackend):
+        def __init__(self):
+            super().__init__()
+            self.iterator = EagerIterator()
+
+        def stream(self, messages, config, request_id):
+            return self.iterator
+
+    package, manifest = make_package(tmp_path)
+    registry = Registry(tmp_path / "registry")
+    registry.register(package)
+    backend = EagerBackend()
+    app = create_app(Settings(initial_model=manifest["artifact_id"], request_timeout_seconds=0.03 if failure == "deadline" else 1),
+                     registry, lambda metadata: backend)
+    payload = json.dumps(body(manifest, stream=True)).encode()
+    delivered, content_sent = False, False
+
+    async def receive():
+        nonlocal delivered
+        if not delivered:
+            delivered = True
+            return {"type": "http.request", "body": payload, "more_body": False}
+        await asyncio.Event().wait()
+
+    async def send(message):
+        nonlocal content_sent
+        if message["type"] == "http.response.body" and b"audit-content" in message.get("body", b""):
+            content_sent = True
+            # Let the inner response prefetch another eager backend chunk and
+            # block while sending it. Cancellation now occurs outside generate().
+            await asyncio.sleep(0.08)
+            if failure == "socket":
+                raise OSError("CPU fixture socket send failure")
+
+    scope = {"type": "http", "asgi": {"version": "3.0", "spec_version": "2.4"}, "method": "POST",
+             "scheme": "http", "path": "/v1/chat/completions", "raw_path": b"/v1/chat/completions",
+             "query_string": b"", "headers": [(b"content-type", b"application/json")],
+             "client": ("127.0.0.1", 10000), "server": ("127.0.0.1", 8000), "http_version": "1.1"}
+    async with app.router.lifespan_context(app):
+        try:
+            await asyncio.wait_for(app(scope, receive, send), 1)
+        except OSError:
+            assert failure == "socket"
+        assert content_sent
+        assert backend.iterator.closed
+        assert backend.iterator.lease_during_close == 1
+        assert app.state.manager.leases == app.state.manager.running == 0
+        async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://fixture") as client:
+            metrics = (await client.get("/metrics")).text
+            assert 'llm_requests_total{status="ok"}' not in metrics
+
+
+@pytest.mark.parametrize("chunks", [
+    [TokenChunk("truncated", 1)],
+    [TokenChunk("", 0, "stop"), TokenChunk("extra", 1)],
+    [TokenChunk("", 0, "stop"), TokenChunk("", 0, "stop")],
+    [TokenChunk("bad count", True), TokenChunk("", 0, "stop")],
+    [TokenChunk("bad count", 1.5), TokenChunk("", 0, "stop")],
+    [TokenChunk("bad finish", 1, "unexpected")],
+])
+async def test_malformed_backend_stream_is_never_reported_as_success(tmp_path, chunks):
+    class MalformedBackend(FixtureBackend):
+        async def stream(self, messages, config, request_id):
+            for chunk in chunks:
+                yield chunk
+
+    async with client_for(tmp_path, MalformedBackend()) as (client, app, backend, manifest):
+        response = await client.post("/v1/chat/completions", json=body(manifest))
+        assert response.status_code == 503
+        assert response.json()["error"]["code"] == "engine_error"
+        streamed = await client.post("/v1/chat/completions", json=body(manifest, stream=True))
+        assert '"engine_error"' in streamed.text
+        assert "[DONE]" not in streamed.text
+        assert app.state.manager.leases == 0

@@ -6,6 +6,7 @@ the Hugging Face cache; only adapters, tokenizers and provenance are packaged.
 from __future__ import annotations
 
 import hashlib
+from contextlib import contextmanager
 import json
 import os
 from pathlib import Path, PurePosixPath
@@ -13,11 +14,22 @@ import re
 import shutil
 import tempfile
 import time
+import math
 from typing import Any
 
 
 class ArtifactError(ValueError):
     """The package or its compatibility metadata could not be verified."""
+
+
+def _linklike(path: Path) -> bool:
+    """Reject symlinks and Windows directory junction/reparse aliases."""
+    if path.is_symlink():
+        return True
+    try:
+        return bool(getattr(path.lstat(), "st_file_attributes", 0) & 0x400)
+    except FileNotFoundError:
+        return False
 
 
 def canonical_json(value: Any) -> bytes:
@@ -47,11 +59,11 @@ def _safe_name(name: str) -> PurePosixPath:
 
 
 def _files(root: Path) -> dict[str, str]:
-    if root.is_symlink() or not root.is_dir():
+    if _linklike(root) or not root.is_dir():
         raise ArtifactError("Package must be an ordinary directory")
     files = {}
     for path in sorted(root.rglob("*")):
-        if path.is_symlink():
+        if _linklike(path):
             raise ArtifactError("Symlinks are not permitted in model packages")
         if not path.is_file():
             if not path.is_dir():
@@ -74,6 +86,9 @@ def _metadata(manifest: dict[str, Any], root: Path) -> None:
     try:
         if type(manifest["schema_version"]) is not int or manifest["schema_version"] != 1 or manifest["kind"] not in {"base", "adapter"}:
             raise ArtifactError("Unsupported package schema or kind")
+        for component in ("base_model", "tokenizer", "runtime", "provenance", "evaluation"):
+            if not isinstance(manifest[component], dict):
+                raise ArtifactError(f"{component} metadata must be an object")
         for component in ("base_model", "tokenizer"):
             value = manifest[component]
             if not isinstance(value["id"], str) or not value["id"].strip():
@@ -91,13 +106,14 @@ def _metadata(manifest: dict[str, Any], root: Path) -> None:
         if not config_path.is_file():
             raise ArtifactError("Tokenizer configuration is missing")
         token_config = json.loads(config_path.read_text(encoding="utf-8"))
+        if not isinstance(token_config, dict):
+            raise ArtifactError("Tokenizer configuration must be an object")
         template_file = token_path / "chat_template.jinja"
         template = template_file.read_text(encoding="utf-8") if template_file.is_file() else token_config.get("chat_template")
-        if template is None:
-            raise ArtifactError("Packaged chat template is missing")
-        # Transformers saves a string template as raw UTF-8; named templates use
-        # canonical JSON to retain a stable identity.
-        template_bytes = template.encode("utf-8") if isinstance(template, str) else canonical_json(template)
+        if not isinstance(template, str) or not template.strip():
+            raise ArtifactError("Supported packaged chat templates must be nonempty strings")
+        # Both supported backends require a single explicit UTF-8 template.
+        template_bytes = template.encode("utf-8")
         if hashlib.sha256(template_bytes).hexdigest() != tokenizer["chat_template_sha256"]:
             raise ArtifactError("Packaged chat template does not match its identity")
         runtime = manifest["runtime"]
@@ -120,16 +136,21 @@ def _metadata(manifest: dict[str, Any], root: Path) -> None:
         evaluation = manifest["evaluation"]
         if not isinstance(evaluation["limitations"], list) or not all(isinstance(x, str) for x in evaluation["limitations"]):
             raise ArtifactError("Known limitations must be recorded")
-        if evaluation["report"] is not None and not isinstance(evaluation["report"], str):
+        if evaluation["report"] is not None and (not isinstance(evaluation["report"], str) or not evaluation["report"].strip()):
             raise ArtifactError("Evaluation report must be a reference or null")
         if evaluation["report"] is None and not evaluation["limitations"]:
             raise ArtifactError("Unevaluated artifacts must state their limitation")
         adapter = manifest["adapter"]
         if manifest["kind"] == "adapter":
-            if not provenance.get("dataset_id") or not provenance.get("experiment_id"):
+            if any(not isinstance(provenance.get(key), str) or not provenance[key].strip()
+                   for key in ("dataset_id", "experiment_id")):
                 raise ArtifactError("Adapter dataset and experiment identities are required")
+            if not isinstance(adapter, dict) or not isinstance(adapter.get("config"), dict):
+                raise ArtifactError("Adapter metadata and configuration must be objects")
             adapter_path = root.joinpath(*_safe_name(adapter["path"]).parts)
             adapter_config = json.loads((adapter_path / "adapter_config.json").read_text(encoding="utf-8"))
+            if not isinstance(adapter_config, dict):
+                raise ArtifactError("Packaged adapter configuration must be an object")
             if adapter["config"] != adapter_config:
                 raise ArtifactError("Adapter metadata differs from packaged configuration")
             if adapter_config.get("base_model_name_or_path") != manifest["base_model"]["id"]:
@@ -141,18 +162,20 @@ def _metadata(manifest: dict[str, Any], root: Path) -> None:
                 raise ArtifactError("Safetensors adapter weights are missing")
         elif adapter is not None:
             raise ArtifactError("Base packages cannot carry an adapter")
-    except (KeyError, TypeError, OSError, json.JSONDecodeError) as exc:
+    except ArtifactError:
+        raise
+    except (KeyError, TypeError, AttributeError, OSError, ValueError, RecursionError) as exc:
         raise ArtifactError(f"Incomplete or malformed package metadata: {exc}") from exc
 
 
 def verify_package(package: Path) -> dict[str, Any]:
     """Verify every byte and the identity before a runtime sees the package."""
     root = Path(package)
-    if root.is_symlink() or (root / "manifest.json").is_symlink():
+    if _linklike(root) or _linklike(root / "manifest.json"):
         raise ArtifactError("Package symlinks are forbidden")
     try:
         manifest = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
-    except (OSError, ValueError) as exc:
+    except (OSError, ValueError, RecursionError) as exc:
         raise ArtifactError("Missing or malformed manifest") from exc
     if not isinstance(manifest, dict):
         raise ArtifactError("Manifest must be an object")
@@ -160,7 +183,7 @@ def verify_package(package: Path) -> dict[str, Any]:
     content = {key: value for key, value in manifest.items() if key != "artifact_id"}
     try:
         expected_identity = _digest(content)
-    except (ValueError, TypeError) as exc:
+    except (ValueError, TypeError, RecursionError) as exc:
         raise ArtifactError("Manifest contains unsupported JSON values") from exc
     if not isinstance(supplied, str) or supplied != expected_identity:
         raise ArtifactError("Manifest identity mismatch")
@@ -220,11 +243,17 @@ def _atomic_json(path: Path, value: Any) -> None:
 class Registry:
     def __init__(self, root: Path | str):
         self.root = Path(root)
-        if self.root.is_symlink():
+        if _linklike(self.root):
             raise ArtifactError("Registry root cannot be a symlink")
         self.packages = self.root / "packages"
+        if _linklike(self.packages):
+            raise ArtifactError("Registry package storage cannot be a symlink or junction")
         self.packages.mkdir(parents=True, exist_ok=True)
         self.state_path = self.root / "deployment.json"
+
+    def _check_storage(self) -> None:
+        if _linklike(self.root) or _linklike(self.packages) or _linklike(self.state_path):
+            raise ArtifactError("Registry storage aliases are forbidden")
 
     @staticmethod
     def _id(artifact_id: str) -> str:
@@ -233,6 +262,7 @@ class Registry:
         return artifact_id
 
     def register(self, package: Path) -> str:
+        self._check_storage()
         manifest = verify_package(package)
         artifact_id = manifest["artifact_id"]
         target = self.packages / artifact_id
@@ -250,6 +280,7 @@ class Registry:
         return artifact_id
 
     def verify(self, artifact_id: str) -> tuple[Path, dict[str, Any]]:
+        self._check_storage()
         path = self.packages / self._id(artifact_id)
         manifest = verify_package(path)
         if manifest["artifact_id"] != artifact_id:
@@ -257,6 +288,7 @@ class Registry:
         return path, manifest
 
     def list(self) -> list[dict[str, Any]]:
+        self._check_storage()
         result = []
         for path in sorted(self.packages.iterdir()):
             if path.name.startswith("."):
@@ -270,6 +302,7 @@ class Registry:
         return result
 
     def deployment(self) -> dict[str, Any]:
+        self._check_storage()
         if not self.state_path.exists():
             return {"current": None, "previous": None, "generation": 0}
         try:
@@ -277,39 +310,53 @@ class Registry:
             self._id(state["current"])
             if state["previous"] is not None:
                 self._id(state["previous"])
-            if not isinstance(state["generation"], int):
+            if type(state["generation"]) is not int or state["generation"] < 1:
                 raise ValueError("Invalid generation")
+            updated = state.get("updated_at")
+            if updated is not None and (type(updated) not in {int, float} or not math.isfinite(updated)):
+                raise ValueError("Invalid deployment timestamp")
+            canonical_json(state)  # reject non-finite values anywhere in persisted state
             return state
-        except (OSError, ValueError, KeyError, TypeError) as exc:
+        except (OSError, ValueError, KeyError, TypeError, OverflowError, RecursionError) as exc:
             raise ArtifactError("Deployment state is corrupt") from exc
 
-    def promote(self, artifact_id: str) -> dict[str, Any]:
-        """Persist a verified pointer. The gateway separately verifies runtime loading.
-
-        An exclusive cross-process lock rejects overlapping local CLI/admin writers;
-        stale locks require operator inspection instead of unsafe automatic removal.
-        """
-        self.verify(artifact_id)
+    @contextmanager
+    def _deployment_writer(self):
+        self._check_storage()
         lock = self.root / ".deployment.lock"
         try:
             descriptor = os.open(lock, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
         except FileExistsError as exc:
             raise ArtifactError("Another deployment writer holds the registry lock") from exc
         try:
-            os.write(descriptor, str(os.getpid()).encode())
-            os.close(descriptor)
-            state = self.deployment()
-            if state["current"] == artifact_id:
-                return state
-            updated = {"current": artifact_id, "previous": state["current"],
-                       "generation": state["generation"] + 1, "updated_at": time.time()}
-            _atomic_json(self.state_path, updated)
-            return updated
+            with os.fdopen(descriptor, "wb") as stream:
+                stream.write(str(os.getpid()).encode())
+            yield
         finally:
             lock.unlink(missing_ok=True)
 
+    def _select(self, state: dict[str, Any], artifact_id: str) -> dict[str, Any]:
+        self.verify(artifact_id)
+        if state["current"] == artifact_id:
+            return state
+        updated = {"current": artifact_id, "previous": state["current"],
+                   "generation": state["generation"] + 1, "updated_at": time.time()}
+        _atomic_json(self.state_path, updated)
+        return updated
+
+    def promote(self, artifact_id: str) -> dict[str, Any]:
+        """Verify and select under one exclusive cross-process writer lock.
+
+        Runtime loading is separately verified by the gateway. Stale locks require
+        operator inspection rather than unsafe automatic removal.
+        """
+        with self._deployment_writer():
+            return self._select(self.deployment(), artifact_id)
+
     def rollback(self) -> dict[str, Any]:
-        previous = self.deployment()["previous"]
-        if previous is None:
-            raise ArtifactError("No prior verified deployment exists")
-        return self.promote(previous)
+        # Read the previous identity under the same lock as pointer mutation.
+        with self._deployment_writer():
+            state = self.deployment()
+            if state["previous"] is None:
+                raise ArtifactError("No prior verified deployment exists")
+            return self._select(state, state["previous"])

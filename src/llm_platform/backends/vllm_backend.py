@@ -57,12 +57,51 @@ class VLLMBackend:
     async def load(self, package: Path, manifest: dict[str, Any]) -> None:
         if self.client is not None:
             raise RuntimeError("Backend already loaded")
+        preparation = asyncio.create_task(asyncio.to_thread(self._prepare_sync, Path(package), manifest))
+        interrupted = False
+        try:
+            while not preparation.done():
+                try:
+                    await asyncio.shield(preparation)
+                except asyncio.CancelledError:
+                    interrupted = True
+            prepared = preparation.result()
+        finally:
+            if interrupted:
+                # Hub/cache/tokenizer work cannot be stopped by cancelling its
+                # asyncio wrapper. Settle the owned thread before returning; no
+                # HTTP client, probe, or selected runtime is published yet.
+                raise asyncio.CancelledError
+        verified, model_name = prepared["manifest"], prepared["model_name"]
+        headers = {"Authorization": f"Bearer {self.api_key}"} if self.api_key else {}
+        client = httpx.AsyncClient(base_url=self.base_url, headers=headers, timeout=self.timeout,
+                                   limits=httpx.Limits(max_connections=128, max_keepalive_connections=32))
+        try:
+            response = await client.get("/v1/models")
+            response.raise_for_status()
+            if model_name not in {m["id"] for m in response.json()["data"]}:
+                raise ValueError("vLLM does not expose the expected immutable artifact name")
+        except BaseException:
+            await client.aclose()
+            raise
+        self.client, self.tokenizer, self.manifest, self.model_name = client, prepared["tokenizer"], verified, model_name
+        self.max_model_len = prepared["max_model_len"]
+        self._decoding_policy = prepared["decoding_policy"]
+        self._precision = prepared["precision"]
+        self._ready, self._last_probe = True, time.monotonic()
+        self._probe_task = asyncio.create_task(self._probe_health())
+
+    def _prepare_sync(self, package: Path, manifest: dict[str, Any]) -> dict[str, Any]:
+        """Verify files and resolve tokenizer/config off the ASGI event loop."""
+        if self.client is not None:
+            raise RuntimeError("Backend already loaded")
         from llm_platform.registry import verify_package
         from transformers import AutoConfig, AutoTokenizer
 
         verified = verify_package(Path(package))
         if verified["artifact_id"] != manifest.get("artifact_id"):
             raise ValueError("Manifest does not match verified package")
+        manifest = verified
         if manifest["runtime"]["backend"] != "vllm":
             raise ValueError("Package is not configured for vLLM")
         if self.identity_path is None:
@@ -94,7 +133,9 @@ class VLLMBackend:
             raise ValueError("This runtime requires the base model's exact tokenizer revision")
         tokenizer_path = Path(package) / meta["path"] if meta.get("path") else meta["id"]
         tokenizer = AutoTokenizer.from_pretrained(tokenizer_path, revision=meta["revision"], trust_remote_code=False)
-        if hashlib.sha256((tokenizer.chat_template or "").encode()).hexdigest() != meta["chat_template_sha256"]:
+        if not isinstance(tokenizer.chat_template, str) or not tokenizer.chat_template.strip():
+            raise ValueError("Supported tokenizers require a nonempty string chat template")
+        if hashlib.sha256(tokenizer.chat_template.encode()).hexdigest() != meta["chat_template_sha256"]:
             raise ValueError("Tokenizer chat template mismatch")
         architecture = AutoConfig.from_pretrained(manifest["base_model"]["id"],
                                                    revision=manifest["base_model"]["revision"], trust_remote_code=False)
@@ -105,23 +146,8 @@ class VLLMBackend:
             raise ValueError("vLLM architectural EOS differs from packaged tokenizer EOS")
         bos = tokenizer.bos_token_id if tokenizer.bos_token_id is not None else architecture.bos_token_id
         decoding_policy = serving_decoding_policy(tokenizer.eos_token_id, bos, tokenizer.pad_token_id)
-        headers = {"Authorization": f"Bearer {self.api_key}"} if self.api_key else {}
-        client = httpx.AsyncClient(base_url=self.base_url, headers=headers, timeout=self.timeout,
-                                   limits=httpx.Limits(max_connections=128, max_keepalive_connections=32))
-        try:
-            response = await client.get("/v1/models")
-            response.raise_for_status()
-            if model_name not in {m["id"] for m in response.json()["data"]}:
-                raise ValueError("vLLM does not expose the expected immutable artifact name")
-        except BaseException:
-            await client.aclose()
-            raise
-        self.client, self.tokenizer, self.manifest, self.model_name = client, tokenizer, verified, model_name
-        self.max_model_len = max_model_len
-        self._decoding_policy = decoding_policy
-        self._precision = precision
-        self._ready, self._last_probe = True, time.monotonic()
-        self._probe_task = asyncio.create_task(self._probe_health())
+        return {"manifest": verified, "model_name": model_name, "tokenizer": tokenizer,
+                "max_model_len": max_model_len, "decoding_policy": decoding_policy, "precision": precision}
 
     async def _probe_health(self) -> None:
         """Bounded periodic probes make engine loss visible without a user request."""

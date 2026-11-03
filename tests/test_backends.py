@@ -5,6 +5,7 @@ import hashlib
 import json
 import struct
 import sys
+import threading
 import time
 from types import SimpleNamespace
 
@@ -516,3 +517,58 @@ async def test_vllm_rejects_missing_or_inconsistent_adapter_precision(monkeypatc
     with pytest.raises(ValueError, match="runtime precision"):
         await backend.load(tmp_path, manifest)
     assert backend.client is None
+
+
+async def test_vllm_prepare_keeps_loop_responsive_and_settles_cancelled_worker(monkeypatch, tmp_path):
+    backend = VLLMBackend()
+    entered, release = threading.Event(), threading.Event()
+    main_thread = threading.get_ident()
+    ownership = []
+
+    def blocked_prepare(package, manifest):
+        ownership.append(threading.get_ident())
+        entered.set()
+        if not release.wait(2):
+            raise RuntimeError("CPU preparation fixture was not released")
+        ownership.append("settled")
+        return {"manifest": manifest}
+
+    monkeypatch.setattr(backend, "_prepare_sync", blocked_prepare)
+    loading = asyncio.create_task(backend.load(tmp_path, {"artifact_id": "a" * 64}))
+    assert await asyncio.to_thread(entered.wait, 1)
+    heartbeat = 0
+    for _ in range(3):
+        await asyncio.sleep(0.005)
+        heartbeat += 1
+    assert heartbeat == 3 and ownership[0] != main_thread
+    loading.cancel()
+    await asyncio.sleep(0.01)
+    assert not loading.done()
+    assert backend.client is None and backend._probe_task is None
+    loading.cancel()
+    release.set()
+    with pytest.raises(asyncio.CancelledError):
+        await asyncio.wait_for(loading, 1)
+    assert ownership[-1] == "settled"
+    assert backend.client is backend.tokenizer is backend.manifest is None
+    assert backend._probe_task is None and not backend.health()["ready"]
+
+
+@pytest.mark.parametrize("template", [None, "", "  ", {"default": "template"}, ["template"]])
+async def test_vllm_invalid_chat_template_fails_before_http_client_creation(monkeypatch, tmp_path, template):
+    manifest, identity = identity_fixture()
+    manifest.update(kind="base")
+    manifest["base_model"]["id"] = "base-model"
+    manifest["tokenizer"].update(id="base-model", revision=manifest["base_model"]["revision"], path="tokenizer")
+    manifest["runtime"]["backend"] = "vllm"
+    identity.update(tokenizer_revision=manifest["tokenizer"]["revision"], max_model_len=32)
+    identity_path = tmp_path / "identity.json"
+    identity_path.write_text(json.dumps(identity))
+    monkeypatch.setattr("llm_platform.registry.verify_package", lambda path: manifest)
+    monkeypatch.setitem(sys.modules, "transformers", SimpleNamespace(
+        AutoTokenizer=SimpleNamespace(from_pretrained=lambda *a, **kw: SimpleNamespace(chat_template=template)),
+        AutoConfig=SimpleNamespace(from_pretrained=lambda *a, **kw: pytest.fail("Invalid template must fail before architecture resolution"))))
+    backend = VLLMBackend(identity_path=identity_path)
+    with pytest.raises(ValueError, match="nonempty string chat template"):
+        await backend.load(tmp_path, manifest)
+    assert backend.client is None and backend._probe_task is None

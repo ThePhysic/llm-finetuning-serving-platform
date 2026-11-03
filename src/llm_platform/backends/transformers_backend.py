@@ -83,7 +83,9 @@ class TransformersBackend:
         tokenizer_path = package / tokenizer_meta["path"] if tokenizer_meta.get("path") else tokenizer_meta["id"]
         tokenizer = AutoTokenizer.from_pretrained(tokenizer_path, revision=tokenizer_meta["revision"],
                                                   trust_remote_code=False)
-        actual_template = hashlib.sha256((tokenizer.chat_template or "").encode()).hexdigest()
+        if not isinstance(tokenizer.chat_template, str) or not tokenizer.chat_template.strip():
+            raise ValueError("Supported tokenizers require a nonempty string chat template")
+        actual_template = hashlib.sha256(tokenizer.chat_template.encode()).hexdigest()
         if actual_template != tokenizer_meta["chat_template_sha256"]:
             raise ValueError("Tokenizer chat template does not match artifact identity")
         if tokenizer.pad_token_id is None:
