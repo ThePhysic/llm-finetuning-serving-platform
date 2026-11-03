@@ -14,6 +14,7 @@ artifacts/
 runs/
 registry/
 *.safetensors
+!evidence/adapter-package/adapter/adapter_model.safetensors
 *.bin
 *.pt
 *.pth
