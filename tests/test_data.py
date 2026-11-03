@@ -3,11 +3,12 @@ from __future__ import annotations
 import copy
 import json
 import re
+from pathlib import Path
 import pytest
 
 from llm_platform.data import (CATEGORIES, audit_records, load_records, normalize_record,
                                prepare_dataset, verify_dataset, write_jsonl)
-from llm_platform.synthetic import generate_records
+from llm_platform.synthetic import generate_records, write_synthetic
 
 
 def test_normalizes_instruction_and_conversation_without_losing_target():
@@ -134,3 +135,18 @@ def test_display_ids_and_prompt_inputs_do_not_leak_gold_metadata():
         altered["target"] = {"category": "different-gold-label"}
         assert messages_for(altered, "lora") == messages_for(row, "lora")
     assert len(cases) == len(rows)
+
+
+def test_frozen_v3_reproduces_exact_source_splits_and_manifest_bytes_on_every_host(tmp_path):
+    repository = Path(__file__).resolve().parents[1]
+    source = tmp_path / "synthetic-v2.jsonl"
+    write_synthetic(source)
+    assert source.read_bytes() == (repository / "data" / "synthetic-v2.jsonl").read_bytes()
+    output = tmp_path / "triage-v3"
+    reproduced = prepare_dataset(source, output)
+    frozen = verify_dataset(repository / "data" / "triage-v3")
+    assert reproduced == frozen
+    for filename in [*frozen["files"], "manifest.json"]:
+        raw = (output / filename).read_bytes()
+        assert raw == (repository / "data" / "triage-v3" / filename).read_bytes()
+        assert b"\n" not in raw.replace(b"\r\n", b""), "v3 serialization must use explicit CRLF, including on Linux"

@@ -176,7 +176,9 @@ def load_records(path: Path) -> list[dict[str, Any]]:
 def write_jsonl(path: Path, rows: list[dict[str, Any]]) -> None:
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text("".join(canonical_json(row) + "\n" for row in rows), encoding="utf-8")
+    # Frozen v3 was created with Windows CRLF bytes. Preserve that explicit wire
+    # format on every host so source/split hashes survive Linux reproduction.
+    path.write_bytes("".join(canonical_json(row) + "\r\n" for row in rows).encode("utf-8"))
 
 
 def audit_records(records: list[dict[str, Any]], near_threshold: float = 0.9) -> dict[str, Any]:
@@ -325,7 +327,8 @@ def prepare_dataset(source: Path, output: Path, seed: int = 42, max_chars: int =
         "policy": "Never use test/regressions to train, tune hyperparameters, or select prompts.",
     }
     manifest["manifest_sha256"] = content_hash(manifest)
-    (output / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+    (output / "manifest.json").write_bytes(
+        (json.dumps(manifest, indent=2) + "\n").replace("\n", "\r\n").encode("utf-8"))
     return manifest
 
 
