@@ -5,6 +5,7 @@ import subprocess
 import sys
 from types import SimpleNamespace
 
+from click import unstyle
 import pytest
 from typer.testing import CliRunner
 
@@ -146,11 +147,13 @@ def test_package_base_rejects_named_templates_before_any_save(tmp_path, monkeypa
     assert not (tmp_path / "package").exists()
 
 
-def test_review_import_requires_structured_provenance_not_a_reviewer_label(tmp_path):
+@pytest.mark.parametrize("color", [False, True])
+def test_review_import_requires_structured_provenance_not_a_reviewer_label(tmp_path, color):
     result = runner.invoke(app, ["review", "import", str(tmp_path / "packet.jsonl"), str(tmp_path / "key.json"),
-                                 str(tmp_path / "result.json")])
-    assert result.exit_code != 0
-    assert "--provenance" in result.output
+                                 str(tmp_path / "result.json")], color=color)
+    assert result.exit_code == 2
+    # Rich may insert ANSI codes within an option name on colored CI terminals.
+    assert "--provenance" in unstyle(result.output)
     assert not (tmp_path / "result.json").exists()
 
 
