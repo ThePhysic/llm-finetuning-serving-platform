@@ -9,6 +9,7 @@
 docker/Dockerfile.* text eol=lf
 # Dependency inventories are hash-bound evidence; keep identical bytes on every OS.
 requirements/** -text
+docs/assets/** -text
 # Hash-bound data/evidence override every extension rule, including source snapshots.
 data/** -text
 evidence/** -text

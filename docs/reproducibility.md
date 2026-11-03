@@ -8,6 +8,12 @@ configuration and other device users.
 
 ## Environment and source
 
+For new isolated training/reference-serving work, use the separately validated
+[modern candidate](dependency-migration.md), including its exact CUDA 12.6 lock.
+Its compatibility checks do not replace the historical quality/performance
+experiments or validate a patched vLLM runtime. The instructions below reproduce
+the original environment and are explicitly trusted-local-only.
+
 The measured training environment used Python 3.12.16, CUDA 12.4, and NVIDIA
 driver 566.36. `requirements/train.txt` pins the core GPU stack;
 `requirements/train-resolved-linux.txt` records its resolved Linux environment.
@@ -243,13 +249,18 @@ preserved byte-for-byte in the provenance-correction archive. The current report
 attributes them as AI-assisted and keeps independent-human estimates unavailable.
 
 The fresh `evidence/independent-human-review/review_packet.jsonl` uses two different
-held-out families selected without inspecting scores. Its annotation fields are
-empty until the owner actually reviews the responses. The model mapping stays
-local and ignored until judgments are complete; a published hash commits to it.
-Qualifying review requires explicit origin, submitter, reviewer type and an
-attestation of independent assessment. Pasted values or a reviewer-name string
-alone cannot establish human provenance. If AI assistance is used, preserve that
-fact and report those labels separately. See [review provenance](review-provenance.md).
+held-out families selected without inspecting scores. Its original annotation
+fields remain empty as a creation-time record; `annotated.jsonl` preserves the
+owner's six actual fresh judgments. The owner explicitly confirmed personal
+assessment without AI-generated scores or judgments. The model mapping stayed
+local until those responses and the attestation arrived, then was published with
+its unchanged hash commitment.
+
+For any new review, keep its mapping local until judgments are complete. Qualifying
+review requires explicit origin, submitter, reviewer type and confirmation bound
+to the exact annotated packet and raw reply hashes. Pasted values or a reviewer-name
+string alone cannot establish human provenance. If AI assistance is used, preserve
+that fact and report those labels separately. See [review provenance](review-provenance.md).
 The larger original packet was not additionally reviewed.
 
 ## Evidence checklist

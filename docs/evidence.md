@@ -108,9 +108,12 @@ or unverified imports cannot enter independent-human metrics. Archived old
 reports remain evidence of what was claimed, not current independent verification.
 The fresh empty packet in `evidence/independent-human-review/` uses two different
 held-out families, selected without looking at model scores. Its model-mapping
-key stays local while pending; only the hash commitment is published. Actual
-independent judgments and explicit owner confirmation are still required. Other
-engineering work continues while this criterion is pending.
+key stayed local until the actual judgments and explicit owner confirmation were
+received and imported. It can now be published with its unchanged commitment.
+The fresh report contains six owner-attested independent judgments; the machine
+checks bind those replies and the exact annotated digest but do not externally
+verify the reviewer's identity. For future packets, keep this criterion pending
+until qualifying judgments exist while continuing unrelated engineering work.
 
 ## Precision amendment and measurement isolation
 

@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "docker",
+    "inspect",
+    "d513bec8474fc57c816c9ce079e4415216cd8ebf58e88585af78495fb6c758e7",
+    "--format",
+    "{{json .NetworkSettings.Ports}}"
+  ],
+  "started_at_unix": 1793682269.431918,
+  "seconds": 0.09644699096679688,
+  "returncode": 0,
+  "stdout": "{\"8000/tcp\":[{\"HostIp\":\"127.0.0.1\",\"HostPort\":\"51767\"}]}\n",
+  "stderr": ""
+}

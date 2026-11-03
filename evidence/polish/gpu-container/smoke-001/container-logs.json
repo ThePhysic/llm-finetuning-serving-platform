@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "docker",
+    "logs",
+    "d513bec8474fc57c816c9ce079e4415216cd8ebf58e88585af78495fb6c758e7"
+  ],
+  "started_at_unix": 1793682340.0304425,
+  "seconds": 0.1067960262298584,
+  "returncode": 0,
+  "stdout": "",
+  "stderr": "INFO:     Started server process [1]\nINFO:     Waiting for application startup.\nSliding Window Attention is enabled but not implemented for `sdpa`; unexpected results may be encountered.\nINFO:     Application startup complete.\nINFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)\n/opt/conda/lib/python3.11/site-packages/transformers/generation/configuration_utils.py:653: UserWarning: `do_sample` is set to `False`. However, `top_k` is set to `0` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `top_k`.\n  warnings.warn(\n"
+}

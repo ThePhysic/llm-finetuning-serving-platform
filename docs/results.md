@@ -38,12 +38,17 @@ disclosed in the [decoding addendum](../evidence/quality-decoding-addendum.json)
 Six historical A–F scores were AI-generated/AI-assisted and submitted through the
 project owner. Their AI-assisted action averages remain 0 for zero-shot and 0.5
 for both prompting and LoRA; these are not independent human judgments. Independent
-human action correctness, summary faithfulness and unsupported-claim estimates
-remain unavailable pending a fresh review. The
+human results for those historical cases remain unavailable. The
 [corrected annotation report](../evidence/human-review/report.json) and
 [provenance correction](review-provenance.md) preserve the original values and
-explain the new attribution. A fresh blinded packet uses two previously unshown
-families; its model mapping remains local until judgments are complete.
+explain the new attribution. A fresh packet uses two previously unshown families.
+The owner supplied all six fresh judgments and explicitly confirmed independent
+assessment without AI-generated scores or judgments. The
+[separate owner-attested report](../evidence/independent-human-review/report.json)
+records action means of 0.50, 0.00 and 0.25 for zero-shot, prompting and LoRA,
+respectively. Two cases and one reviewer do not support a population estimate.
+The model mapping was withheld until completion; the old AI-assisted values were
+never counted as independent human judgments.
 
 ## Serving and optimization
 
@@ -109,10 +114,10 @@ unit tests and throughput runs.
 | Linux CPU suite, CUDA hidden | 215 passed |
 | Windows CPU suite | 213 passed, 2 platform/privilege skips |
 | Ruff | Passed |
-| Offline evidence consistency audit | Historical export reported all 11 passed; independent-human criterion is superseded and now pending |
+| Offline evidence consistency audit | Historical human claim superseded; current independent-human criterion uses the new owner-attested packet |
 | Final CPU Docker build and doctor | Passed |
 | Real CPU-container HTTP control plane | Live 200, unloaded ready 503, unauthorized models 401, authorized models 200, metrics 200; graceful exit 0 |
-| GPU Docker image | Definition provided; build and execution unverified |
+| GPU Docker image | Originally unverified; later historical-stack GPU build and HTTP smoke passed in the polish work |
 
 [Validation records](../evidence/validation/) preserve these checks. GPU evidence
 comes from real native WSL2 training and inference, not CPU tests or the CPU
@@ -125,5 +130,6 @@ and remote-commit verification.
 Historical audit exports and Astra reviews contain the earlier unsupported human
 attribution. They remain unchanged as records of those checks; the
 [provenance correction](review-provenance.md) overrides their independent-human
-completion claim. The current audit must retain that criterion as pending until
-qualifying judgments exist. Historical model/performance measurements are unchanged.
+completion claim. The current audit validates the separate fresh judgments and
+their explicit, digest-bound owner confirmation. Historical model/performance
+measurements are unchanged.

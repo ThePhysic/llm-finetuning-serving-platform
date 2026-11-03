@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-11-03T04:59:32.916327+00:00",
+  "reason": "Official Torch 2.6 CUDA12.4 base uses Python3.11.11; original numpy2.5.4 cannot install. Build003 preserves real failure.",
+  "changed_pin": {
+    "package": "numpy",
+    "original": "2.5.4",
+    "container_variant": "2.4.6"
+  },
+  "target": "x86_64-unknown-linux-gnu Python3.11",
+  "resolve_command": [
+    "uv",
+    "pip",
+    "compile",
+    "requirements/gpu-container-cpu-py311.in",
+    "--python-version",
+    "3.11",
+    "--python-platform",
+    "x86_64-unknown-linux-gnu",
+    "--generate-hashes",
+    "--quiet",
+    "--output-file",
+    "requirements/gpu-container-cpu-py311.lock"
+  ],
+  "files_sha256": {
+    "requirements/cpu.lock": "5085127f70126d1371780f3d83b0e4bab6b6375a765e798a5cf3b1d438a53912",
+    "requirements/train.txt": "b6482c8eca69acd80841bfa9856e348c4b57f811892eeb52f8e13d172f51e830",
+    "requirements/gpu-container-cpu-py311.in": "ec954bdedc29ed713300f90d2b9d6cd090e70a4d83a064dd58a099f30e9eef76",
+    "requirements/gpu-container-cpu-py311.lock": "a489918545899cad9471e267b95c68da01c0f76585c929acb436d1013ea12853",
+    "docker/Dockerfile.gpu": "89dd089686123a9a40cc0d18f011ec85dc71526fe342fc8a66e67dea2feb01ae"
+  },
+  "numpy_pypi_metadata": {
+    "2.5.4": {
+      "source_url": "https://pypi.org/pypi/numpy/2.5.4/json",
+      "response_sha256": "3d5ab646290a0954f48ca6139bccb402377e54165b064b567d50c1106ce5678f",
+      "requires_python": ">=3.12",
+      "cp311_linux_wheels": []
+    },
+    "2.4.6": {
+      "source_url": "https://pypi.org/pypi/numpy/2.4.6/json",
+      "response_sha256": "47121e3c41e7f6575370e2937674546e87caa261e51c5219ae6996619d7ae07f",
+      "requires_python": ">=3.11",
+      "cp311_linux_wheels": [
+        {
+          "filename": "numpy-2.4.6-cp311-cp311-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl",
+          "sha256": "0ab0a9c4ffb1a6d95ef519fe4247dba8eb6b18ad93999f76b7f657039acabd47",
+          "requires_python": ">=3.11"
+        },
+        {
+          "filename": "numpy-2.4.6-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl",
+          "sha256": "89cd468399cfd2504718f0ba50e410dca55a170b61a02ad92bb18c8a65186e93",
+          "requires_python": ">=3.11"
+        }
+      ]
+    }
+  },
+  "limitations": [
+    "Container Python/NumPy variant is not historical benchmark environment equivalence.",
+    "Old training stack remains historical/trusted-local-only with known dependency advisories."
+  ]
+}

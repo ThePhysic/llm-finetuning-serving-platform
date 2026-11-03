@@ -1,0 +1,166 @@
+{
+  "queried_at_utc": "2026-11-03T04:36:26.085820+00:00",
+  "source": "https://files.pythonhosted.org/packages/8b/a8/92e278093df40fde4c4bfd6572704bb8f398d6a2280d8c82cb5efaf12047/vllm-0.33.0-cp38-abi3-manylinux_2_28_x86_64.whl",
+  "published_wheel_sha256": "4b6bdec4ab269990bf70d45a3c1e94c3760a27064513760193b26d6f0da883aa",
+  "whole_wheel_hash_verified": false,
+  "method": "Bounded HTTP range reads plus ZIP CRC validation; static ELF DT_NEEDED parsing only; no native code loaded or executed.",
+  "cuda_visible_devices": "",
+  "bytes_downloaded": 2936772,
+  "wheel_size_bytes": 336361138,
+  "observed_libraries": [
+    {
+      "member": "vllm/spinloop.abi3.so",
+      "compressed_bytes": 3645,
+      "uncompressed_bytes": 16872,
+      "member_sha256": "d9611e3b08ab8ed4ec80c28d483371aad10b212ab597603e60452ab0e8549b7f",
+      "needed_libraries": [
+        "libtorch.so",
+        "libc10.so",
+        "libnvrtc.so.13",
+        "libc10_cuda.so",
+        "libtorch_cpu.so",
+        "libtorch_cuda.so",
+        "libc.so.6"
+      ]
+    },
+    {
+      "member": "vllm/cumem_allocator.abi3.so",
+      "compressed_bytes": 7948,
+      "uncompressed_bytes": 27264,
+      "member_sha256": "92ad21a86537952bd9229c2ecd88ac66a5787f37ec60ddf8b26be3ff04205c32",
+      "needed_libraries": [
+        "libcuda.so.1",
+        "libtorch.so",
+        "libc10.so",
+        "libnvrtc.so.13",
+        "libc10_cuda.so",
+        "libtorch_cpu.so",
+        "libtorch_cuda.so",
+        "libstdc++.so.6",
+        "libc.so.6"
+      ]
+    },
+    {
+      "member": "vllm/fs_io_C.abi3.so",
+      "compressed_bytes": 8242,
+      "uncompressed_bytes": 27592,
+      "member_sha256": "1214f5bbe44bf7f5efc714c05a4af4a608478ebb1aa2701db4c20bf544580be2",
+      "needed_libraries": [
+        "libtorch.so",
+        "libc10.so",
+        "libnvrtc.so.13",
+        "libc10_cuda.so",
+        "libtorch_cpu.so",
+        "libtorch_cuda.so",
+        "libstdc++.so.6",
+        "libgcc_s.so.1",
+        "libc.so.6"
+      ]
+    },
+    {
+      "member": "vllm/_flashmla_extension_C.abi3.so",
+      "compressed_bytes": 128309,
+      "uncompressed_bytes": 219736,
+      "member_sha256": "178e6b3d2d698d20f30c68bcb38d9569513e4334e6be24ca52cc462cfa24eb1f",
+      "needed_libraries": [
+        "libtorch.so",
+        "libcudart.so.13",
+        "libcuda.so.1",
+        "libtorch_cpu.so",
+        "libtorch_cuda.so",
+        "libdl.so.2",
+        "libstdc++.so.6",
+        "libgcc_s.so.1",
+        "libc.so.6",
+        "ld-linux-x86-64.so.2"
+      ]
+    },
+    {
+      "member": "vllm/_qutlass_C.abi3.so",
+      "compressed_bytes": 571931,
+      "uncompressed_bytes": 1426016,
+      "member_sha256": "3ec23a3319af97f3090b1bb240ddd09445eb8287de923d7cc03a3b3af6436e97",
+      "needed_libraries": [
+        "libtorch.so",
+        "libcudart.so.13",
+        "libcuda.so.1",
+        "libtorch_cpu.so",
+        "libtorch_cuda.so",
+        "libstdc++.so.6",
+        "libgcc_s.so.1",
+        "libc.so.6"
+      ]
+    },
+    {
+      "member": "vllm/_flashkda_C.abi3.so",
+      "compressed_bytes": 1562869,
+      "uncompressed_bytes": 5422576,
+      "member_sha256": "2f10bcce0114256411e18a70c64ce61cdb80fd54ada49dcc65a7f7994736f047",
+      "needed_libraries": [
+        "libtorch.so",
+        "libcudart.so.13",
+        "libcuda.so.1",
+        "libtorch_cpu.so",
+        "libtorch_cuda.so",
+        "libdl.so.2",
+        "libstdc++.so.6",
+        "libgcc_s.so.1",
+        "libc.so.6"
+      ]
+    }
+  ],
+  "all_shared_libraries": [
+    {
+      "member": "vllm/spinloop.abi3.so",
+      "compressed_bytes": 3645
+    },
+    {
+      "member": "vllm/cumem_allocator.abi3.so",
+      "compressed_bytes": 7948
+    },
+    {
+      "member": "vllm/fs_io_C.abi3.so",
+      "compressed_bytes": 8242
+    },
+    {
+      "member": "vllm/_flashmla_extension_C.abi3.so",
+      "compressed_bytes": 128309
+    },
+    {
+      "member": "vllm/_qutlass_C.abi3.so",
+      "compressed_bytes": 571931
+    },
+    {
+      "member": "vllm/_flashkda_C.abi3.so",
+      "compressed_bytes": 1562869
+    },
+    {
+      "member": "vllm/_deepselect_C.abi3.so",
+      "compressed_bytes": 2263059
+    },
+    {
+      "member": "vllm/_flashmla_C.abi3.so",
+      "compressed_bytes": 2270774
+    },
+    {
+      "member": "vllm/third_party/deep_gemm/_C_extension.abi3.so",
+      "compressed_bytes": 7067808
+    },
+    {
+      "member": "vllm/_moe_C_stable_libtorch.abi3.so",
+      "compressed_bytes": 38607871
+    },
+    {
+      "member": "vllm/vllm_flash_attn/_vllm_fa3_C.abi3.so",
+      "compressed_bytes": 42860902
+    },
+    {
+      "member": "vllm/_C_stable_libtorch.abi3.so",
+      "compressed_bytes": 65773119
+    },
+    {
+      "member": "vllm/vllm_flash_attn/_vllm_fa2_C.abi3.so",
+      "compressed_bytes": 130205427
+    }
+  ]
+}

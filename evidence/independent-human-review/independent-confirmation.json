@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "reviewer_id": "human-project-owner-independent-fresh",
+  "personally_assessed_each_response": true,
+  "used_ai_generated_scores": false,
+  "statement": "I personally assessed each response without AI-generated scores or judgments.",
+  "blind_ids": [
+    "2dfa89a95ec702b0fef12319",
+    "40395def1bd4a0dce7132104",
+    "7b1a6c79b34dfeef79a1fec4",
+    "c0cc7b56d83d78cece5a54ac",
+    "d9fca34c5a463b74fe62c527",
+    "f214fd5e2a72741970febaa5"
+  ],
+  "annotated_packet_sha256": "429dc57220c92357c05ef4da63c80ec714f0d020aa73bacdeaed36730da1b6e2",
+  "source_records_sha256": "dca9acc1fafb58903cde118e7f1425f772dd166b4cfcf5ce1babbefbfc07c80e",
+  "attestation_source_sha256": "e14da446379f522032f181caa26475a4b518cf4b9a457f5133ec3cf761646217",
+  "display_map_sha256": "d252648ac6c3c6c5f4e28b036acbe3a86bea8c7c1fdb74e3b30f56e3405fbafe",
+  "verification_boundary": "This is a lossless transcription and hash binding of the owner statement and ratings, not a cryptographic signature or external verification of identity/independence.",
+  "rating_bindings": {
+    "A": {
+      "blind_id": "f214fd5e2a72741970febaa5",
+      "source_id": "fresh-response-1",
+      "action_correctness": 0.0,
+      "summary_faithful": true,
+      "unsupported_claims": 0,
+      "total_claims": 2
+    },
+    "B": {
+      "blind_id": "7b1a6c79b34dfeef79a1fec4",
+      "source_id": "fresh-response-1",
+      "action_correctness": 1.0,
+      "summary_faithful": true,
+      "unsupported_claims": 0,
+      "total_claims": 2
+    },
+    "C": {
+      "blind_id": "40395def1bd4a0dce7132104",
+      "source_id": "fresh-response-1",
+      "action_correctness": 0.0,
+      "summary_faithful": true,
+      "unsupported_claims": 0,
+      "total_claims": 2
+    },
+    "D": {
+      "blind_id": "c0cc7b56d83d78cece5a54ac",
+      "source_id": "fresh-response-2",
+      "action_correctness": 0.0,
+      "summary_faithful": true,
+      "unsupported_claims": 0,
+      "total_claims": 2
+    },
+    "E": {
+      "blind_id": "d9fca34c5a463b74fe62c527",
+      "source_id": "fresh-response-2",
+      "action_correctness": 0.0,
+      "summary_faithful": false,
+      "unsupported_claims": 1,
+      "total_claims": 2
+    },
+    "F": {
+      "blind_id": "2dfa89a95ec702b0fef12319",
+      "source_id": "fresh-response-2",
+      "action_correctness": 0.5,
+      "summary_faithful": true,
+      "unsupported_claims": 0,
+      "total_claims": 2
+    }
+  }
+}

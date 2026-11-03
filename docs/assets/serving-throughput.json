@@ -1,0 +1,47 @@
+{
+  "source": "Preserved corrected serving matrix; no new measurements",
+  "units": "output tokens/second",
+  "aggregation": "Median of two run-level throughput observations",
+  "weight_order": [
+    "base",
+    "adapter"
+  ],
+  "values": {
+    "transformers": [
+      15.496408227561425,
+      9.089255640821811
+    ],
+    "vllm": [
+      98.66330987158028,
+      30.88550753502438
+    ]
+  },
+  "input_sha256": {
+    "evidence/serving/runs/transformers-base-r0-short-sync-c4/report.json": "71be55b1c6debc2ade1799eff97c970b625c516278b4c395776d41ddeec73a8c",
+    "evidence/serving/runs/transformers-base-r1-short-sync-c4/report.json": "55907c5be3f4ae61829f038d7be216aab013ea9b8a4816cc21a78a20f10ca0c2",
+    "evidence/serving/runs/transformers-adapter-r0-short-sync-c4/report.json": "7d367744ca150f395b75728fea573da48fd2b6e6ffa5292309b5a4bc28152467",
+    "evidence/serving/runs/transformers-adapter-r1-short-sync-c4/report.json": "5d77403e895dba62a8e0c535f56f6df42bfdd92425478b4c5de41bc74e696e05",
+    "evidence/serving/runs/vllm-base-r0-short-sync-c4/report.json": "0e1839b9ff9d04518ebb846d56c603e1cd17fce6e299a7a9a9f1951b1d06b9a9",
+    "evidence/serving/runs/vllm-base-r1-short-sync-c4/report.json": "5c48df126e0475b3e40e71e44948c48d526c5b0ff832a0a93b96fbb19faffc1f",
+    "evidence/serving/runs/vllm-adapter-r0-short-sync-c4/report.json": "0c90d7d134e06f28a76b179d924e2645d2e8d676c6a6fc268970e69a63cdcd3e",
+    "evidence/serving/runs/vllm-adapter-r1-short-sync-c4/report.json": "6ccd77473a7cd77593947b490499a7beb481bdbc3fa49fe30efa86bd09394439"
+  },
+  "conditions": {
+    "gpu": "RTX 4060 Laptop 8GB",
+    "model": "Qwen2.5-0.5B-Instruct",
+    "compute": "BF16",
+    "client_concurrency": 4,
+    "max_output_tokens": 32,
+    "requests_per_run": 12,
+    "repetitions": 2,
+    "excluded_warmups_per_run": 2,
+    "gateway_slots": {
+      "transformers": 1,
+      "vllm": 8
+    },
+    "vllm_max_sequences": 8
+  },
+  "plotting_version": "3.11.2",
+  "svg_sha256": "3914d884caa054fb65413c6f9e20b63803a7409ee3cf167f1223d63a21e8bb4b",
+  "png_sha256": "0b3b015f8044b9bb6d8ddaa411e6930c7e596d31365afe41caeda5ba3444401e"
+}

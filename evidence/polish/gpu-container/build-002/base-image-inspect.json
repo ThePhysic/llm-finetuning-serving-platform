@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "docker",
+    "image",
+    "inspect",
+    "pytorch/pytorch:2.6.0-cuda12.4-cudnn9-runtime",
+    "--format",
+    "{\"Id\":{{json .Id}},\"RepoDigests\":{{json .RepoDigests}},\"User\":{{json .Config.User}}}"
+  ],
+  "started_at_unix": 1793681341.9225433,
+  "seconds": 0.14979314804077148,
+  "returncode": 1,
+  "stdout": "\n",
+  "stderr": "template parsing error: template: :1:76: executing \"\" at <.Config.User>: map has no entry for key \"User\"\n"
+}

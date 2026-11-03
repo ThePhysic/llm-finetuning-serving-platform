@@ -1,0 +1,91 @@
+{
+  "queried_at_utc": "2026-11-03T04:28:09.365481+00:00",
+  "indexes": [
+    {
+      "url": "https://download.pytorch.org/whl/cu126/torch/",
+      "response_sha256": "407a3020efb3bd3b184f540e79f89e842638bcf3d3e89beebd8096fb4e30e9f7",
+      "python": "3.12",
+      "platform": "linux_x86_64",
+      "available_torch_versions": [
+        "2.10.0+cu126",
+        "2.11.0+cu126",
+        "2.12.0+cu126",
+        "2.12.1+cu126",
+        "2.13.0+cu126",
+        "2.13.0.dev20260610+cu126",
+        "2.14.0+cu126",
+        "2.14.1+cu126",
+        "2.6.0+cu126",
+        "2.7.0+cu126",
+        "2.7.1+cu126",
+        "2.8.0+cu126",
+        "2.9.0+cu126",
+        "2.9.1+cu126"
+      ],
+      "wheel_urls": [
+        "https://download-r2.pytorch.org/whl/cu126/torch-2.10.0+cu126-cp312-cp312-manylinux_2_28_x86_64.whl#sha256=2a7a569206f07965eff69b28e147676540bb0ba6e1a39410802b6e4708cb8356",
+        "https://download-r2.pytorch.org/whl/cu126/torch-2.11.0+cu126-cp312-cp312-manylinux_2_28_x86_64.whl#sha256=9235c0c2f5032d1f8af75dd97493f3ad12aaedf81c0f3fab2d13c1d90bc54ff9",
+        "https://download-r2.pytorch.org/whl/cu126/torch-2.12.0+cu126-cp312-cp312-manylinux_2_28_x86_64.whl#sha256=792711a06946fa1dcd1a86d46c387dd413744b9324262ff77c05f61830d0e678",
+        "https://download-r2.pytorch.org/whl/cu126/torch-2.12.1+cu126-cp312-cp312-manylinux_2_28_x86_64.whl#sha256=fcc3cf2026f15afeb69f51fa3fde7b286ffd7e6d9b8e070021ca8abd95bd220a",
+        "https://download-r2.pytorch.org/whl/cu126/torch-2.13.0+cu126-cp312-cp312-manylinux_2_28_x86_64.whl#sha256=8695f3c6b7966d44560275b90c5c28e5091ba33ddbb1ab33b2173782ca1e9145",
+        "https://download-r2.pytorch.org/whl/cu126/torch-2.13.0.dev20260610+cu126-cp312-cp312-manylinux_2_28_x86_64.whl",
+        "https://download-r2.pytorch.org/whl/cu126/torch-2.14.0+cu126-cp312-cp312-manylinux_2_28_x86_64.whl#sha256=e9922441cb2ed269742a46246840c53634ca963f8b0a38d30182c28b4e8388da",
+        "https://download-r2.pytorch.org/whl/cu126/torch-2.14.1+cu126-cp312-cp312-manylinux_2_28_x86_64.whl#sha256=75727245346d8f92224a860bf40c56bd681edcfa0456d01d7dfcb0bf6f0cf86c",
+        "https://download-r2.pytorch.org/whl/cu126/torch-2.6.0+cu126-cp312-cp312-manylinux_2_28_x86_64.whl#sha256=6bc5b9126daa3ac1e4d920b731da9f9503ff1f56204796de124e080f5cc3570e",
+        "https://download-r2.pytorch.org/whl/cu126/torch-2.7.0+cu126-cp312-cp312-manylinux_2_28_x86_64.whl#sha256=4933a51bfb906f34b44c23c6ea28fdfef5bf14a3c79a43d5d798285e29eba295",
+        "https://download-r2.pytorch.org/whl/cu126/torch-2.7.1+cu126-cp312-cp312-manylinux_2_28_x86_64.whl#sha256=63bce0590bc540fc16139e2be0177847585182b8c5e68d7f9213789d1d96c978",
+        "https://download-r2.pytorch.org/whl/cu126/torch-2.8.0+cu126-cp312-cp312-manylinux_2_28_x86_64.whl#sha256=ce6e6a1f4803ad62d1fe51cec3fe5ca14bcd8bc7cace7b09d5590f8147fa16ad",
+        "https://download-r2.pytorch.org/whl/cu126/torch-2.9.0+cu126-cp312-cp312-manylinux_2_28_x86_64.whl#sha256=ea68e3146cd7d770c662f0120f18b8b4a6d96be4314e7196047b282887828cfb",
+        "https://download-r2.pytorch.org/whl/cu126/torch-2.9.1+cu126-cp312-cp312-manylinux_2_28_x86_64.whl#sha256=67e9b1054f435d33af6fa67343f93d73dc2d37013623672d6ffb24ce39b666c2"
+      ]
+    },
+    {
+      "url": "https://download.pytorch.org/whl/cu128/torch/",
+      "response_sha256": "4abf74798d77e9a784eaefd77ac2ed5ee36b68176fa88b4faae491d697f4f54b",
+      "python": "3.12",
+      "platform": "linux_x86_64",
+      "available_torch_versions": [
+        "2.10.0+cu128",
+        "2.11.0+cu128",
+        "2.7.0+cu128",
+        "2.7.1+cu128",
+        "2.8.0+cu128",
+        "2.9.0+cu128",
+        "2.9.1+cu128"
+      ],
+      "wheel_urls": [
+        "https://download-r2.pytorch.org/whl/cu128/torch-2.10.0+cu128-cp312-cp312-manylinux_2_28_x86_64.whl#sha256=628e89bd5110ced7debee2a57c69959725b7fbc64eab81a39dd70e46c7e28ba5",
+        "https://download-r2.pytorch.org/whl/cu128/torch-2.11.0+cu128-cp312-cp312-manylinux_2_28_x86_64.whl#sha256=d252cf975fb18c94a85336323ad425f473df56dab35a44b00399bd70c7a3b997",
+        "https://download-r2.pytorch.org/whl/cu128/torch-2.7.0+cu128-cp312-cp312-manylinux_2_28_x86_64.whl#sha256=7c0f08d1c44a02abad389373dddfce75904b969a410be2f4e5109483dd3dc0ce",
+        "https://download-r2.pytorch.org/whl/cu128/torch-2.7.1+cu128-cp312-cp312-manylinux_2_28_x86_64.whl#sha256=0b64f7d0a6f2a739ed052ba959f7b67c677028c9566ce51997f9f90fe573ddaa",
+        "https://download-r2.pytorch.org/whl/cu128/torch-2.8.0+cu128-cp312-cp312-manylinux_2_28_x86_64.whl#sha256=4354fc05bb79b208d6995a04ca1ceef6a9547b1c4334435574353d381c55087c",
+        "https://download-r2.pytorch.org/whl/cu128/torch-2.9.0+cu128-cp312-cp312-manylinux_2_28_x86_64.whl#sha256=87c62d3b95f1a2270bd116dbd47dc515c0b2035076fbb4a03b4365ea289e89c4",
+        "https://download-r2.pytorch.org/whl/cu128/torch-2.9.1+cu128-cp312-cp312-manylinux_2_28_x86_64.whl#sha256=7cb4018f4ce68b61fd3ef87dc1c4ca520731c7b5b200e360ad47b612d7844063"
+      ]
+    },
+    {
+      "url": "https://download.pytorch.org/whl/cu129/torch/",
+      "response_sha256": "98044f5e3375e3b78cfbd198597709b5ad8c344f88fa261fa078400c86eb1943",
+      "python": "3.12",
+      "platform": "linux_x86_64",
+      "available_torch_versions": [
+        "2.10.0+cu129",
+        "2.11.0+cu129",
+        "2.12.1+cu129",
+        "2.13.0+cu129",
+        "2.8.0+cu129",
+        "2.9.0+cu129",
+        "2.9.1+cu129"
+      ],
+      "wheel_urls": [
+        "https://download-r2.pytorch.org/whl/cu129/torch-2.10.0+cu129-cp312-cp312-manylinux_2_28_x86_64.whl#sha256=a3c703e74a88cccfeb4b1807c49d563a0a73793ba72d4fa035d4ac5885f3aefd",
+        "https://download-r2.pytorch.org/whl/cu129/torch-2.11.0+cu129-cp312-cp312-manylinux_2_28_x86_64.whl#sha256=68b83cb7d7d43bc67c2833c8aebaea6a966f2017c3389885affa3361c258b7e3",
+        "https://download-r2.pytorch.org/whl/cu129/torch-2.12.1+cu129-cp312-cp312-manylinux_2_28_x86_64.whl#sha256=fb2adab402cc7f1bc048eb38070f9a9072aa75235436eab3b4a49e1ce0472eaf",
+        "https://download-r2.pytorch.org/whl/cu129/torch-2.13.0+cu129-cp312-cp312-manylinux_2_28_x86_64.whl#sha256=df28741fcd89e3da7cce2d48cbe5299d6732d510ac20f5d422d0b85edf18c327",
+        "https://download-r2.pytorch.org/whl/cu129/torch-2.8.0+cu129-cp312-cp312-manylinux_2_28_x86_64.whl#sha256=02c7258e917f3043c978b53acf6f02b818db0d0d85db0e58ae578af333b9b4e2",
+        "https://download-r2.pytorch.org/whl/cu129/torch-2.9.0+cu129-cp312-cp312-manylinux_2_28_x86_64.whl#sha256=6a2f119afeefe66eef75484f008b1a240952e45b24899d27d281961e8a395458",
+        "https://download-r2.pytorch.org/whl/cu129/torch-2.9.1+cu129-cp312-cp312-manylinux_2_28_x86_64.whl#sha256=9968834a95e4b09f702549285f6210eade0d268b3b7e52b35aff1c6529fb8022"
+      ]
+    }
+  ]
+}

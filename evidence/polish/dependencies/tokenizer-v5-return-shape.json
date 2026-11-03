@@ -1,0 +1,17 @@
+{
+  "default": {
+    "prefix_type": "BatchEncoding",
+    "full_type": "BatchEncoding",
+    "prefix_len": 2,
+    "complete_len": 2,
+    "equal_prefix": false
+  },
+  "explicit_list": {
+    "prefix_type": "list",
+    "full_type": "list",
+    "prefix_len": 163,
+    "complete_len": 241,
+    "equal_prefix": true,
+    "token_sha256": "a94acc41c2980ad1089c54a6a3b8ae0a8c2773a6f08b1f8a0a69cd37274e5fab"
+  }
+}

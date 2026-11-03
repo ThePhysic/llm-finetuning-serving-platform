@@ -1,0 +1,17 @@
+{
+  "started_at_utc": "2026-11-03T04:57:52.833594+00:00",
+  "scope": "Complete current CPU test suite in the isolated modern training/Transformers candidate; no GPU evidence",
+  "cuda_visible_devices": "",
+  "source_revision": "fd2d3c060078eef0544e41822781d40019d96357",
+  "source_dirty": true,
+  "resolved_inventory_sha256": "ebf6042dc68ccb9154e239de364d5d4928867dc953dd3c9f0941f2b8eb43f557",
+  "command": [
+    "/home/ridle/llm-platform-candidate-train-polish-001/bin/python",
+    "-c",
+    "import os; assert os.environ.get('CUDA_VISIBLE_DEVICES') == ''; import torch; assert not torch.cuda.is_initialized(); import pytest; result = pytest.main(['-q']); assert not torch.cuda.is_initialized(); print('CUDA_CONTEXT_INITIALIZED_AFTER_FULL_SUITE=False'); raise SystemExit(result)"
+  ],
+  "exit_code": 0,
+  "stdout": "........................................................................ [ 16%]\n........................................................................ [ 33%]\n........................................................................ [ 50%]\n........................................................................ [ 67%]\n........................................................................ [ 84%]\n...................................................................      [100%]\n=============================== warnings summary ===============================\ntests/test_training.py::test_real_cpu_resume_preserves_weights_and_complete_raw_history\ntests/test_training.py::test_real_cpu_resume_preserves_weights_and_complete_raw_history\ntests/test_training.py::test_real_cpu_training_honors_verified_manifest_character_budget\n  /home/ridle/llm-platform-candidate-train-polish-001/lib/python3.12/site-packages/peft/tuners/lora/layer.py:2760: UserWarning: fan_in_fan_out is set to False but the target module is `Conv1D`. Setting fan_in_fan_out to True.\n    warnings.warn(\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n427 passed, 3 warnings in 87.17s (0:01:27)\nCUDA_CONTEXT_INITIALIZED_AFTER_FULL_SUITE=False\n",
+  "stderr": "",
+  "finished_at_utc": "2026-11-03T04:59:28.639160+00:00"
+}

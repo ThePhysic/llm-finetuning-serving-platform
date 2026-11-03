@@ -1,0 +1,43 @@
+{
+  "queried_at_utc": "2026-11-03T04:30:13.945210+00:00",
+  "resolver_version": "uv 0.13.5 (46776a95d 2026-10-21 x86_64-pc-windows-msvc)",
+  "scope": "Linux/Python3.12 metadata resolution only. No dependency was installed and no CUDA/model code imported.",
+  "results": [
+    {
+      "name": "training-compatible",
+      "exit_code": 0,
+      "resolved_output": "requirements/candidate-training-compatible-resolved-linux.txt",
+      "resolved_sha256": "3922863de73f041579a90ece9aa9fe398dcd730be2a1077814bacb87aa7cc4ab"
+    },
+    {
+      "name": "training-modern-project-conflict",
+      "exit_code": 1,
+      "resolved_output": null,
+      "resolved_sha256": null
+    },
+    {
+      "name": "training-modern-standalone",
+      "exit_code": 0,
+      "resolved_output": "requirements/candidate-training-modern-standalone-resolved-linux.txt",
+      "resolved_sha256": "edac182b5f5226ba8e7c4b6816dd3e30d04f04eb707fd510ccf4962c3e2ec909"
+    },
+    {
+      "name": "vllm-compatible",
+      "exit_code": 0,
+      "resolved_output": "requirements/candidate-vllm-compatible-resolved-linux.txt",
+      "resolved_sha256": "90df95347e7057ca54ad40a52ab509e95155991ecee0709d3540d580e2a8c6a8"
+    },
+    {
+      "name": "vllm-modern-project-conflict",
+      "exit_code": 1,
+      "resolved_output": null,
+      "resolved_sha256": null
+    },
+    {
+      "name": "vllm-modern-standalone",
+      "exit_code": 0,
+      "resolved_output": "requirements/candidate-vllm-modern-standalone-resolved-linux.txt",
+      "resolved_sha256": "ea9edce451f95164b5ae4e26d73abc65b83b6f2ad38afa729755b0c76d50373a"
+    }
+  ]
+}

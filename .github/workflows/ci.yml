@@ -8,6 +8,8 @@ jobs:
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      CUDA_VISIBLE_DEVICES: ''
     steps:
       - uses: actions/checkout@v4
         with:
@@ -23,5 +25,5 @@ jobs:
       - run: pytest -q
       - run: llm-platform data verify data/triage-v3
       - run: llm-platform doctor
-      # Preserve the external human-review gap without waiving any failed/other pending criterion.
+      # Allow only a validated future absence of human judgments; current evidence is complete.
       - run: llm-platform audit-evidence --allow-expected-human-pending

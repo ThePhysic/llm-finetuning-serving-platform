@@ -1,0 +1,75 @@
+{
+  "started_at_utc": "2026-11-03T04:40:59.884474+00:00",
+  "environment": "/home/ridle/llm-platform-candidate-train-polish-001",
+  "cuda_visible_devices": "",
+  "historical_environments_modified": false,
+  "steps": [
+    {
+      "command": [
+        "/home/ridle/.local/bin/uv",
+        "pip",
+        "compile",
+        "/mnt/c/Users/ridle/llm-finetuning-serving-platform/pyproject.toml",
+        "/mnt/c/Users/ridle/llm-finetuning-serving-platform/requirements/candidate-training-modern-cu126.in",
+        "--extra",
+        "train",
+        "--extra",
+        "dev",
+        "--python-version",
+        "3.12",
+        "--python-platform",
+        "x86_64-unknown-linux-gnu",
+        "--torch-backend",
+        "cu126",
+        "--no-header",
+        "--output-file",
+        "/mnt/c/Users/ridle/llm-finetuning-serving-platform/requirements/candidate-training-modern-integrated-resolved-linux.txt"
+      ],
+      "exit_code": 0,
+      "stdout": "accelerate==1.15.0\n    # via\n    #   -r requirements/candidate-training-modern-cu126.in\n    #   llm-finetuning-serving-platform (pyproject.toml)\n    #   peft\nannotated-doc==0.0.5\n    # via\n    #   fastapi\n    #   typer\nannotated-types==0.8.0\n    # via pydantic\nanyio==4.16.0\n    # via\n    #   httpx\n    #   starlette\ncertifi==2026.10.23\n    # via\n    #   httpcore\n    #   httpx\nclick==8.5.0\n    # via\n    #   huggingface-hub\n    #   uvicorn\ncuda-bindings==12.9.10\n    # via torch\ncuda-pathfinder==1.8.5\n    # via cuda-bindings\ncuda-toolkit==12.6.3\n    # via torch\nfastapi==0.162.0\n    # via llm-finetuning-serving-platform (pyproject.toml)\nfilelock==4.2.7\n    # via\n    #   huggingface-hub\n    #   torch\nfsspec==2026.9.0\n    # via\n    #   huggingface-hub\n    #   torch\nh11==0.16.0\n    # via\n    #   httpcore\n    #   uvicorn\nhf-xet==1.8.0\n    # via huggingface-hub\nhttpcore==1.0.9\n    # via httpx\nhttpx==0.28.1\n    # via\n    #   llm-finetuning-serving-platform (pyproject.toml)\n    #   huggingface-hub\nhuggingface-hub==1.33.0\n    # via\n    #   llm-finetuning-serving-platform (pyproject.toml)\n    #   accelerate\n    #   peft\n    #   tokenizers\n    #   transformers\nidna==3.20\n    # via\n    #   anyio\n    #   httpx\niniconfig==2.3.1\n    # via pytest\njinja2==3.1.6\n    # via torch\nmarkdown-it-py==4.2.0\n    # via rich\nmarkupsafe==3.0.4\n    # via jinja2\nmdurl==0.1.2\n    # via markdown-it-py\nmpmath==1.3.0\n    # via sympy\nnetworkx==3.7\n    # via torch\nnumpy==2.5.4\n    # via\n    #   llm-finetuning-serving-platform (pyproject.toml)\n    #   accelerate\n    #   peft\n    #   transformers\nnvidia-cublas-cu12==12.6.4.1\n    # via\n    #   cuda-toolkit\n    #   nvidia-cudnn-cu12\n    #   nvidia-cusolver-cu12\nnvidia-cuda-cupti-cu12==12.6.80\n    # via cuda-toolkit\nnvidia-cuda-nvrtc-cu12==12.6.85\n    # via cuda-toolkit\nnvidia-cuda-runtime-cu12==12.6.77\n    # via cuda-toolkit\nnvidia-cudnn-cu12==9.10.2.21\n    # via torch\nnvidia-cufft-cu12==11.3.0.4\n    # via cuda-toolkit\nnvidia-cufile-cu12==1.11.1.6\n    # via cuda-toolkit\nnvidia-curand-cu12==10.3.7.77\n    # via cuda-toolkit\nnvidia-cusolver-cu12==11.7.1.2\n    # via cuda-toolkit\nnvidia-cusparse-cu12==12.5.4.2\n    # via\n    #   cuda-toolkit\n    #   nvidia-cusolver-cu12\nnvidia-cusparselt-cu12==0.7.1\n    # via torch\nnvidia-nccl-cu12==2.29.3\n    # via torch\nnvidia-nvjitlink-cu12==12.9.86\n    # via\n    #   nvidia-cufft-cu12\n    #   nvidia-cusolver-cu12\n    #   nvidia-cusparse-cu12\n    #   torch\nnvidia-nvshmem-cu12==3.4.5\n    # via torch\nnvidia-nvtx-cu12==12.6.77\n    # via cuda-toolkit\nopentelemetry-api==1.45.2\n    # via fastapi\npackaging==26.3\n    # via\n    #   accelerate\n    #   huggingface-hub\n    #   peft\n    #   pytest\n    #   transformers\npeft==0.21.2\n    # via\n    #   -r requirements/candidate-training-modern-cu126.in\n    #   llm-finetuning-serving-platform (pyproject.toml)\npluggy==1.7.0\n    # via pytest\nprometheus-client==0.26.0\n    # via llm-finetuning-serving-platform (pyproject.toml)\npsutil==7.2.2\n    # via\n    #   accelerate\n    #   peft\npydantic==2.14.2\n    # via\n    #   llm-finetuning-serving-platform (pyproject.toml)\n    #   fastapi\npydantic-core==2.50.2\n    # via pydantic\npygments==2.21.0\n    # via\n    #   pytest\n    #   rich\npytest==9.2.0\n    # via\n    #   llm-finetuning-serving-platform (pyproject.toml)\n    #   pytest-asyncio\npytest-asyncio==1.4.1.post1\n    # via llm-finetuning-serving-platform (pyproject.toml)\npyyaml==6.0.3\n    # via\n    #   accelerate\n    #   huggingface-hub\n    #   peft\n    #   transformers\nregex==2026.9.29\n    # via transformers\nrich==15.0.0\n    # via typer\nruff==0.17.3\n    # via llm-finetuning-serving-platform (pyproject.toml)\nsafetensors==0.8.0\n    # via\n    #   -r requirements/candidate-training-modern-cu126.in\n    #   llm-finetuning-serving-platform (pyproject.toml)\n    #   accelerate\n    #   peft\n    #   transformers\nsetuptools==84.2.1\n    # via torch\nshellingham==1.5.4\n    # via typer\nstarlette==1.10.0\n    # via fastapi\nsympy==1.14.0\n    # via torch\ntokenizers==0.23.3\n    # via transformers\ntorch==2.14.1+cu126\n    # via\n    #   -r requirements/candidate-training-modern-cu126.in\n    #   llm-finetuning-serving-platform (pyproject.toml)\n    #   accelerate\n    #   peft\ntqdm==4.70.1\n    # via\n    #   huggingface-hub\n    #   peft\n    #   transformers\ntransformers==5.20.0\n    # via\n    #   -r requirements/candidate-training-modern-cu126.in\n    #   llm-finetuning-serving-platform (pyproject.toml)\n    #   peft\ntriton==3.8.0\n    # via torch\ntyper==0.27.3\n    # via\n    #   llm-finetuning-serving-platform (pyproject.toml)\n    #   transformers\ntyping-extensions==4.16.0\n    # via\n    #   anyio\n    #   fastapi\n    #   huggingface-hub\n    #   opentelemetry-api\n    #   pydantic\n    #   pydantic-core\n    #   pytest-asyncio\n    #   starlette\n    #   torch\n    #   typing-inspection\ntyping-inspection==0.4.4\n    # via\n    #   fastapi\n    #   pydantic\nuvicorn==0.54.0\n    # via llm-finetuning-serving-platform (pyproject.toml)\n",
+      "stderr": "Resolved 70 packages in 3.40s\n"
+    },
+    {
+      "command": [
+        "/home/ridle/.local/bin/uv",
+        "venv",
+        "--python",
+        "/home/ridle/llm-platform-env/bin/python",
+        "/home/ridle/llm-platform-candidate-train-polish-001"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "Using CPython 3.12.16 interpreter at: /home/ridle/llm-platform-env/bin/python\nCreating virtual environment at: /home/ridle/llm-platform-candidate-train-polish-001\nActivate with: source /home/ridle/llm-platform-candidate-train-polish-001/bin/activate\n"
+    },
+    {
+      "command": [
+        "/home/ridle/.local/bin/uv",
+        "pip",
+        "sync",
+        "--python",
+        "/home/ridle/llm-platform-candidate-train-polish-001/bin/python",
+        "--torch-backend",
+        "cu126",
+        "/mnt/c/Users/ridle/llm-finetuning-serving-platform/requirements/candidate-training-modern-integrated-resolved-linux.txt"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "Using Python 3.12.16 environment at: /home/ridle/llm-platform-candidate-train-polish-001\nResolved 70 packages in 25ms\nDownloading sympy (6.0MiB)\nDownloading tokenizers (3.2MiB)\nDownloading transformers (12.2MiB)\nDownloading nvidia-cufile-cu12 (1.1MiB)\nDownloading nvidia-cufft-cu12 (190.9MiB)\nDownloading nvidia-nvjitlink-cu12 (37.9MiB)\nDownloading nvidia-cuda-nvrtc-cu12 (22.6MiB)\nDownloading nvidia-cublas-cu12 (374.9MiB)\nDownloading nvidia-cusparse-cu12 (206.5MiB)\nDownloading nvidia-cuda-cupti-cu12 (8.5MiB)\nDownloading nvidia-cusolver-cu12 (150.9MiB)\nDownloading nvidia-nccl-cu12 (276.3MiB)\nDownloading nvidia-cusparselt-cu12 (273.9MiB)\nDownloading nvidia-curand-cu12 (53.7MiB)\nDownloading nvidia-cudnn-cu12 (674.0MiB)\nDownloading cuda-bindings (7.3MiB)\nDownloading nvidia-nvshmem-cu12 (132.7MiB)\nDownloading torch (828.9MiB)\nDownloading triton (235.4MiB)\n Downloaded nvidia-cufile-cu12\n Downloaded tokenizers\n Downloaded sympy\n Downloaded cuda-bindings\n Downloaded nvidia-cuda-cupti-cu12\n Downloaded transformers\n Downloaded nvidia-cuda-nvrtc-cu12\n Downloaded nvidia-nvjitlink-cu12\n Downloaded nvidia-curand-cu12\n Downloaded triton\n Downloaded torch\n Downloaded nvidia-nvshmem-cu12\n Downloaded nvidia-cusolver-cu12\n Downloaded nvidia-cufft-cu12\n Downloaded nvidia-cusparse-cu12\n Downloaded nvidia-nccl-cu12\n Downloaded nvidia-cusparselt-cu12\n Downloaded nvidia-cublas-cu12\n Downloaded nvidia-cudnn-cu12\nPrepared 25 packages in 9m 29s\nInstalled 70 packages in 1.31s\n + accelerate==1.15.0\n + annotated-doc==0.0.5\n + annotated-types==0.8.0\n + anyio==4.16.0\n + certifi==2026.10.23\n + click==8.5.0\n + cuda-bindings==12.9.10\n + cuda-pathfinder==1.8.5\n + cuda-toolkit==12.6.3\n + fastapi==0.162.0\n + filelock==4.2.7\n + fsspec==2026.9.0\n + h11==0.16.0\n + hf-xet==1.8.0\n + httpcore==1.0.9\n + httpx==0.28.1\n + huggingface-hub==1.33.0\n + idna==3.20\n + iniconfig==2.3.1\n + jinja2==3.1.6\n + markdown-it-py==4.2.0\n + markupsafe==3.0.4\n + mdurl==0.1.2\n + mpmath==1.3.0\n + networkx==3.7\n + numpy==2.5.4\n + nvidia-cublas-cu12==12.6.4.1\n + nvidia-cuda-cupti-cu12==12.6.80\n + nvidia-cuda-nvrtc-cu12==12.6.85\n + nvidia-cuda-runtime-cu12==12.6.77\n + nvidia-cudnn-cu12==9.10.2.21\n + nvidia-cufft-cu12==11.3.0.4\n + nvidia-cufile-cu12==1.11.1.6\n + nvidia-curand-cu12==10.3.7.77\n + nvidia-cusolver-cu12==11.7.1.2\n + nvidia-cusparse-cu12==12.5.4.2\n + nvidia-cusparselt-cu12==0.7.1\n + nvidia-nccl-cu12==2.29.3\n + nvidia-nvjitlink-cu12==12.9.86\n + nvidia-nvshmem-cu12==3.4.5\n + nvidia-nvtx-cu12==12.6.77\n + opentelemetry-api==1.45.2\n + packaging==26.3\n + peft==0.21.2\n + pluggy==1.7.0\n + prometheus-client==0.26.0\n + psutil==7.2.2\n + pydantic==2.14.2\n + pydantic-core==2.50.2\n + pygments==2.21.0\n + pytest==9.2.0\n + pytest-asyncio==1.4.1.post1\n + pyyaml==6.0.3\n + regex==2026.9.29\n + rich==15.0.0\n + ruff==0.17.3\n + safetensors==0.8.0\n + setuptools==84.2.1\n + shellingham==1.5.4\n + starlette==1.10.0\n + sympy==1.14.0\n + tokenizers==0.23.3\n + torch==2.14.1+cu126\n + tqdm==4.70.1\n + transformers==5.20.0\n + triton==3.8.0\n + typer==0.27.3\n + typing-extensions==4.16.0\n + typing-inspection==0.4.4\n + uvicorn==0.54.0\n"
+    },
+    {
+      "command": [
+        "/home/ridle/.local/bin/uv",
+        "pip",
+        "install",
+        "--python",
+        "/home/ridle/llm-platform-candidate-train-polish-001/bin/python",
+        "--no-deps",
+        "-e",
+        "/mnt/c/Users/ridle/llm-finetuning-serving-platform"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "Using Python 3.12.16 environment at: /home/ridle/llm-platform-candidate-train-polish-001\nResolved 1 package in 13ms\n   Building llm-finetuning-serving-platform @ file:///mnt/c/Users/ridle/llm-finetuning-serving-platform\n      Built llm-finetuning-serving-platform @ file:///mnt/c/Users/ridle/llm-finetuning-serving-platform\nPrepared 1 package in 1.46s\nInstalled 1 package in 3ms\n + llm-finetuning-serving-platform==0.1.0 (from file:///mnt/c/Users/ridle/llm-finetuning-serving-platform)\n"
+    }
+  ]
+}

@@ -6,6 +6,9 @@ single GPU on Linux/WSL2; CPU operation is a lightweight validation path.
 The pinned GPU reference stack has known upstream advisories and is intended for
 isolated trusted reproduction. Read the [dependency findings and worker controls](security.md)
 before any non-local use. Gateway authentication does not patch its execution engine.
+The [separate modern training/Transformers candidate](dependency-migration.md)
+has actual GPU compatibility evidence and a dated zero-match package audit; this
+does not validate modern vLLM or transfer the historical performance results.
 
 1. Verify the frozen dataset and the exported package. Register a package with
    `llm-platform registry register PACKAGE --registry runtime/registry`.
@@ -54,3 +57,10 @@ The CPU image's `doctor` default cannot serve a real model until the training or
 execution dependencies and model artifacts are provided. Container definitions
 do not by themselves establish a successful image build or GPU benchmark; consult
 the validation evidence for checks actually run.
+
+The polish work built and GPU-tested the historical image recipe. The default
+base is Python 3.11, so it now uses the separate hashed Python 3.11 CPU-layer lock
+with NumPy 2.4.6; the original Python 3.12 lock remains intact. The
+[container verification report](polish-handoff.md) records image/source identities,
+nonroot execution, GPU HTTP checks, mounts and teardown. Its successful execution
+does not remove the legacy GPU dependency advisories or transfer native benchmarks.

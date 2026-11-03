@@ -1,0 +1,29 @@
+{
+  "name": "vllm-modern-project-conflict",
+  "started_source": "requirements/candidate-vllm-modern.in",
+  "command": [
+    "uv",
+    "pip",
+    "compile",
+    "pyproject.toml",
+    "--extra",
+    "vllm",
+    "--extra",
+    "dev",
+    "requirements/candidate-vllm-modern.in",
+    "--python-version",
+    "3.12",
+    "--python-platform",
+    "x86_64-unknown-linux-gnu",
+    "--output-file",
+    "C:\\Users\\ridle\\llm-finetuning-serving-platform\\requirements\\candidate-vllm-modern-project-conflict-resolved-linux.txt",
+    "--no-header"
+  ],
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "error: No solution found when resolving dependencies\n  cause: Because vllm>=0.33.0 depends on huggingface-hub>=1.31.0 and llm-finetuning-serving-platform depends on vllm==0.33.0, we can conclude that llm-finetuning-serving-platform depends on huggingface-hub>=1.31.0.\n         And because llm-finetuning-serving-platform depends on huggingface-hub>=0.28,<1, we can conclude that your requirements are unsatisfiable.\n",
+  "cuda_hidden": true,
+  "installs_performed": false,
+  "resolved_output": null,
+  "resolved_sha256": null
+}

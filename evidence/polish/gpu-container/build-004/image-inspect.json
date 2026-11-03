@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "docker",
+    "image",
+    "inspect",
+    "llm-platform-gpu-verify:96f7832325254978a75cb8dea703e76a",
+    "--format",
+    "{\"Id\":{{json .Id}},\"RepoDigests\":{{json .RepoDigests}},\"User\":{{json (index .Config \"User\")}}}"
+  ],
+  "started_at_unix": 1793682122.2390213,
+  "seconds": 0.264603853225708,
+  "returncode": 0,
+  "stdout": "{\"Id\":\"sha256:15a5cde723527525ea9fee3ac16d45d3a50df64eb48d5857ca45424a7cdfcd68\",\"RepoDigests\":[\"llm-platform-gpu-verify@sha256:15a5cde723527525ea9fee3ac16d45d3a50df64eb48d5857ca45424a7cdfcd68\"],\"User\":\"platform\"}\n",
+  "stderr": ""
+}

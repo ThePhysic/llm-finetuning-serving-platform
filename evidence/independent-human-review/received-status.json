@@ -1,0 +1,9 @@
+{
+  "status": "all_ratings_and_owner_attestation_received_import_complete",
+  "submitted_labels": ["A", "B", "C", "D", "E", "F"],
+  "missing_labels": [],
+  "annotation_origin": "owner_attested_independent",
+  "independent_verification": "owner_attested_digest_bound_import",
+  "independent_human_acceptance": "complete_for_fresh_two_case_subset",
+  "note": "Both rating batches and the owner's explicit independent-assessment/no-AI-judgments disclosure are preserved exactly. The canonical importer validated the exact annotated digest and raw source bindings. This is owner-attested review, not external identity verification. The historical six AI-assisted labels remain separate."
+}

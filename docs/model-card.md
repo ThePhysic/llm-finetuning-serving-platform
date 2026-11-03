@@ -1,7 +1,7 @@
 # Enterprise triage adapter model card
 
 The adapter improved measured accuracy on this small synthetic test, but its
-37.5% classification accuracy, failed abstention, and absent qualifying independent human review do not
+37.5% classification accuracy, failed abstention, and limited owner-attested human review do not
 justify unattended incident triage or autonomous operational actions.
 
 The six historical A–F ratings are AI-generated/AI-assisted annotations submitted
@@ -135,7 +135,7 @@ Evidence locations:
 | Original model, stronger authored diagnostic prompt | `evidence/evaluation/prompted/` |
 | Reloaded LoRA model, same instruction as zero-shot | `evidence/evaluation/lora/` |
 | Historical AI-assisted annotations and original submitted replies | `evidence/human-review/` |
-| Fresh unannotated independent-review packet | `evidence/independent-human-review/` |
+| Fresh owner-attested independent review, original empty packet and replies | `evidence/independent-human-review/` |
 | Serving raw observations and optimization comparisons | `evidence/serving/` |
 | Historical loaded source and retrospective clarification | `evidence/execution-source/`, `evidence/execution-provenance.json` |
 
@@ -144,7 +144,7 @@ classification accuracy and macro F1, exact extractive evidence metrics, action
 keyword coverage, escalation and abstention, general regressions, category/tag
 slices, failure examples, and uncertainty. Automatic action keywords do not prove
 action correctness. Overall unsupported claims and semantic action correctness
-are unavailable as independent-human results until qualifying review exists.
+are distinct from independent-human results, now available only on the small fresh subset below.
 The historical six A–F ratings were generated with ChatGPT assistance and supplied
 through the user, covering an API prompt-injection case and an ambiguous delivery
 case. Submission by a human did not establish independent assessment of those
@@ -163,9 +163,25 @@ These are AI-assisted labels for two selected incidents, with three alternatives
 per incident. The numeric scores are preserved; their origin changes how they can
 be interpreted. They establish neither independently judged action correctness
 nor a population hallucination rate. The historical automatic reports remain
-immutable with pending human fields. A fresh blinded packet excludes the two
-previously displayed families and awaits actual independent judgments and explicit
-provenance attestation. Its model mapping stays local until review is complete.
+immutable with pending human fields. The fresh blinded packet excludes the two
+previously displayed families. The owner supplied all six new judgments and
+explicitly stated that each response was assessed without AI-generated scores or
+judgments. That attestation and the actual replies are bound to the exact annotated
+packet. Its mapping was kept local until the judgments were received.
+
+| Fresh owner-attested human subset | Zero-shot | Stronger prompt | LoRA |
+|---|---:|---:|---:|
+| Responses assessed | 2 | 2 | 2 |
+| Mean action rubric score (0 / 0.5 / 1) | 0.50 | 0.00 | 0.25 |
+| Faithful summaries | 1/2 | 2/2 | 2/2 |
+| Unsupported factual claims / total reviewed claims | 1/4 | 0/4 | 0/4 |
+
+See the [fresh report](../evidence/independent-human-review/report.json). This is
+one owner-attested reviewer and two different held-out families, with one output
+per model per case. It provides descriptive judgments, not a population estimate,
+external identity verification or expert consensus. The old AI-assisted and new
+human subsets cover different cases and must not be compared as a controlled
+reviewer study. A rubric mean is not a fraction of actions proven safe.
 
 The original serving matrix had a separate precision confound: Transformers used
 FP32 adapter compute while vLLM used BF16, despite identical FP32 serialized adapter

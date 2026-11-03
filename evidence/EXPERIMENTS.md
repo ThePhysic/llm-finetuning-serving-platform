@@ -6,7 +6,7 @@
 | `evaluation/`, `quality-comparison.json` | Frozen 40-incident plus eight-regression comparisons. Historical quality decoding is disclosed separately. |
 | `human-review/` | Six historical AI-generated/AI-assisted ratings submitted through the user; original scores retained, current attribution corrected. This is not completed independent-human review. |
 | `review-provenance-correction/` | Byte-preserved historical attribution and the correction that supersedes its human-completion claims. |
-| `independent-human-review/` | Fresh blinded packet from two different held-out families. Qualifying judgments are pending; its identity key stays local until completion. |
+| `independent-human-review/` | Six fresh owner-attested independent judgments from two different held-out families; original empty packet, replies and confirmation retained. Key published only after completion. |
 | `execution-source/`, `execution-provenance.json` | Explicitly retrospective reconstruction of the quality process's startup source; later disk observations remain unchanged in raw manifests. |
 | `serving/` | Completed authoritative 28-run serving matrix, including twelve precision-corrected adapter replacements. The amendment binds the original archive and new raw observations. |
 | `startup/` | Clean paired fresh-process first-load and same-process warm-reload measurements. Local weight cache and uncontrolled OS cache are disclosed. |
@@ -41,5 +41,5 @@ negative outcomes and validation scopes without replacing the raw records.
 
 Historical audit exports and review verdicts that called the original six labels
 independent human evidence are superseded by [the attribution correction](../docs/review-provenance.md).
-The current audit retains independent-human review as pending until qualifying
-judgments and provenance exist; successful integrity checks alone cannot supply them.
+The current audit validates the separate fresh judgments and explicit owner
+confirmation. Integrity checks alone cannot supply human judgments or attest identity.

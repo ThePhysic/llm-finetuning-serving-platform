@@ -1,0 +1,30 @@
+{
+  "name": "candidate-vllm-modern",
+  "command": [
+    "uvx",
+    "--from",
+    "pip-audit==2.10.1",
+    "pip-audit",
+    "--no-deps",
+    "--disable-pip",
+    "-r",
+    "C:\\Users\\ridle\\llm-finetuning-serving-platform\\evidence\\polish\\dependencies\\query-inputs\\candidate-vllm-modern.txt",
+    "--format",
+    "json"
+  ],
+  "exit_code": 1,
+  "stderr": "WARNING:pip_audit._cli:--no-deps is supported, but users are encouraged to fully hash their pinned dependencies\nWARNING:pip_audit._cli:Consider using a tool like `pip-compile`: https://pip-tools.readthedocs.io/en/latest/#using-hashes\nFound 3 known vulnerabilities in 1 package\n",
+  "source_inventory": "requirements/candidate-vllm-modern-standalone-resolved-linux.txt",
+  "source_sha256": "ea9edce451f95164b5ae4e26d73abc65b83b6f2ad38afa729755b0c76d50373a",
+  "query_input": "evidence/polish/dependencies/query-inputs/candidate-vllm-modern.txt",
+  "query_sha256": "7fa89a4890b97ae863c3f04edd4ce3d1d1b7f4e633ac414c01fb383ad407ba4f",
+  "normalizations": [],
+  "audit_status": "completed_with_findings",
+  "audit_file": "evidence/polish/dependencies/candidate-vllm-modern-audit.json",
+  "raw_advisory_records": 3,
+  "distinct_primary_ids": 2,
+  "affected_packages": [
+    "setuptools"
+  ],
+  "skipped": []
+}

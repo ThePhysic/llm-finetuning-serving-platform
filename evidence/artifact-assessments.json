@@ -173,7 +173,7 @@
         "Synthetic authored fixtures; only eight independent held-out incident families.",
         "The base model classified 2/40 incidents correctly zero-shot and 7/40 with the stronger prompt; both failed all five required-abstention cases.",
         "Historical quality decoding and adapter computation differ from the explicit BF16 serving configuration; semantic equivalence is not claimed.",
-        "The historical AI-assisted labels do not qualify as independent human evaluation; qualifying new judgments remain pending.",
+        "The historical AI-assisted labels do not qualify as independent human evaluation. Separate fresh owner-attested two-case judgments are descriptive and do not justify unattended deployment.",
         "No generated recommendation may automatically execute an operational action."
       ],
       "deployment_decision": "Reviewer demonstration only; these results do not justify unattended operational triage.",
@@ -186,9 +186,35 @@
         "independent_verification": "unverified"
       },
       "independent_human_review": {
-        "status": "pending",
-        "metrics": null,
-        "packet": "independent-human-review/review_packet.jsonl"
+        "status": "independent_complete",
+        "path": "independent-human-review/report.json",
+        "sha256": "1d8e8aa1fbceda3ca95a7a9b79cdd6cef35ec2865d38dc6238dcd1b6fb814014",
+        "annotation_origin": "human_authored",
+        "reviewer_type": "independent_human",
+        "verification_basis": "Owner attestation of personal assessment without AI-generated judgments, bound to exact reply and annotation hashes",
+        "external_identity_verification": false,
+        "cases_per_variant": 2,
+        "variant_metrics": {
+          "zero_shot": {
+            "reviewed_examples": 2,
+            "action_correctness": 0.5,
+            "summary_faithfulness": 0.5,
+            "unsupported_claim_rate": 0.25,
+            "recorded_reviewer_labels": [
+              "human-project-owner-independent-fresh"
+            ]
+          },
+          "prompted": {
+            "reviewed_examples": 2,
+            "action_correctness": 0.0,
+            "summary_faithfulness": 1,
+            "unsupported_claim_rate": 0.0,
+            "recorded_reviewer_labels": [
+              "human-project-owner-independent-fresh"
+            ]
+          }
+        },
+        "limitations": "One owner-attested reviewer and two different held-out families; descriptive subset only, no population safety or model-quality clearance."
       }
     },
     {
@@ -282,7 +308,7 @@
         "Synthetic authored fixtures; only eight independent held-out incident families.",
         "The adapted model misclassified 25 of 40 incidents and failed all five required-abstention cases.",
         "Historical quality decoding and adapter computation differ from the explicit BF16 serving configuration; semantic equivalence is not claimed.",
-        "The historical AI-assisted labels do not qualify as independent human evaluation; qualifying new judgments remain pending.",
+        "The historical AI-assisted labels do not qualify as independent human evaluation. Separate fresh owner-attested two-case judgments are descriptive and do not justify unattended deployment.",
         "No generated recommendation may automatically execute an operational action."
       ],
       "deployment_decision": "Reviewer demonstration only; these results do not justify unattended operational triage.",
@@ -295,9 +321,26 @@
         "independent_verification": "unverified"
       },
       "independent_human_review": {
-        "status": "pending",
-        "metrics": null,
-        "packet": "independent-human-review/review_packet.jsonl"
+        "status": "independent_complete",
+        "path": "independent-human-review/report.json",
+        "sha256": "1d8e8aa1fbceda3ca95a7a9b79cdd6cef35ec2865d38dc6238dcd1b6fb814014",
+        "annotation_origin": "human_authored",
+        "reviewer_type": "independent_human",
+        "verification_basis": "Owner attestation of personal assessment without AI-generated judgments, bound to exact reply and annotation hashes",
+        "external_identity_verification": false,
+        "cases_per_variant": 2,
+        "variant_metrics": {
+          "lora": {
+            "reviewed_examples": 2,
+            "action_correctness": 0.25,
+            "summary_faithfulness": 1,
+            "unsupported_claim_rate": 0.0,
+            "recorded_reviewer_labels": [
+              "human-project-owner-independent-fresh"
+            ]
+          }
+        },
+        "limitations": "One owner-attested reviewer and two different held-out families; descriptive subset only, no population safety or model-quality clearance."
       }
     }
   ],
@@ -307,5 +350,6 @@
     "sha256": "a4b1e16c7e69ed9cd4a5500f45b9c3411bd22e91704599b9394eb45bbffc449e",
     "source_revision": "c1a38281f6764e501c3c7ccf4265db83271a8dd9",
     "reason": "The six labels were AI-generated/AI-assisted and pasted through the owner; independent human assessment was not established."
-  }
+  },
+  "fresh_independent_review_attached_at_utc": "2026-11-03T04:55:23.207856+00:00"
 }

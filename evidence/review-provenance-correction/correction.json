@@ -5,7 +5,7 @@
   "submitter": "project_owner",
   "reviewer_type": "ai_assisted",
   "independent_verification": "unverified",
-  "independent_human_review": "pending",
+  "historical_independent_human_review": "not_established",
   "authoritative_handoff": "LLM Fine Tuning and Inference Serving Platform Codex Polish Handoff.md",
   "archive_manifest_sha256": "254e49965ba55bb364bc4666d0e0901bcb2497bc7dda397350994b066cdf742b",
   "original_tree_sha256": "532c599bd266d18cf237691ca15077445cf4a18383ce56184dfd22ad95cac382",
@@ -30,5 +30,7 @@
   ],
   "preservation": "Historical files are retained as records of what was claimed; this correction does not silently rewrite old review, training, quality or benchmark reports.",
   "fresh_review": "evidence/independent-human-review",
-  "fresh_review_status": "pending_unannotated"
+  "fresh_review_status": "independent_complete",
+  "fresh_review_status_at_creation": "pending_unannotated",
+  "fresh_review_boundary": "Fresh judgments are separately owner-attested. They do not change the AI-generated origin of the historical six labels."
 }

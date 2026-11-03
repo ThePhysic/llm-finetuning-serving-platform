@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "operation": "gpu_http_smoke",
+  "status": "passed",
+  "gpu_verified": true,
+  "security_scope": "HISTORICAL/TRUSTED-LOCAL-ONLY; known dependency advisories; no untrusted deployment claim",
+  "build_result_sha256": "6bb46bb79c1d9f8a926f8ab32c1e0d160e911c6f6ab6d4285a27298bbf875316",
+  "image_id": "sha256:15a5cde723527525ea9fee3ac16d45d3a50df64eb48d5857ca45424a7cdfcd68",
+  "base_artifact_id": "b4d8a201e94315bff4f5b030336d6644691da18fc6d050f04a8e095ae9d484ad",
+  "adapter_artifact_id": "1183832f233f3a2f720a98efad446cffb2ada613cc59860fedd58e186af6838c",
+  "synthetic_inputs_only": true,
+  "limitations": [
+    "Functional HTTP smoke; no throughput, dependency security or quality certification."
+  ],
+  "source_revision": "ae04ce0fdce67634d3a171378e743fe354a283d3",
+  "snapshot_sha256": "1172867e59905e8f8d678702aadce73ac6fbc7e7e8430a7f8531abb30e113106",
+  "bootstrap_sha256": "5c0cb59ed2e1eb0a5748a48df53284f10fc05b65f8873c621c7d6b7d6b90eb3c",
+  "container_id": "d513bec8474fc57c816c9ce079e4415216cd8ebf58e88585af78495fb6c758e7",
+  "shutdown": {
+    "Status": "exited",
+    "Running": false,
+    "Paused": false,
+    "Restarting": false,
+    "OOMKilled": false,
+    "Dead": false,
+    "Pid": 0,
+    "ExitCode": 0,
+    "Error": "",
+    "StartedAt": "2026-11-03T05:04:28.306826041Z",
+    "FinishedAt": "2026-11-03T05:05:41.954824424Z"
+  }
+}

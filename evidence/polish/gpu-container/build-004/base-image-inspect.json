@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "docker",
+    "image",
+    "inspect",
+    "pytorch/pytorch:2.6.0-cuda12.4-cudnn9-runtime",
+    "--format",
+    "{\"Id\":{{json .Id}},\"RepoDigests\":{{json .RepoDigests}},\"User\":{{json (index .Config \"User\")}}}"
+  ],
+  "started_at_unix": 1793682043.2124872,
+  "seconds": 0.11523008346557617,
+  "returncode": 0,
+  "stdout": "{\"Id\":\"sha256:77f17f843507062875ce8be2a6f76aa6aa3df7f9ef1e31d9d7432f4b0f563dee\",\"RepoDigests\":[\"pytorch/pytorch@sha256:77f17f843507062875ce8be2a6f76aa6aa3df7f9ef1e31d9d7432f4b0f563dee\"],\"User\":null}\n",
+  "stderr": ""
+}

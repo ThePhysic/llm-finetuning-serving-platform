@@ -1,0 +1,262 @@
+{
+  "started_at_utc": "2026-11-03T04:53:57.809132+00:00",
+  "status": "passed",
+  "purpose": "New dependency compatibility smoke only; not a replacement quality/performance experiment",
+  "source_revision": "fd2d3c060078eef0544e41822781d40019d96357",
+  "source_dirty": true,
+  "script_sha256": "4cfd7a18081e5380586ec1db79c417fe88de782a71f026f3a1802e0b7fc852ae",
+  "historical_artifacts_modified": false,
+  "steps": [
+    {
+      "name": "actual_cuda_bfloat16_matmul_and_sdpa",
+      "status": "passed"
+    },
+    {
+      "name": "real_two_step_lora_training_and_export",
+      "status": "passed"
+    },
+    {
+      "name": "real_tcp_sync_sse_auth_cancel_identity_promotion_rollback",
+      "status": "passed"
+    }
+  ],
+  "versions": {
+    "torch": "2.14.1+cu126",
+    "transformers": "5.20.0",
+    "peft": "0.21.2",
+    "accelerate": "1.15.0",
+    "safetensors": "0.8.0",
+    "huggingface-hub": "1.33.0",
+    "triton": "3.8.0",
+    "fastapi": "0.162.0",
+    "httpx": "0.28.1"
+  },
+  "cuda_runtime": "12.6",
+  "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+  "driver": "566.36",
+  "smoke_data": {
+    "source": "Frozen triage-v3 train/validation only; first two rows each, no test records",
+    "selected_ids": {
+      "train": [
+        "api_failure-scenario-00-wording-0",
+        "api_failure-scenario-00-wording-1"
+      ],
+      "validation": [
+        "api_failure-scenario-04-wording-0",
+        "api_failure-scenario-04-wording-1"
+      ]
+    }
+  },
+  "train_config": {
+    "model_id": "Qwen/Qwen2.5-0.5B-Instruct",
+    "revision": "7ae557604adf67be50417f59c2c2f167def9a775",
+    "seed": 42,
+    "max_steps": 2,
+    "batch_size": 1,
+    "gradient_accumulation_steps": 1,
+    "max_seq_length": 768,
+    "learning_rate": 0.0002,
+    "weight_decay": 0.01,
+    "warmup_steps": 5,
+    "max_grad_norm": 1.0,
+    "rank": 8,
+    "alpha": 16,
+    "dropout": 0.05,
+    "target_modules": [
+      "q_proj",
+      "v_proj"
+    ],
+    "dtype": "bfloat16",
+    "device": "cuda",
+    "qlora": false,
+    "gradient_checkpointing": true,
+    "validation_every": 2,
+    "checkpoint_every": 1,
+    "dataset_id": "compatibility-smoke-26a80547a577cd0921658d0bdc40f387ac35c0290981835a46945c653e3faa54",
+    "experiment_id": "candidate-dependency-two-step-smoke",
+    "resume_from": null
+  },
+  "new_training_artifact_id": "1c2cc1c165847bd8090c53c8f33dc95f7779076d800937f27f428b1e67055502",
+  "new_training_metrics": {
+    "completed_optimizer_steps": 2,
+    "trainable_parameters": 540672,
+    "total_parameters": 494573440,
+    "trainable_fraction": 0.0010932087254827108,
+    "elapsed_seconds": 3.827013361002173,
+    "history": [
+      {
+        "step": 1,
+        "train_loss": 1.4807591438293457,
+        "learning_rate": 2e-05,
+        "elapsed_seconds": 0.9322011440017377,
+        "gradient_norm": 4.869395732879639,
+        "cuda_peak_allocated_bytes": 1465336320,
+        "cuda_allocated_bytes": 1023090688
+      },
+      {
+        "step": 2,
+        "train_loss": 1.35822331905365,
+        "learning_rate": 8.000000000000001e-06,
+        "elapsed_seconds": 2.171848513000441,
+        "gradient_norm": 4.652227401733398,
+        "validation_loss": 1.5290432572364807,
+        "cuda_peak_allocated_bytes": 1470753792,
+        "cuda_allocated_bytes": 1023080960
+      }
+    ],
+    "gpu_evidence": true,
+    "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+    "cuda_version": "12.6",
+    "cuda_peak_allocated_bytes": 1470753792,
+    "adapter_bytes": 2181516,
+    "versions": {
+      "torch": "2.14.1+cu126",
+      "transformers": "5.20.0",
+      "peft": "0.21.2",
+      "accelerate": "1.15.0",
+      "safetensors": "0.8.0"
+    },
+    "python": "3.12.16"
+  },
+  "http": {
+    "transport": "genuine loopback TCP HTTP to Uvicorn; real candidate PyTorch model execution",
+    "base_artifact_id": "b4d8a201e94315bff4f5b030336d6644691da18fc6d050f04a8e095ae9d484ad",
+    "adapter_artifact_id": "1183832f233f3a2f720a98efad446cffb2ada613cc59860fedd58e186af6838c",
+    "unauthenticated_models_status": 401,
+    "inference_key_admin_status": 401,
+    "base_completion": {
+      "id": "chatcmpl-87f45d8404b04cd1a59e2d986c8cb5e5",
+      "object": "chat.completion",
+      "created": 1793681729,
+      "model": "b4d8a201e94315bff4f5b030336d6644691da18fc6d050f04a8e095ae9d484ad",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "Based on the information provided, there are a few potential issues that could be causing"
+          },
+          "finish_reason": "length"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 53,
+        "completion_tokens": 16,
+        "total_tokens": 69
+      },
+      "system_fingerprint": "b4d8a201e94315bff4f5b030336d6644691da18fc6d050f04a8e095ae9d484ad",
+      "metadata": {
+        "artifact_id": "b4d8a201e94315bff4f5b030336d6644691da18fc6d050f04a8e095ae9d484ad",
+        "base_model_revision": "7ae557604adf67be50417f59c2c2f167def9a775",
+        "tokenizer_revision": "7ae557604adf67be50417f59c2c2f167def9a775",
+        "backend": "transformers",
+        "request_id": "req-8d191ca3069c467ca89e2c7d9d14d490"
+      }
+    },
+    "adapter_engine_health": {
+      "ready": true,
+      "backend": "transformers",
+      "device": "cuda",
+      "dtype": "bfloat16",
+      "active_requests": 0,
+      "last_error": null,
+      "cleanup_pending": false,
+      "decoding_policy": {
+        "version": "platform-serving-v1",
+        "publisher_generation_config": "ignored",
+        "repetition_penalty": 1.0,
+        "presence_penalty": 0.0,
+        "frequency_penalty": 0.0,
+        "top_p": 1.0,
+        "top_k": "disabled",
+        "num_beams": 1,
+        "num_return_sequences": 1,
+        "min_p": "disabled",
+        "length_penalty": 1.0,
+        "no_repeat_ngram_size": 0,
+        "bad_words_ids": null,
+        "forced_token_ids": null,
+        "constraints": null,
+        "min_new_tokens": 0,
+        "eos_token_ids": [
+          151645
+        ],
+        "bos_token_id": 151643,
+        "pad_token_id": 151643,
+        "eos_policy": "packaged-tokenizer-single-eos",
+        "ignore_eos": false,
+        "sha256": "aaa5a1cdd345cdb0c00a74169e019c4823a6e8555400fdc67ae2e69096c484eb"
+      },
+      "base_compute_dtype": "bfloat16",
+      "adapter_compute_dtype": "bfloat16",
+      "adapter_storage_dtype": "float32",
+      "precision_source": "actual-runtime-parameters-and-safetensors-header",
+      "max_model_len": 32768,
+      "cuda_allocated_bytes": 1022962688,
+      "cuda_reserved_bytes": 1377828864,
+      "cuda_peak_allocated_bytes": 2021840896
+    },
+    "adapter_stream": {
+      "content": "Warehouse reports no stock, but the inventory shows twelve units. This situation indicates that the inventory synchronization has timed out, which",
+      "usage": {
+        "prompt_tokens": 53,
+        "completion_tokens": 24,
+        "total_tokens": 77
+      },
+      "terminal": true,
+      "done": true
+    },
+    "active_requests_before_disconnect": 1,
+    "disconnect_released_engine_and_lease": true,
+    "rollback": {
+      "current": "b4d8a201e94315bff4f5b030336d6644691da18fc6d050f04a8e095ae9d484ad",
+      "previous": "1183832f233f3a2f720a98efad446cffb2ada613cc59860fedd58e186af6838c",
+      "generation": 3,
+      "updated_at": 1793681771.6096926,
+      "committed": true,
+      "cleanup_pending": false,
+      "cleanup": [],
+      "warning": null
+    },
+    "ready_after_rollback": {
+      "status": "ready",
+      "model": "b4d8a201e94315bff4f5b030336d6644691da18fc6d050f04a8e095ae9d484ad",
+      "switching": false,
+      "last_load_error": null,
+      "switch_status": "committed",
+      "cleanup": [],
+      "commit_uncertain": false
+    },
+    "new_candidate_adapter_reload_completion": {
+      "id": "chatcmpl-91c85a5f464949d7a960c80ba386a34b",
+      "object": "chat.completion",
+      "created": 1793681786,
+      "model": "1c2cc1c165847bd8090c53c8f33dc95f7779076d800937f27f428b1e67055502",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "Based on the information provided, there are a few potential issues that could be causing"
+          },
+          "finish_reason": "length"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 53,
+        "completion_tokens": 16,
+        "total_tokens": 69
+      },
+      "system_fingerprint": "1c2cc1c165847bd8090c53c8f33dc95f7779076d800937f27f428b1e67055502",
+      "metadata": {
+        "artifact_id": "1c2cc1c165847bd8090c53c8f33dc95f7779076d800937f27f428b1e67055502",
+        "base_model_revision": "7ae557604adf67be50417f59c2c2f167def9a775",
+        "tokenizer_revision": "7ae557604adf67be50417f59c2c2f167def9a775",
+        "backend": "transformers",
+        "request_id": "req-ce02f5ec27834826a92346851a5b83a3"
+      }
+    },
+    "graceful_shutdown": true
+  },
+  "finished_at_utc": "2026-11-03T04:56:40.672774+00:00"
+}

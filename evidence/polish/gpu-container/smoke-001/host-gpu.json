@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "nvidia-smi",
+    "--query-gpu=name,uuid,driver_version,memory.total",
+    "--format=csv,noheader"
+  ],
+  "started_at_unix": 1793682267.8279843,
+  "seconds": 0.0823214054107666,
+  "returncode": 0,
+  "stdout": "NVIDIA GeForce RTX 4060 Laptop GPU, GPU-af03e140-b0f2-5030-4a2b-7d19084fdd8e, 566.36, 8188 MiB\n",
+  "stderr": ""
+}

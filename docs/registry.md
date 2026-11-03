@@ -99,8 +99,9 @@ names that package would also create a circular identity dependency.
 
 The original detached assessment is archived with its original bytes. Its earlier
 claim of a genuine human subset is superseded by the corrected current assessment
-and [review provenance](review-provenance.md). Independent-human evaluation remains
-pending; AI-assisted labels never qualify a model for human-reviewed promotion.
+and [review provenance](review-provenance.md). A separate fresh owner-attested
+human report now supplies limited two-case judgments; AI-assisted labels never
+qualify a model for human-reviewed promotion or establish operational safety.
 
 Promotion verifies artifact and runtime integrity. Domain-quality selection stays
 an explicit operator decision. The reference quality results do not justify

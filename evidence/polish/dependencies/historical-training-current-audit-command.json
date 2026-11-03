@@ -1,0 +1,37 @@
+{
+  "name": "historical-training-current",
+  "command": [
+    "uvx",
+    "--from",
+    "pip-audit==2.10.1",
+    "pip-audit",
+    "--no-deps",
+    "--disable-pip",
+    "-r",
+    "C:\\Users\\ridle\\llm-finetuning-serving-platform\\evidence\\polish\\dependencies\\query-inputs\\historical-training-current.txt",
+    "--format",
+    "json"
+  ],
+  "exit_code": 1,
+  "stderr": "WARNING:pip_audit._cli:--no-deps is supported, but users are encouraged to fully hash their pinned dependencies\nWARNING:pip_audit._cli:Consider using a tool like `pip-compile`: https://pip-tools.readthedocs.io/en/latest/#using-hashes\nFound 53 known vulnerabilities in 3 packages\n",
+  "source_inventory": "requirements/train-resolved-linux.txt",
+  "source_sha256": "f7ac488376afd813cbe2556ed2908ce9ae55419a6536b5900a7c93a956438a41",
+  "query_input": "evidence/polish/dependencies/query-inputs/historical-training-current.txt",
+  "query_sha256": "57d15eacf477c005c5c2b6edc7ea45df3163f5b6905c657d153009aa1a59e53c",
+  "normalizations": [
+    {
+      "installed_version": "torch==2.6.0+cu124",
+      "advisory_query": "torch==2.6.0"
+    }
+  ],
+  "audit_status": "completed_with_findings",
+  "audit_file": "evidence/polish/dependencies/historical-training-current-audit.json",
+  "raw_advisory_records": 53,
+  "distinct_primary_ids": 42,
+  "affected_packages": [
+    "accelerate",
+    "torch",
+    "transformers"
+  ],
+  "skipped": []
+}

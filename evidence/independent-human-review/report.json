@@ -1,0 +1,51 @@
+{
+  "schema_version": 2,
+  "status": "independent_complete",
+  "annotated_packet_sha256": "429dc57220c92357c05ef4da63c80ec714f0d020aa73bacdeaed36730da1b6e2",
+  "review_key_sha256": "a01c9d8528fed69079e6b77da58dec1a5c2518a0da4bd61e75ded9d930c941ac",
+  "review_packet_sha256": "ae2156f63c163eb06419f07b6da1a60022e07ad9c2a262c37b1e1bcb8eef8349",
+  "annotation_provenance_sha256": "223e680379fc2f53dfffa89534216f4ecc6066416edf99fd56bd9ba2a77c2a7f",
+  "submitter": "project_owner",
+  "classification_counts": {
+    "ai_assisted": 0,
+    "independent_human": 6,
+    "unverified": 0
+  },
+  "ai_assisted_runs": {},
+  "independent_human_runs": {
+    "prompted": {
+      "reviewed_examples": 2,
+      "action_correctness": 0.0,
+      "summary_faithfulness": 1,
+      "unsupported_claim_rate": 0.0,
+      "recorded_reviewer_labels": [
+        "human-project-owner-independent-fresh"
+      ]
+    },
+    "zero_shot": {
+      "reviewed_examples": 2,
+      "action_correctness": 0.5,
+      "summary_faithfulness": 0.5,
+      "unsupported_claim_rate": 0.25,
+      "recorded_reviewer_labels": [
+        "human-project-owner-independent-fresh"
+      ]
+    },
+    "lora": {
+      "reviewed_examples": 2,
+      "action_correctness": 0.25,
+      "summary_faithfulness": 1,
+      "unsupported_claim_rate": 0.0,
+      "recorded_reviewer_labels": [
+        "human-project-owner-independent-fresh"
+      ]
+    }
+  },
+  "unverified_runs": {},
+  "independent_human_review": {
+    "status": "complete",
+    "qualifying_annotations": 6,
+    "annotations_required": 6
+  },
+  "verification_boundary": "Artifact consistency and explicit human confirmation are checked; JSON metadata cannot attest a person's identity or independence."
+}

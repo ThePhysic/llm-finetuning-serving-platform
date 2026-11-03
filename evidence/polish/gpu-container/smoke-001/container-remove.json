@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "docker",
+    "rm",
+    "d513bec8474fc57c816c9ce079e4415216cd8ebf58e88585af78495fb6c758e7"
+  ],
+  "started_at_unix": 1793682342.4252338,
+  "seconds": 0.1831209659576416,
+  "returncode": 0,
+  "stdout": "d513bec8474fc57c816c9ce079e4415216cd8ebf58e88585af78495fb6c758e7\n",
+  "stderr": ""
+}

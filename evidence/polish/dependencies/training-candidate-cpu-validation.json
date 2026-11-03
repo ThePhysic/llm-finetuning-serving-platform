@@ -1,0 +1,49 @@
+{
+  "started_at_utc": "2026-11-03T04:43:02.151735+00:00",
+  "python": "3.12.16 (main, Oct 26 2026, 14:08:45) [Clang 23.1.3 ]",
+  "cuda_visible_devices": "",
+  "source_revision": "94267ffde18b7f72c99a45c61f3efc9cb220609d",
+  "source_dirty": true,
+  "resolved_inventory_sha256": "ebf6042dc68ccb9154e239de364d5d4928867dc953dd3c9f0941f2b8eb43f557",
+  "versions": {
+    "torch": "2.14.1+cu126",
+    "transformers": "5.20.0",
+    "peft": "0.21.2",
+    "accelerate": "1.15.0",
+    "safetensors": "0.8.0",
+    "huggingface-hub": "1.33.0",
+    "triton": "3.8.0"
+  },
+  "torch_cuda_runtime": "12.6",
+  "cuda_initialized_after_import": false,
+  "bundled_ptx_assemblers": [
+    {
+      "path": "backends/nvidia/bin/ptxas",
+      "exit_code": 0,
+      "stdout": "ptxas: NVIDIA (R) Ptx optimizing assembler\nCopyright (c) 2005-2025 NVIDIA Corporation\nBuilt on Tue_May_27_02:18:05_PDT_2025\nCuda compilation tools, release 12.9, V12.9.86\nBuild cuda_12.9.r12.9/compiler.36037853_0\n",
+      "stderr": ""
+    },
+    {
+      "path": "backends/nvidia/bin/ptxas-blackwell",
+      "exit_code": 0,
+      "stdout": "ptxas-blackwell: NVIDIA (R) Ptx optimizing assembler\nCopyright (c) 2005-2026 NVIDIA Corporation\nBuilt on Fri_Apr_24_07:22:02_PM_PDT_2026\nCuda compilation tools, release 13.3, V13.3.33\nBuild cuda_13.3.r13.3/compiler.37862127_0\n",
+      "stderr": ""
+    }
+  ],
+  "cpu_test_command": [
+    "/home/ridle/llm-platform-candidate-train-polish-001/bin/python",
+    "-m",
+    "pytest",
+    "-q"
+  ],
+  "cpu_test_exit_code": 0,
+  "cpu_test_stdout": "........................................................................ [ 19%]\n........................................................................ [ 39%]\n........................................................................ [ 59%]\n........................................................................ [ 78%]\n........................................................................ [ 98%]\n......                                                                   [100%]\n=============================== warnings summary ===============================\ntests/test_training.py::test_real_cpu_resume_preserves_weights_and_complete_raw_history\ntests/test_training.py::test_real_cpu_resume_preserves_weights_and_complete_raw_history\ntests/test_training.py::test_real_cpu_training_honors_verified_manifest_character_budget\n  /home/ridle/llm-platform-candidate-train-polish-001/lib/python3.12/site-packages/peft/tuners/lora/layer.py:2760: UserWarning: fan_in_fan_out is set to False but the target module is `Conv1D`. Setting fan_in_fan_out to True.\n    warnings.warn(\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n366 passed, 3 warnings in 83.72s (0:01:23)\n",
+  "cpu_test_stderr": "",
+  "finished_at_utc": "2026-11-03T04:45:03.889631+00:00",
+  "cuda_initialized_after_tests": false,
+  "installed_dependency_check": {
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": "Using Python 3.12.16 environment at: /home/ridle/llm-platform-candidate-train-polish-001\nChecked 71 packages in 7ms\nAll installed packages are compatible\n"
+  }
+}

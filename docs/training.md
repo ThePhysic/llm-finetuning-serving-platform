@@ -8,7 +8,11 @@ card](https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct) identifies Apache-2.0
 licensing. Larger models and different licenses require a separate feasibility
 and license check.
 
-Use the pinned Linux training environment described in the root README. Commit
+Use an explicitly pinned Linux environment. For new isolated work, the
+[validated modern candidate](dependency-migration.md) has separate lock, audit
+and GPU compatibility records. The original `requirements/train.txt` and
+`train-resolved-linux.txt` remain the historical baseline, with known advisories;
+they were not upgraded in place. Commit
 the source and freeze the dataset before running the experiment. Record base
 responses first. Then run from the repository root:
 

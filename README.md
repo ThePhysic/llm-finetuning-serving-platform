@@ -1,177 +1,120 @@
 # LLM Fine-Tuning and Inference Serving Platform
 
-A standalone Python system for adapting an open-weight language model, measuring
-whether adaptation helps, and serving verified base models and LoRA adapters
-through a bounded inference gateway. Enterprise operations exception triage is
-the demonstration workload; the platform is the product.
+Adapt an open-weight LLM with LoRA, compare it with prompting on frozen data, and
+serve verified adapters through Transformers or vLLM. This Python platform connects
+reproducible post-training, versioned HTTP deployment and measured GPU performance;
+enterprise incident triage is its demonstration workload.
 
-Quality, GPU serving performance, and operational reliability are separate
-experiments. A passing CPU suite is not GPU evidence. Synthetic labels and
-lexical metrics are not expert human judgments. Recommendations never execute
-operational actions.
+[Results](docs/results.md) · [Architecture](docs/architecture.md) ·
+[Reproduce](docs/reproducibility.md) · [Model card](docs/model-card.md) ·
+[Benchmarks](docs/benchmark.md) · [Security](docs/security.md) ·
+[Polish handoff](docs/polish-handoff.md)
 
-## Recorded reference experiment
+```mermaid
+flowchart LR
+    D[Dataset preparation] --> T[LoRA training and evaluation]
+    T --> R[Verified model registry]
+    R --> G[HTTP gateway]
+    G --> B[Transformers or vLLM]
+    B --> M[Benchmarks and metrics]
+```
 
-The RTX 4060 Laptop GPU completed 80 real LoRA optimizer steps in 171.165 seconds.
-The adapter has 540,672 trainable parameters, occupies about 2.2 MB, and was
-exported, reloaded and evaluated. Peak training tensor allocation was 1.49 GiB.
+## Verified reference evidence
 
-| Alternative | Category accuracy (40 incidents) | Macro F1 | Valid JSON |
-|---|---:|---:|---:|
-| Zero-shot base | 5.0% | 0.020 | 50% |
-| Stronger prompted base | 17.5% | 0.089 | 100% |
-| LoRA | 37.5% | 0.287 | 100% |
+These are recorded experiments on an **RTX 4060 Laptop GPU, 8 GB**, using
+**Qwen2.5-0.5B-Instruct**. Each report retains its source and dependency identities.
 
-These are observations on eight held-out synthetic scenario families, each with
-five correlated variants. LoRA still misclassified 25 of 40 incidents and failed
-all five insufficient-information abstention cases. The model remains an advisory
-demonstration; these results do not justify unattended operational deployment.
-The eight simple general-instruction checks scored 4/8 for every alternative.
+| What was demonstrated | Evidence |
+|---|---|
+| Real GPU adaptation | 80 LoRA optimizer steps in 171.165 s; 540,672 trainable parameters; exported/reloaded adapter; 1.49 GiB peak tensor allocation. [Training records](evidence/training/) |
+| Controlled quality comparison | Category accuracy: zero-shot 2/40, stronger prompt 7/40, LoRA **15/40**. Only **eight independent test families**; required abstention **0/5** for every alternative. [Model card](docs/model-card.md) |
+| Genuine inference and reliability | Sync/SSE generation, immutable identity, auth, cancellation, promotion/rollback and overload recovery. [HTTP evidence](evidence/serving/lifecycle/) · [post-fix GPU smoke](evidence/post-release/gpu-smoke/report.json) |
+| Measured serving experiments | 28 runs with raw requests, TTFT, throughput, GPU samples and errors; precision corrections and unsuccessful experiments preserved. [Method](docs/benchmark.md) |
+| Annotation provenance | Six fresh, owner-attested independent judgments over two new cases; the six historical AI-assisted labels remain separate. This small subset is no population estimate. [Correction and fresh review](docs/review-provenance.md) |
 
-Raw generations, uncertainty, failures and training events are preserved under
-`evidence/`. [The model card](docs/model-card.md) describes the limitations.
-[Historical decoding](evidence/quality-decoding-addendum.json) and
-[source provenance](evidence/execution-provenance.json) distinguish this quality
-experiment from the current explicit serving policy. Use the historical source
-instructions in [reproducibility](docs/reproducibility.md) for reference replay.
+The adapted model still misclassified 25/40 incidents. Its results do not justify
+autonomous triage; recommendations never execute operational actions.
 
-The completed [results report](docs/results.md) links the GPU serving matrix,
-startup measurements, bounded rate sweep, six actual blinded human ratings and
-validation records. On the measured short synchronous workload at concurrency
-four, base-model output throughput was 15.50 tokens/s with Transformers and
-98.66 tokens/s with vLLM; the corrected BF16 adapter comparison was 9.09 versus
-30.89 tokens/s. These are medians of two small runs under documented runtime
-configurations. Prefix caching reduced throughput in its measured workload.
-The [follow-up audit](docs/post-release-audit.md) records subsequently discovered
-bugs, fixes, regression coverage and remaining dependency risks.
+## Measured serving configurations
 
-## Repository map
+![Measured output throughput: base Transformers 15.50 and vLLM 98.66 tokens/s; adapter Transformers 9.09 and vLLM 30.89 tokens/s.](docs/assets/serving-throughput.png)
 
-| Component | Implementation | Evidence or documentation |
-|---|---|---|
-| JSON/JSONL validation, grouping and frozen splits | `src/llm_platform/data.py` | [Dataset](docs/dataset.md), `data/triage-v3/manifest.json` |
-| Completion-only GPU LoRA SFT, checkpointing, export | `src/llm_platform/training.py` | [Training](docs/training.md), `configs/train-4060.json` |
-| Controlled baselines, held-out scoring, blinded review | `src/llm_platform/evaluation.py` | [Evaluation](docs/evaluation.md), `evidence/evaluation/` |
-| Immutable packages and promotion history | `src/llm_platform/registry.py` | [Registry](docs/registry.md) |
-| Bounded sync/SSE inference and safe switching | `src/llm_platform/serving.py` | [Serving](docs/serving.md) |
-| Transformers reference and vLLM integration | `src/llm_platform/backends/` | [Architecture](docs/architecture.md) |
-| Raw HTTP/GPU performance observations | `src/llm_platform/benchmark.py` | [Benchmark method](docs/benchmark.md), `evidence/serving/` |
+**Units: output tokens/second.** Historical BF16, non-quantized model configurations;
+short synchronous prompts, client concurrency 4, output cap 32, 12 measured requests
+per run, two repetitions and two excluded warmups per run. Bars are medians of
+run-level throughput. Transformers serializes generation in one gateway slot;
+vLLM allows eight slots and up to eight batched sequences. These are system
+configuration comparisons, not a new scheduler or kernel implementation.
 
-## CPU validation
+[Raw reports and figure inputs](docs/assets/serving-throughput.json) ·
+[Full comparison](evidence/serving/comparison.md) · [Download SVG](docs/assets/serving-throughput.svg)
 
-Python 3.12 is the reference interpreter; Python 3.11–3.13 are supported by the
-core package. From this repository:
+Small samples limit generalization. Prefix caching reduced throughput in its
+measured workload, and queue timeouts remain in the long-adapter results. Historical
+numbers are not transferred to a newer dependency stack without new measurements.
+
+## Try the platform
+
+For lightweight CPU validation, use Python 3.12 from Bash/WSL at the repository root:
 
 ```bash
 python -m venv .venv
-source .venv/bin/activate       # Windows: .venv\Scripts\Activate.ps1
+source .venv/bin/activate  # Windows: .venv\Scripts\Activate.ps1
 python -m pip install --require-hashes -r requirements/cpu.lock
 python -m pip install --no-deps -e .
-pytest -q
-ruff check src tests
+CUDA_VISIBLE_DEVICES="" pytest -q
 llm-platform data verify data/triage-v3
-llm-platform doctor
+llm-platform audit-evidence
 ```
 
-This path tests validation, registry integrity, HTTP behavior, concurrency and
-failure handling with clearly scoped test backends. It does not install model
-weights or establish CUDA feasibility or performance.
+In PowerShell, use `python -c "import os; os.environ['CUDA_VISIBLE_DEVICES']=''; import pytest; raise SystemExit(pytest.main(['-q']))"`
+to hide CUDA before any test imports (an empty PowerShell environment assignment
+can remove the variable).
+The audit checks provenance and integrity; it cannot attest identity or certify
+security. CPU tests establish no GPU performance claim.
+See the [actual CI workflow](https://github.com/ThePhysic/llm-finetuning-serving-platform/actions/workflows/ci.yml).
 
-## Real GPU experiment
-
-Use Linux or WSL2 with a working NVIDIA GPU. The reference configuration targets
-an RTX 4060 Laptop GPU with 8 GB VRAM and Qwen2.5-0.5B-Instruct. Actual runtime
-memory determines feasibility; 1.5B, QLoRA and quantized serving configurations
-must be measured separately.
-
-```bash
-python -m venv .venv-gpu
-source .venv-gpu/bin/activate
-python -m pip install --require-hashes -r requirements/cpu.lock
-python -m pip install -r requirements/train.txt
-python -m pip install --no-deps -e .
-python scripts/run_quality_experiment.py \
-  --dataset data/triage-v3 --config configs/train-4060.json \
-  --work runtime/quality-001 --evidence evidence
-```
-
-The experiment freezes its protocol, generates both base-model baselines before
-training, runs real LoRA SFT, exports and reloads the adapter, and evaluates all
-three alternatives on the same frozen examples and decoding settings. It refuses
-to overwrite prior evidence. On a checkout that already includes the reference
-evidence, use a new directory such as `--evidence runs/reproduction-001`.
-
-The model downloads from its publisher once and is resolved to an immutable Hub
-revision. Base weights remain in the ignored cache. The small adapted package,
-file hashes, dataset identity, training configuration and source identities are
-the reproducibility boundary. See [reproducibility](docs/reproducibility.md) and
-the [model card](docs/model-card.md).
-
-## Serve and demonstrate
-
-Register an exported package, then start its full immutable identifier:
+For genuine model execution, follow the [Linux/WSL2 setup](docs/reproducibility.md)
+and [dependency guidance](docs/dependency-migration.md). In a configured GPU terminal:
 
 ```bash
 llm-platform registry register evidence/adapter-package --registry runtime/registry
-llm-platform serve --registry runtime/registry --model <artifact_id> --port 8000
-python scripts/demo.py --url http://127.0.0.1:8000 --stream
+llm-platform serve --registry runtime/registry \
+  --model 1183832f233f3a2f720a98efad446cffb2ada613cc59860fedd58e186af6838c
 ```
 
-The CLI also creates base packages with `package-base`, evaluates saved packages
-with `evaluate`, and exposes reproducible `benchmark` and `compare-benchmarks`
-commands. `llm-platform --help` lists the supported interface.
-
-| Endpoint | Behavior |
-|---|---|
-| `POST /v1/chat/completions` | Documented OpenAI-compatible subset; sync or SSE |
-| `GET /v1/models` | Registered immutable identities and loaded state |
-| `GET /health/live` | Process liveness |
-| `GET /health/ready` | Actual loaded runtime readiness |
-| `GET /metrics` | Prometheus request, timing, queue, token and deployment metrics |
-| `GET /admin/status` | Protected deployment and engine state |
-| `POST /admin/promote`, `POST /admin/rollback` | Protected staged switching and rollback |
-
-Local unauthenticated inference accepts loopback clients. For non-local binding,
-provide distinct `LLM_API_KEY` and `LLM_ADMIN_KEY` environment variables and
-terminate TLS in a trusted reverse proxy. Administrative access is disabled
-without its key. The vLLM worker stays on loopback behind the gateway.
-
-## Optimized serving
-
-Use an isolated vLLM environment rather than allowing its tightly coupled CUDA
-dependencies to replace a working training environment. See
-[benchmark methodology](docs/benchmark.md) for the pinned engine stack and
-`scripts/run_serving_experiments.py` for measured API comparisons and lifecycle
-checks. The platform integrates vLLM; it does not implement its scheduler,
-PagedAttention, batching kernels, or native attention algorithms.
-
-The preserved GPU dependency versions have known upstream security advisories.
-They support isolated, trusted reproduction of these measurements; review the
-[dependency findings and mitigations](docs/security.md) before non-local use.
-The vLLM launcher now requires an environment-only worker key and disables browser
-CORS. A patched GPU-stack migration and fresh GPU validation remain necessary for
-untrusted deployment.
-
-## Containers and operational boundaries
+In another terminal, send a real request with the demonstration client:
 
 ```bash
-docker build -f docker/Dockerfile.cpu -t llm-platform:cpu .
-docker run --rm llm-platform:cpu doctor
-docker build -f docker/Dockerfile.gpu -t llm-platform:gpu .
+python scripts/demo.py --url http://127.0.0.1:8000 --stream \
+  --report "Warehouse reports no stock; inventory shows 12 units; the latest synchronization timed out."
 ```
 
-The CPU image was built and its authenticated HTTP control plane exercised.
-GPU training and serving were measured natively on WSL2; the GPU image definition
-has not been built or tested. [Validation records](evidence/validation/) preserve
-these separate scopes.
+The client prints the actual served artifact and generated text. It rejects
+truncated streams and mismatched identities. No fabricated response or screenshot
+is used here. The supported API includes `/v1/chat/completions`, `/v1/models`,
+`/health/live`, `/health/ready`, `/metrics` and protected deployment administration.
 
-The GPU image requires NVIDIA container support, a writable `/runtime` mount,
-registered packages, and the access/admin keys when binding externally. Read
-[deployment](docs/deployment.md), [security](docs/security.md), and
-[serving](docs/serving.md) before exposing a service. The registry is a local
-single-writer system; one gateway owns each registry. Kubernetes, distributed
-inference, automatic action execution and paid services are not core requirements.
+## Reproduce and inspect
 
-Code is MIT licensed. Authored synthetic fixtures are CC0-1.0; the base model and
-derived adapter remain subject to the publisher's Apache-2.0 license. No customer
-data, credentials, base weights, or operational integrations are needed.
+| Area | Documentation |
+|---|---|
+| Data, leakage controls and frozen splits | [Dataset](docs/dataset.md) |
+| LoRA, checkpoints and training/serving quantization distinction | [Training](docs/training.md) |
+| Automatic scores and annotation provenance | [Evaluation](docs/evaluation.md) · [Review correction](docs/review-provenance.md) |
+| Integrity, deployment and rollback | [Registry](docs/registry.md) · [Serving](docs/serving.md) |
+| Runtime and container requirements | [Deployment](docs/deployment.md) · [Dependency migration](docs/dependency-migration.md) |
+| Failures, corrections and limitations | [Post-release audit](docs/post-release-audit.md) · [Polish handoff](docs/polish-handoff.md) |
+
+The preserved GPU stacks have known upstream advisories and are for isolated,
+trusted reproduction. A separate, zero-known-match audited training/Transformers
+candidate passed real GPU compatibility checks; a modern vLLM migration remains
+unvalidated on the installed driver. Read the [current security findings](docs/security.md)
+before non-local use. Worker authentication and disabled browser CORS do not patch
+a vulnerable dependency. GPU-container build/run claims are reported separately in
+the [polish verification report](docs/polish-handoff.md); a recipe alone is not evidence.
+
+Code is MIT licensed; authored synthetic fixtures are CC0-1.0. The Qwen model and
+derived adapter remain subject to the publisher's Apache-2.0 license. Base weights,
+credentials, private incident data and local agent instructions are not included
+in the current repository tree. Historical Git ancestry is preserved.

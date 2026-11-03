@@ -1,0 +1,16 @@
+{
+  "source_revision": "04ccc3414609d6aae79415f60f165419f58e77bf",
+  "work_directory": "C:/Users/ridle/llm-finetuning-serving-platform",
+  "command": [
+    "wsl", "-d", "Ubuntu", "--", "/usr/bin/env",
+    "CUDA_VISIBLE_DEVICES=0",
+    "HF_HOME=/mnt/c/Users/ridle/llm-finetuning-serving-platform/runtime/huggingface",
+    "/home/ridle/llm-platform-candidate-train-polish-001/bin/python",
+    "/mnt/c/Users/ridle/llm-finetuning-serving-platform/scripts/polish_training_smoke.py",
+    "--gpu", "--work", "/mnt/c/Users/ridle/llm-finetuning-serving-platform/runtime/polish-candidate-gpu-001",
+    "--output", "/mnt/c/Users/ridle/llm-finetuning-serving-platform/evidence/polish/dependencies/training-candidate-gpu-smoke.json"
+  ],
+  "exit_code": 1,
+  "last_exception": "ValueError: Chat template changes the prompt prefix; completion mask would be invalid",
+  "interpretation": "Actual CUDA BF16 matmul and SDPA passed; training failed closed on the tokenizer return-format change before optimizer steps. HTTP compatibility was not reached. Failure and work directory preserved."
+}

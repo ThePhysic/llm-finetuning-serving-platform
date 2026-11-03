@@ -1,0 +1,12 @@
+{
+  "purpose": "Preserve unsuccessful audit-wrapper attempt; source container and saved raw audit/aliases were not modified.",
+  "status": "wrapper_failed_after_raw_audit_and_alias_report",
+  "exception_type": "UnicodeDecodeError",
+  "detail": "Ignored local runtime wrapper read UTF-8 alias descriptions with Windows cp1252 default. Raw audit JSON and alias report are valid UTF-8 and preserved; no final index was produced.",
+  "preserved_files": [
+    "evidence/polish/dependencies/gpu-container-full-audit.json",
+    "evidence/polish/dependencies/gpu-container-full-aliases.json",
+    "evidence/polish/dependencies/query-inputs/gpu-container-full.txt"
+  ],
+  "retry": "Fresh files ending -002; only ignored runtime metadata wrapper updated to read explicit UTF-8. No project source changes."
+}

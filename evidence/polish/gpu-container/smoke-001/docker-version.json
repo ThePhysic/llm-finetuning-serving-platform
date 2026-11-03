@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "docker",
+    "version",
+    "--format",
+    "{{json .}}"
+  ],
+  "started_at_unix": 1793682267.7193651,
+  "seconds": 0.10694456100463867,
+  "returncode": 0,
+  "stdout": "{\"Client\":{\"Version\":\"29.9.1\",\"ApiVersion\":\"1.56\",\"DefaultAPIVersion\":\"1.56\",\"GitCommit\":\"dfc520d\",\"GoVersion\":\"go1.26.9\",\"Os\":\"windows\",\"Arch\":\"amd64\",\"BuildTime\":\"Wed Oct 14 18:34:24 2026\",\"Context\":\"desktop-linux\"},\"Server\":{\"Platform\":{\"Name\":\"Docker Desktop 4.96.0 (243774)\"},\"Version\":\"29.9.1\",\"ApiVersion\":\"1.56\",\"MinAPIVersion\":\"1.40\",\"Os\":\"linux\",\"Arch\":\"amd64\",\"Components\":[{\"Name\":\"Engine\",\"Version\":\"29.9.1\",\"Details\":{\"ApiVersion\":\"1.56\",\"Arch\":\"amd64\",\"BuildTime\":\"Wed Oct 14 18:32:24 2026\",\"Experimental\":\"false\",\"GitCommit\":\"b26fb77\",\"GoVersion\":\"go1.26.9\",\"KernelVersion\":\"6.18.54.1-microsoft-standard-WSL2\",\"MinAPIVersion\":\"1.40\",\"Module\":\"github.com/moby/moby/v2\",\"ModuleVersion\":\"v2.0.0+unknown\",\"Os\":\"linux\"}},{\"Name\":\"containerd\",\"Version\":\"v2.4.2\",\"Details\":{\"GitCommit\":\"b7a25261e029d68978bbf290df0a62fc819b3c51\"}},{\"Name\":\"runc\",\"Version\":\"1.5.2\",\"Details\":{\"GitCommit\":\"v1.5.2-0-g29dd3dc2\"}},{\"Name\":\"docker-init\",\"Version\":\"0.19.0\",\"Details\":{\"GitCommit\":\"de40ad0\"}}],\"GitCommit\":\"b26fb77\",\"GoVersion\":\"go1.26.9\",\"KernelVersion\":\"6.18.54.1-microsoft-standard-WSL2\",\"BuildTime\":\"2026-10-14T18:32:24.000000000+00:00\"}}\n",
+  "stderr": ""
+}

@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "source_revision": "04ccc3414609d6aae79415f60f165419f58e77bf",
+  "recorded_at": "2026-11-03T04:49:01.305218+00:00",
+  "mode": "pre-generation filesystem source capture",
+  "files": {
+    "scripts/audit_dependency_aliases.py": "8a23f11247c5c20eeec99d50205ad5d917939232a362ef6b76adb88e7ff5ee26",
+    "scripts/demo.py": "34e49d8906739a12b77c33df6071898f69039c28cd5c28a7f41defe6bd633617",
+    "scripts/gpu_container_entry.py": "5c0cb59ed2e1eb0a5748a48df53284f10fc05b65f8873c621c7d6b7d6b90eb3c",
+    "scripts/measure_load_rates.py": "0fb746533fbc3b46498e510c60eaf00358f1f0d85a55c0a20dbd12b91399f4cc",
+    "scripts/measure_startup.py": "3d602c7be5a3aed4dcc407e9648e846b84f35ae5d4280e3219032d373b000c26",
+    "scripts/polish_training_smoke.py": "4cfd7a18081e5380586ec1db79c417fe88de782a71f026f3a1802e0b7fc852ae",
+    "scripts/prepare_human_sample.py": "727e2dadc210a07bc3c878e19c72b0b7110fb2196c49700591ff2d1e1dc3ef18",
+    "scripts/realign_adapter_benchmarks.py": "09095ac070898369eb9a3115915b4ec6dc8507d19adbd326b6a7346f8a800d76",
+    "scripts/render_readme_chart.py": "977993542d781fa99339ad8756f44329bed903a5a9d3c3110f13ce099de7eec0",
+    "scripts/run_quality_experiment.py": "d292aef4f3cab6ce6b2e7edd995e88a90fd53d8775c507d2f302849e344aa72f",
+    "scripts/run_serving_experiments.py": "937a131e1fde0cc2c59dc268ff0dc38e4e0f10e98085514a2068c932e25c53c6",
+    "scripts/verify_gpu_container.py": "07fbffc2693b1258d913112c6f7128577db7d07570abd7d950b8ec8eda15bea9",
+    "src/llm_platform/__init__.py": "345fc34c2323ca08d5799bc4a7c7b17c2b3b2a59d77f903d3ad8db18970c36d1",
+    "src/llm_platform/backends/__init__.py": "6ac08ec30729dfc90e99dcb1605ded4aa9aaabfa4d9ba55b576db189c39a27a5",
+    "src/llm_platform/backends/launch_vllm.py": "07adb16495385b207e5de7a2fcc1aa34edfc6e222af046ae2e1321dbe2a3701b",
+    "src/llm_platform/backends/precision.py": "bee8fb279e72cf3ad4095b7c97d7b6abcfd838be93c5a9bb22c0eaab37561706",
+    "src/llm_platform/backends/transformers_backend.py": "6f8550a12ed495988b8c87d99aa6deed0e12fbc9fa555ef5f8c9bff0cba6a1be",
+    "src/llm_platform/backends/vllm_backend.py": "ea5dd64b13b5270ad93196304900f64bcb952a919b382fb921dbe0668c2c0d5d",
+    "src/llm_platform/benchmark.py": "c0632f79d21654d228425300cb5c798b32276c8944fbdf7da1ab9553971773b1",
+    "src/llm_platform/cli.py": "f6cdad3f3fc806193a59b76ddf5107fb178ae6dae60eba214162a6d6c8546a93",
+    "src/llm_platform/contracts.py": "d2f3a180e2877ec9664eb3e61ebec6a33419a42ec2c633bcb4dbaf22ce5cb903",
+    "src/llm_platform/data.py": "014cd9c2c76427c65f79c7a368c13f40ae85b2383e04b80881df633f85f63523",
+    "src/llm_platform/evaluation.py": "aa8a4c3bc6b59e63d8d68291192f922cb50dc6a046e268984441be9848ca7805",
+    "src/llm_platform/evidence.py": "b1e00c1b3dfd41c208815bb77ba8be297e0cb121aebc10de9d578bc121a580d1",
+    "src/llm_platform/prompts.py": "b9d57c5183197f15476bdd5149ebfccdbc1eaa984c5e46ccdae4f599198487c2",
+    "src/llm_platform/provenance.py": "c627ff10df363c6b8be2ba4420ee610bd7c95877e9af0c041f14f75250df1014",
+    "src/llm_platform/registry.py": "c2eb7b0b1cf5792cdb27695f9496f67e55ac8c16445d9d265b456318d3c15849",
+    "src/llm_platform/serving.py": "ffd3c85c4922ef3535d74b9c22e360886e1362c9c518963b10440c0b98c1a55a",
+    "src/llm_platform/synthetic.py": "5949bcf822ec93b14db8fbfb2d0b54540b03e2642f6f4ef4aee86766aab32add",
+    "src/llm_platform/training.py": "ad90a7bae84ed22d591b1155c5a74df28cb8482c49d645d30bbcf98e4fc32568"
+  },
+  "limitations": [
+    "A source inventory establishes bytes and version identity, not remote execution attestation."
+  ],
+  "snapshot_sha256": "b588b672c753d0c084e8322d013bea3d59a496c76c039d920abe7ec270fb42d7"
+}

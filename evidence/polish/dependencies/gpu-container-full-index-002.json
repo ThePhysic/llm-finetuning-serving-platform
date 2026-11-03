@@ -1,0 +1,197 @@
+{
+  "started_at_utc": "2026-11-03T05:10:21.227771+00:00",
+  "finished_at_utc": "2026-11-03T05:10:25.877650+00:00",
+  "scope": "Every installed third-party Python distribution from actual historical GPU image. Python advisory lookup only, not native CUDA/OS/driver/image scanning or exploitability proof. Trusted-local-only boundary remains; CPU-layer zero-match result must not stand for this whole image.",
+  "image_id": "sha256:15a5cde723527525ea9fee3ac16d45d3a50df64eb48d5857ca45424a7cdfcd68",
+  "source_revision": "ae04ce0fdce67634d3a171378e743fe354a283d3",
+  "container_proof": "evidence/polish/gpu-container/smoke-001/container-proof.json",
+  "container_proof_sha256": "64d4818b1a7b3c363d696b42ac8c48be5f23ab2ee227fce419533a6322d8f9bc",
+  "smoke_result": "evidence/polish/gpu-container/smoke-001/result.json",
+  "smoke_result_sha256": "3f74a6b74136c8b6fb2ede75a37db05aa8cfc8a4c1f786427a17c898cc065937",
+  "installed_distribution_count": 147,
+  "explicitly_excluded_local_application": [
+    {
+      "name": "llm-finetuning-serving-platform",
+      "version": "0.1.0",
+      "reason": "Local repository application source, not queried as a published PyPI distribution. Exclusion is not a clean security result; source identity/review/tests are separate."
+    }
+  ],
+  "third_party_distribution_query_count": 146,
+  "query_input": "evidence/polish/dependencies/query-inputs/gpu-container-full-002.txt",
+  "query_input_sha256": "4f72a8dc1aa35b373146072b00b3fea5b70ed1e5195a3515a4945e237d0313f8",
+  "normalizations": [
+    {
+      "name": "torch",
+      "installed_version": "2.6.0+cu124",
+      "advisory_query_version": "2.6.0",
+      "reason": "Remove local CUDA build label for upstream advisory matching only; installed artifact untouched."
+    },
+    {
+      "name": "torchaudio",
+      "installed_version": "2.6.0+cu124",
+      "advisory_query_version": "2.6.0",
+      "reason": "Remove local CUDA build label for upstream advisory matching only; installed artifact untouched."
+    },
+    {
+      "name": "torchvision",
+      "installed_version": "0.21.0+cu124",
+      "advisory_query_version": "0.21.0",
+      "reason": "Remove local CUDA build label for upstream advisory matching only; installed artifact untouched."
+    }
+  ],
+  "command": [
+    "uvx",
+    "--from",
+    "pip-audit==2.10.1",
+    "pip-audit",
+    "--no-deps",
+    "--disable-pip",
+    "-r",
+    "C:\\Users\\ridle\\llm-finetuning-serving-platform\\evidence\\polish\\dependencies\\query-inputs\\gpu-container-full-002.txt",
+    "--format",
+    "json"
+  ],
+  "audit_exit_code": 1,
+  "audit_stderr": "WARNING:pip_audit._cli:--no-deps is supported, but users are encouraged to fully hash their pinned dependencies\nWARNING:pip_audit._cli:Consider using a tool like `pip-compile`: https://pip-tools.readthedocs.io/en/latest/#using-hashes\nFound 161 known vulnerabilities in 14 packages\n",
+  "raw_audit": "evidence/polish/dependencies/gpu-container-full-audit-002.json",
+  "raw_audit_sha256": "6eaba2e2ab7c43529f95b7fb19ba7fd9ece2c52864b5f693c035f20301ef3b9f",
+  "raw_advisory_records": 161,
+  "alias_deduplicated_advisories": 117,
+  "affected_packages": {
+    "accelerate": {
+      "versions": [
+        "1.6.0"
+      ],
+      "raw_occurrences": 1,
+      "alias_deduplicated_advisories": 1
+    },
+    "brotli": {
+      "versions": [
+        "1.1.0"
+      ],
+      "raw_occurrences": 4,
+      "alias_deduplicated_advisories": 2
+    },
+    "dnspython": {
+      "versions": [
+        "2.7.0"
+      ],
+      "raw_occurrences": 1,
+      "alias_deduplicated_advisories": 1
+    },
+    "h2": {
+      "versions": [
+        "4.1.0"
+      ],
+      "raw_occurrences": 4,
+      "alias_deduplicated_advisories": 2
+    },
+    "hpack": {
+      "versions": [
+        "4.0.0"
+      ],
+      "raw_occurrences": 1,
+      "alias_deduplicated_advisories": 1
+    },
+    "jinja2": {
+      "versions": [
+        "3.1.5"
+      ],
+      "raw_occurrences": 2,
+      "alias_deduplicated_advisories": 1
+    },
+    "lief": {
+      "versions": [
+        "0.14.1"
+      ],
+      "raw_occurrences": 4,
+      "alias_deduplicated_advisories": 2
+    },
+    "pillow": {
+      "versions": [
+        "11.0.0"
+      ],
+      "raw_occurrences": 68,
+      "alias_deduplicated_advisories": 52
+    },
+    "pip": {
+      "versions": [
+        "24.3.1"
+      ],
+      "raw_occurrences": 12,
+      "alias_deduplicated_advisories": 6
+    },
+    "setuptools": {
+      "versions": [
+        "75.8.0"
+      ],
+      "raw_occurrences": 5,
+      "alias_deduplicated_advisories": 3
+    },
+    "soupsieve": {
+      "versions": [
+        "2.5"
+      ],
+      "raw_occurrences": 6,
+      "alias_deduplicated_advisories": 4
+    },
+    "torch": {
+      "versions": [
+        "2.6.0"
+      ],
+      "raw_occurrences": 24,
+      "alias_deduplicated_advisories": 22
+    },
+    "transformers": {
+      "versions": [
+        "4.51.3"
+      ],
+      "raw_occurrences": 28,
+      "alias_deduplicated_advisories": 19
+    },
+    "wheel": {
+      "versions": [
+        "0.45.1"
+      ],
+      "raw_occurrences": 1,
+      "alias_deduplicated_advisories": 1
+    }
+  },
+  "database_skips": [
+    {
+      "name": "conda",
+      "reason": "Dependency not found on PyPI and could not be audited: conda (25.1.0)"
+    },
+    {
+      "name": "conda-build",
+      "reason": "Dependency not found on PyPI and could not be audited: conda-build (25.1.1)"
+    },
+    {
+      "name": "conda-index",
+      "reason": "Dependency not found on PyPI and could not be audited: conda-index (0.5.0)"
+    },
+    {
+      "name": "conda-libmamba-solver",
+      "reason": "Dependency not found on PyPI and could not be audited: conda-libmamba-solver (25.1.1)"
+    },
+    {
+      "name": "libmambapy",
+      "reason": "Dependency not found on PyPI and could not be audited: libmambapy (2.0.5)"
+    },
+    {
+      "name": "menuinst",
+      "reason": "Dependency not found on PyPI and could not be audited: menuinst (2.2.0)"
+    }
+  ],
+  "database_successfully_queried_distributions": 140,
+  "alias_command": [
+    "C:\\Users\\ridle\\llm-finetuning-serving-platform\\.venv\\Scripts\\python.exe",
+    "scripts/audit_dependency_aliases.py",
+    "--source",
+    "gpu-container-full=C:\\Users\\ridle\\llm-finetuning-serving-platform\\evidence\\polish\\dependencies\\gpu-container-full-audit-002.json",
+    "--output",
+    "C:\\Users\\ridle\\llm-finetuning-serving-platform\\evidence\\polish\\dependencies\\gpu-container-full-aliases-002.json"
+  ],
+  "alias_report": "evidence/polish/dependencies/gpu-container-full-aliases-002.json",
+  "alias_report_sha256": "5ca2e89312d630a87cb76c66a70d89733d302116889911cb95bee47b8afb8b69"
+}

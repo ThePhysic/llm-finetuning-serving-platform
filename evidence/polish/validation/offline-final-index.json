@@ -1,0 +1,61 @@
+{
+  "scope": "Final offline checks; no GPU or security certification",
+  "checks": [
+    {
+      "name": "ruff-final",
+      "command": [
+        "C:\\Users\\ridle\\llm-finetuning-serving-platform\\.venv\\Scripts\\python.exe",
+        "-m",
+        "ruff",
+        "check",
+        "src",
+        "tests",
+        "scripts"
+      ],
+      "source_revision": "ae04ce0fdce67634d3a171378e743fe354a283d3",
+      "started_at_utc": "2026-11-03T05:14:13.291725+00:00",
+      "finished_at_utc": "2026-11-03T05:14:13.446433+00:00",
+      "cuda_visible_devices": "",
+      "exit_code": 0,
+      "stdout_path": "evidence/polish/validation/ruff-final.txt",
+      "stdout_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+      "stderr": ""
+    },
+    {
+      "name": "dataset-final",
+      "command": [
+        "C:\\Users\\ridle\\llm-finetuning-serving-platform\\.venv\\Scripts\\python.exe",
+        "-m",
+        "llm_platform.cli",
+        "data",
+        "verify",
+        "data/triage-v3"
+      ],
+      "source_revision": "ae04ce0fdce67634d3a171378e743fe354a283d3",
+      "started_at_utc": "2026-11-03T05:14:13.446433+00:00",
+      "finished_at_utc": "2026-11-03T05:14:13.855372+00:00",
+      "cuda_visible_devices": "",
+      "exit_code": 0,
+      "stdout_path": "evidence/polish/validation/dataset-final.json",
+      "stdout_sha256": "2de2b737caed23baa4561140022a60e8282499749f17e2bfbfa4923a99d08e72",
+      "stderr": ""
+    },
+    {
+      "name": "evidence-audit-final",
+      "command": [
+        "C:\\Users\\ridle\\llm-finetuning-serving-platform\\.venv\\Scripts\\python.exe",
+        "-m",
+        "llm_platform.cli",
+        "audit-evidence"
+      ],
+      "source_revision": "ae04ce0fdce67634d3a171378e743fe354a283d3",
+      "started_at_utc": "2026-11-03T05:14:13.855372+00:00",
+      "finished_at_utc": "2026-11-03T05:14:20.212428+00:00",
+      "cuda_visible_devices": "",
+      "exit_code": 0,
+      "stdout_path": "evidence/polish/validation/evidence-audit-final.json",
+      "stdout_sha256": "79c55ab163f46399d2a019be031b61c10ddc8bd6e34b8da7085d56a60adb9a52",
+      "stderr": ""
+    }
+  ]
+}

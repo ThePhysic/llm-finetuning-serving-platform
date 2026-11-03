@@ -1,0 +1,35 @@
+{
+  "name": "candidate-training-compatible",
+  "command": [
+    "uvx",
+    "--from",
+    "pip-audit==2.10.1",
+    "pip-audit",
+    "--no-deps",
+    "--disable-pip",
+    "-r",
+    "C:\\Users\\ridle\\llm-finetuning-serving-platform\\evidence\\polish\\dependencies\\query-inputs\\candidate-training-compatible.txt",
+    "--format",
+    "json"
+  ],
+  "exit_code": 1,
+  "stderr": "WARNING:pip_audit._cli:--no-deps is supported, but users are encouraged to fully hash their pinned dependencies\nWARNING:pip_audit._cli:Consider using a tool like `pip-compile`: https://pip-tools.readthedocs.io/en/latest/#using-hashes\nFound 9 known vulnerabilities in 1 package\n",
+  "source_inventory": "requirements/candidate-training-compatible-resolved-linux.txt",
+  "source_sha256": "3922863de73f041579a90ece9aa9fe398dcd730be2a1077814bacb87aa7cc4ab",
+  "query_input": "evidence/polish/dependencies/query-inputs/candidate-training-compatible.txt",
+  "query_sha256": "14893b590495ff291435ef50d6a8706d5586dc724e81358d914155a4cefcff99",
+  "normalizations": [
+    {
+      "installed_version": "torch==2.14.1+cu126",
+      "advisory_query": "torch==2.14.1"
+    }
+  ],
+  "audit_status": "completed_with_findings",
+  "audit_file": "evidence/polish/dependencies/candidate-training-compatible-audit.json",
+  "raw_advisory_records": 9,
+  "distinct_primary_ids": 6,
+  "affected_packages": [
+    "transformers"
+  ],
+  "skipped": []
+}

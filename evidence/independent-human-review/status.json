@@ -4,7 +4,14 @@
   "selected_examples": 2,
   "annotations_required": 6,
   "packet_sha256": "ae2156f63c163eb06419f07b6da1a60022e07ad9c2a262c37b1e1bcb8eef8349",
-  "status": "pending",
-  "reviewer_type": "not_yet_supplied",
-  "independent_verification": "unverified"
+  "status": "independent_complete",
+  "reviewer_type": "independent_human",
+  "independent_verification": "verified_by_human",
+  "annotation_origin": "human_authored",
+  "submitter": "project_owner",
+  "independent_human_review": "complete",
+  "annotated_packet_sha256": "429dc57220c92357c05ef4da63c80ec714f0d020aa73bacdeaed36730da1b6e2",
+  "report_sha256": "1d8e8aa1fbceda3ca95a7a9b79cdd6cef35ec2865d38dc6238dcd1b6fb814014",
+  "reviewer_provenance_sha256": "223e680379fc2f53dfffa89534216f4ecc6066416edf99fd56bd9ba2a77c2a7f",
+  "verification_boundary": "Owner-attested personal assessment; machine bindings do not externally verify identity or independence."
 }

@@ -1,0 +1,35 @@
+# Independent Astra medium polish review
+
+**Verdict: no remaining complaints in the reviewed implementation, evidence and documented claims against the supplied polish handoff.** This accepts the handoff's explicitly permitted bounded outcome for the unresolved vLLM migration. It does not assert that upstream vulnerabilities are resolved, that the platform is bug-free, or that untrusted production deployment is approved.
+
+Reviewed on 2026-11-03 UTC against implementation `ae04ce0fdce67634d3a171378e743fe354a283d3`, including tokenizer compatibility change `fd2d3c060078eef0544e41822781d40019d96357`, and the completed documentation/evidence supplied for publication. I read the complete polish handoff and performed independent adversarial review across its P0/P1/P2 requirements. I did not implement the fixes, initialize CUDA, or rerun GPU experiments. This new review is the only file I wrote in this final pass.
+
+## Provenance correction and fresh judgments
+
+The earlier six ratings are AI-generated/AI-assisted annotations submitted through the owner. Their historical labeling did not establish independent human judgment. The correction explicitly supersedes that part of my historical `final.md` and `post-release.md` verdicts, as well as the earlier audit exports. Those original records remain unchanged rather than being rewritten to conceal the mistake.
+
+The fresh six ratings cover two different held-out families. I inspected the preserved question payload, display mapping, raw replies, exact owner disclosure, annotated packet and digest-bound confirmation. The owner stated: “I personally assessed each response without AI-generated scores or judgments.” The new aggregate is appropriately described as owner-attested independent review, not external identity verification, expert consensus or a population estimate. The original AI-assisted and fresh owner-attested aggregates remain separate. Publishing the previously sealed mapping after judgment completion is consistent with the recorded protocol.
+
+This review found and required correction of two additional provenance defects: the CI pending exception could waive missing prerequisites, and confirmation did not bind the exact ratings. Both are resolved. The waiver now requires a designated pending code after prerequisite validation; confirmation binds annotated bytes and the canonical source-hash inventory. Tests reject changed ratings or source files reused with an old confirmation. The public pending packet is checked against the actual per-variant output multiset even when its mapping remains local. The current strict evidence audit passes all eleven criteria using the fresh review, not the old AI-assisted labels.
+
+## Dependency and runtime outcomes
+
+The separate modern training/reference-serving candidate has a complete installed 70-package inventory matching its dated zero-known-advisory, zero-skip Python audit. Its real GPU retry records BF16 operations, two LoRA optimizer steps, validation/export/reload, and TCP HTTP sync/SSE, authorization, identity, active-request cancellation, promotion/rollback and shutdown. The unsuccessful first GPU attempt is preserved. The tokenizer return-shape fix normalizes actual token IDs while retaining strict shape, prefix equality and sequence-budget checks. Neither this two-step check nor its CPU tests transfers historical throughput or quality claims to the new stack.
+
+The vLLM migration remains unresolved. The investigation preserves resolved candidates, alias deduplication, upstream constraints and static evidence of CUDA-13 dependencies in the current binary on a driver-566.36 laptop. It does not incorrectly infer that every CUDA-12 custom build is impossible. No driver upgrade or custom vLLM source build was completed. Historical vLLM remains restricted to trusted local use, and the modern training audit does not confer whole-platform security approval.
+
+The historical GPU container was genuinely built and run. I inspected its build/source identities, installed/runtime proof, actual HTTP observations, GPU allocation, nonroot execution, adapter switching, cancellation/recovery, exit code 0 and successful removal. Build-only records correctly remain distinct from GPU verification. The separate Python-3.11 CPU lock resolves the observed NumPy compatibility failure without changing the historical reference locks. Failed attempts remain available.
+
+The container is explicitly not the modern audited training environment. Its full installed Python audit retains 161 matching records, 117 alias-deduplicated identities across 14 packages, six missing-PyPI skips and one explicit local-application exclusion. These are neither 161 demonstrated exploits nor a clean image result. Native CUDA, operating-system and driver security are outside that package audit. Trusted-local-only restrictions remain necessary.
+
+## Independent verification and presentation
+
+During the polish rounds I independently ran 93 provenance/evidence/CLI tests and later 129 tokenization/container-helper/evaluation/evidence tests, with one platform skip in the latter run. CUDA was hidden before Python execution. Initial Windows sandbox temporary-directory failures were environmental; the successful reruns used the required filesystem access. These checks exercised CPU code and did not substitute for GPU execution.
+
+In this final pass I independently verified all 616 listed preserved scientific/input files against their historical Git blobs, the three final full-suite log hashes, and every current file in the GPU build context against its recorded hash. I also checked the smoke-to-build binding and reran the strict evidence auditor: all eleven criteria passed. The implementing team's final recorded suites report 428 passed in each Linux environment and 422 passed with six skips on Windows; their commands hide CUDA and check that no CUDA context initialized. I inspected those records rather than independently repeating those full suites.
+
+The README now presents the reusable platform separately from the triage workload, with architecture, reproduction links and a measured chart tied to eight preserved run reports. Units, aggregation, workload, repetitions and different engine concurrency configurations are disclosed. The quality limitation remains prominent: LoRA 15/40 category accuracy, eight independent test families and required abstention 0/5. Negative experiments, serving errors, historical decoding/precision corrections and small-sample limitations are retained.
+
+`AGENTS.md` remains on disk, ignored and untracked. History is preserved, including historical accessibility of its generic instructions. The current documents consistently distinguish completed work, owner attestation, historical measurements and unresolved security constraints.
+
+The reviewed content is ready for the authorized publication step with these limitations intact. Final remote commit equality, repository visibility and the GitHub Actions result remain separate live checks for the publishing agent; this review does not claim those later checks have already completed.

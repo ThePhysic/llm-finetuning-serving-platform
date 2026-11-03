@@ -1,0 +1,48 @@
+{
+  "schema_version": 2,
+  "annotation_origin": "human_authored",
+  "submitter": "project_owner",
+  "reviewer_type": "independent_human",
+  "independent_verification": "verified_by_human",
+  "review_status": "independent_complete",
+  "source_type": "direct_human_assessment",
+  "source_ids": [
+    "fresh-response-1",
+    "fresh-response-2",
+    "fresh-attestation"
+  ],
+  "source_records": [
+    {
+      "id": "fresh-response-1",
+      "path": "source-response-1.json",
+      "sha256": "c50b15234e703df4cc2a215fa764c2563ce444b908dfcaa1a676281ae6e9ef39",
+      "annotation_origin": "human_authored"
+    },
+    {
+      "id": "fresh-response-2",
+      "path": "source-response-2.json",
+      "sha256": "181bc007650b824e15172d476c4dadf47b319e568ed437912a2883bf39b486d1",
+      "annotation_origin": "human_authored"
+    },
+    {
+      "id": "fresh-attestation",
+      "path": "source-attestation.json",
+      "sha256": "e14da446379f522032f181caa26475a4b518cf4b9a457f5133ec3cf761646217",
+      "annotation_origin": "human_authored"
+    }
+  ],
+  "artifact_bindings": {
+    "annotated_packet_sha256": "429dc57220c92357c05ef4da63c80ec714f0d020aa73bacdeaed36730da1b6e2",
+    "review_key_sha256": "a01c9d8528fed69079e6b77da58dec1a5c2518a0da4bd61e75ded9d930c941ac",
+    "review_packet_sha256": "ae2156f63c163eb06419f07b6da1a60022e07ad9c2a262c37b1e1bcb8eef8349"
+  },
+  "independent_confirmation": {
+    "path": "independent-confirmation.json",
+    "sha256": "4643275c6e64545adad7bad4a83b146ababaf9412566f64bb45e67dad4b9d314"
+  },
+  "normalization": "A-F ratings transcribed exactly through the pre-existing display map; machine-computed hash bindings do not replace the preserved actual owner replies.",
+  "limitations": [
+    "One owner-attested human reviewer, two held-out incident families, six responses; no population-level human-quality estimate.",
+    "The earlier six ChatGPT-generated ratings remain separate AI-assisted annotations."
+  ]
+}

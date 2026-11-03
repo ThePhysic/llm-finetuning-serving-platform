@@ -1,0 +1,56 @@
+{
+  "started_at_utc": "2026-11-03T05:00:52.820674+00:00",
+  "finished_at_utc": "2026-11-03T05:01:00.532385+00:00",
+  "scope": "GPU-container Python3.11 CPU/application layer ONLY. Does not audit CUDA base OS/native libraries or the separately installed historical Torch/Transformers GPU layer; known GPU-stack advisories and trusted-local restriction remain.",
+  "command": [
+    "uvx",
+    "--from",
+    "pip-audit==2.10.1",
+    "pip-audit",
+    "--no-deps",
+    "--disable-pip",
+    "--require-hashes",
+    "-r",
+    "C:\\Users\\ridle\\llm-finetuning-serving-platform\\requirements\\gpu-container-cpu-py311.lock",
+    "--format",
+    "json"
+  ],
+  "exit_code": 0,
+  "stderr": "WARNING:pip_audit._cli:The --no-deps flag is redundant when used with --require-hashes\nWARNING:pip_audit._cli:--no-deps is supported, but users are encouraged to fully hash their pinned dependencies\nWARNING:pip_audit._cli:Consider using a tool like `pip-compile`: https://pip-tools.readthedocs.io/en/latest/#using-hashes\nNo known vulnerabilities found\n",
+  "source_inventory": "requirements/gpu-container-cpu-py311.lock",
+  "source_sha256": "a489918545899cad9471e267b95c68da01c0f76585c929acb436d1013ea12853",
+  "historical_inventory": "requirements/cpu.lock",
+  "historical_sha256": "5085127f70126d1371780f3d83b0e4bab6b6375a765e798a5cf3b1d438a53912",
+  "historical_declared_pins": 41,
+  "linux_python311_active_pins": 40,
+  "version_changes": {
+    "numpy": {
+      "historical": "2.5.4",
+      "new": "2.4.6"
+    }
+  },
+  "excluded_historical_markers": [
+    {
+      "name": "colorama",
+      "version": "0.4.6",
+      "marker": "sys_platform == \"win32\""
+    }
+  ],
+  "audit_dependencies_queried": 40,
+  "raw_advisory_records": 0,
+  "alias_deduplicated_advisories": 0,
+  "skipped": [],
+  "raw_audit": "evidence/polish/dependencies/gpu-container-cpu-py311-audit.json",
+  "raw_audit_sha256": "2cc93dce2319e687c8a6483fd4cffdc11f05cecc3839538ad2804818d4ba3117",
+  "alias_command": [
+    "C:\\Users\\ridle\\llm-finetuning-serving-platform\\.venv\\Scripts\\python.exe",
+    "scripts/audit_dependency_aliases.py",
+    "--source",
+    "gpu-container-cpu-py311=C:\\Users\\ridle\\llm-finetuning-serving-platform\\evidence\\polish\\dependencies\\gpu-container-cpu-py311-audit.json",
+    "--output",
+    "C:\\Users\\ridle\\llm-finetuning-serving-platform\\evidence\\polish\\dependencies\\gpu-container-cpu-py311-audit-aliases.json"
+  ],
+  "alias_report": "evidence/polish/dependencies/gpu-container-cpu-py311-audit-aliases.json",
+  "alias_report_sha256": "efa7e991509d29f8a6ef976551b8778d3f14140e0477b5207fe3485b7f4b7831",
+  "source_revision": "ae04ce0fdce67634d3a171378e743fe354a283d3"
+}

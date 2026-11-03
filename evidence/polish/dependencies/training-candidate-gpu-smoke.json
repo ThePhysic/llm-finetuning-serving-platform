@@ -1,0 +1,73 @@
+{
+  "started_at_utc": "2026-11-03T04:49:05.980732+00:00",
+  "status": "failed",
+  "purpose": "New dependency compatibility smoke only; not a replacement quality/performance experiment",
+  "source_revision": "04ccc3414609d6aae79415f60f165419f58e77bf",
+  "source_dirty": true,
+  "script_sha256": "4cfd7a18081e5380586ec1db79c417fe88de782a71f026f3a1802e0b7fc852ae",
+  "historical_artifacts_modified": false,
+  "steps": [
+    {
+      "name": "actual_cuda_bfloat16_matmul_and_sdpa",
+      "status": "passed"
+    }
+  ],
+  "versions": {
+    "torch": "2.14.1+cu126",
+    "transformers": "5.20.0",
+    "peft": "0.21.2",
+    "accelerate": "1.15.0",
+    "safetensors": "0.8.0",
+    "huggingface-hub": "1.33.0",
+    "triton": "3.8.0",
+    "fastapi": "0.162.0",
+    "httpx": "0.28.1"
+  },
+  "cuda_runtime": "12.6",
+  "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+  "driver": "566.36",
+  "smoke_data": {
+    "source": "Frozen triage-v3 train/validation only; first two rows each, no test records",
+    "selected_ids": {
+      "train": [
+        "api_failure-scenario-00-wording-0",
+        "api_failure-scenario-00-wording-1"
+      ],
+      "validation": [
+        "api_failure-scenario-04-wording-0",
+        "api_failure-scenario-04-wording-1"
+      ]
+    }
+  },
+  "train_config": {
+    "model_id": "Qwen/Qwen2.5-0.5B-Instruct",
+    "revision": "7ae557604adf67be50417f59c2c2f167def9a775",
+    "seed": 42,
+    "max_steps": 2,
+    "batch_size": 1,
+    "gradient_accumulation_steps": 1,
+    "max_seq_length": 768,
+    "learning_rate": 0.0002,
+    "weight_decay": 0.01,
+    "warmup_steps": 5,
+    "max_grad_norm": 1.0,
+    "rank": 8,
+    "alpha": 16,
+    "dropout": 0.05,
+    "target_modules": [
+      "q_proj",
+      "v_proj"
+    ],
+    "dtype": "bfloat16",
+    "device": "cuda",
+    "qlora": false,
+    "gradient_checkpointing": true,
+    "validation_every": 2,
+    "checkpoint_every": 1,
+    "dataset_id": "compatibility-smoke-26a80547a577cd0921658d0bdc40f387ac35c0290981835a46945c653e3faa54",
+    "experiment_id": "candidate-dependency-two-step-smoke",
+    "resume_from": null
+  },
+  "exception_type": "ValueError",
+  "finished_at_utc": "2026-11-03T04:49:33.762457+00:00"
+}

@@ -1,0 +1,36 @@
+{
+  "purpose": "Real cached pinned Qwen tokenizer compatibility and CPU-only targeted regression tests; not GPU evidence",
+  "cuda_visible_devices": "",
+  "cuda_initialized": false,
+  "model_id": "Qwen/Qwen2.5-0.5B-Instruct",
+  "model_revision": "7ae557604adf67be50417f59c2c2f167def9a775",
+  "prompt_tokens": 163,
+  "completed_tokens": 241,
+  "supervised_tokens": 78,
+  "backend_count_tokens": {
+    "TransformersBackend": 163,
+    "VLLMBackend": 163
+  },
+  "source_revision": "04ccc3414609d6aae79415f60f165419f58e77bf",
+  "source_dirty": true,
+  "source_sha256": {
+    "src/llm_platform/tokenization.py": "1f5b06896a98826838cc448e932998eba397cb1584bbd48ddb9bfd99858c7d51",
+    "src/llm_platform/training.py": "d6ad7080841b763cd03cd8879b2e9fdfc50cb7327393b68a92ef969aa739c06f",
+    "src/llm_platform/data.py": "62abe835e5eb65e1a070fd047ad024de5cc947c7055e08dcaf41370129fb196f",
+    "src/llm_platform/backends/transformers_backend.py": "f2d12439af12da8ab6899ac0bb85c33bd2d26973b574f1bc5b6239c84d4bffb6",
+    "src/llm_platform/backends/vllm_backend.py": "20ad4c01218d0506cb2ce00bf3939588d75be4a66808b117a3f7fbf3fac4e748"
+  },
+  "test_command": [
+    "/home/ridle/llm-platform-candidate-train-polish-001/bin/python",
+    "-m",
+    "pytest",
+    "tests/test_tokenization.py",
+    "tests/test_data.py",
+    "tests/test_training.py",
+    "tests/test_backends.py",
+    "-q"
+  ],
+  "test_exit_code": 0,
+  "test_stdout": "........................................................................ [ 58%]\n...................................................                      [100%]\n=============================== warnings summary ===============================\ntests/test_training.py::test_real_cpu_resume_preserves_weights_and_complete_raw_history\ntests/test_training.py::test_real_cpu_resume_preserves_weights_and_complete_raw_history\ntests/test_training.py::test_real_cpu_training_honors_verified_manifest_character_budget\n  /home/ridle/llm-platform-candidate-train-polish-001/lib/python3.12/site-packages/peft/tuners/lora/layer.py:2760: UserWarning: fan_in_fan_out is set to False but the target module is `Conv1D`. Setting fan_in_fan_out to True.\n    warnings.warn(\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n123 passed, 3 warnings in 38.03s\n",
+  "test_stderr": ""
+}

@@ -10,8 +10,10 @@ model mapping and historical attribution are preserved byte-for-byte under
 [`evidence/review-provenance-correction/`](../evidence/review-provenance-correction/).
 The original values have not been improved, replaced or removed from history.
 The current [`human-review/report.json`](../evidence/human-review/report.json)
-labels them as AI-assisted results. Independent-human semantic quality estimates
-remain pending or unavailable until qualifying new judgments are supplied.
+labels them as AI-assisted results. A separate fresh packet now contains six
+owner-attested independent judgments; none of the old AI-assisted scores is
+reclassified as a human judgment. The small fresh subset is descriptive, not a
+population estimate.
 
 ## What the correction supersedes
 
@@ -43,18 +45,28 @@ records and attestation; it cannot prove a person's identity or mental process.
 ## Fresh independent review
 
 The new [`review packet`](../evidence/independent-human-review/review_packet.jsonl)
-contains six unannotated outputs for two previously unshown held-out families.
+preserves six originally unannotated outputs for two previously unshown held-out families.
 Selection uses a recorded dataset-only seed and excludes the two previously
-displayed families. The owner has been asked for actual judgments and explicit
-disclosure of any AI assistance. No scores have been suggested or prefilled.
+displayed families. The owner supplied actual judgments for all six responses
+and explicitly stated: “I personally assessed each response without AI-generated
+scores or judgments.” No scores were suggested or prefilled. The original replies,
+disclosure and exact transcription are preserved in the
+[fresh report's directory](../evidence/independent-human-review/).
 
-The model mapping is retained separately and locally while review is pending;
-its hash is published so it can be checked after completion. It will be revealed
-only after qualifying judgments are recorded. The original already-revealed
-mapping stays available for auditing the old labels.
+The model mapping was retained separately and locally until both rating batches
+and the disclosure arrived. It is now published with its unchanged creation-time
+hash commitment. Original empty packet, source replies, annotated packet and owner
+confirmation have separate hash bindings. The confirmation is a recorded owner
+attestation and lossless transcription, not a cryptographic signature or external
+verification of the owner's identity or independence. The original already-revealed
+mapping stays available for auditing the old AI-assisted labels.
 
-The independent-human acceptance criterion remains pending during this external
-activity. Engineering, dependency checks and container validation continue.
-A CI mode may allow precisely this expected pending item while still reporting
+The independent-human criterion now validates this separate fresh, owner-attested
+review. Its action means are 0.50 for zero-shot, 0.00 for prompting and 0.25 for
+LoRA, over two responses per variant. These different cases cannot support a
+controlled comparison of AI and human reviewers or a population safety claim.
+
+For future reviews the criterion must remain pending until qualifying judgments
+exist. A CI mode may allow precisely that expected pending item while still reporting
 `pending`; it must never turn missing judgments into a passing human criterion
 or suppress other failed or missing evidence.

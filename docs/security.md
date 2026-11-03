@@ -57,18 +57,44 @@ in memory. Keep the worker inaccessible to untrusted local users too.
 
 ## Known dependency advisories
 
+The polish work adds a separately installed and exercised **training/Transformers
+reference-serving candidate**: Torch 2.14.1+cu126, Transformers 5.20.0, PEFT 0.21.2,
+Accelerate 1.15.0 and safetensors 0.8.0. Its 70 resolved third-party packages match
+the installed inventory and have zero known matches and zero skips in the dated
+scan. Actual GPU checks passed two optimizer steps, export/reload and TCP HTTP
+sync/SSE, authorization, cancellation and rollback. See
+[dependency migration](dependency-migration.md) for exact locks, commands, source
+identities, the preserved failed first probe and the successful retry.
+
+This is a validated, safer option for the exercised training/reference paths,
+not security clearance for the whole platform. The historical vLLM environment
+remains restricted. A current vLLM binary migration has not been validated on the
+installed driver; its CUDA 13 binary dependencies need a different supported
+driver/build path. No OS driver upgrade or custom vLLM source build was performed.
+
 The reference GPU versions are preserved for replay of the recorded experiments;
 they are **not a current, vulnerability-free production dependency baseline**.
 The follow-up scan and [raw results](../evidence/post-release/dependencies/index.json)
 record pip-audit 2.10.1 queries against the complete installed core inventory and
 both recorded Linux inventories. CUDA `+cu124` labels were removed only in advisory
-query inputs to match upstream releases. No measured environment was upgraded.
+query inputs to match upstream releases. No historical measured environment was
+upgraded in place; the new candidate is separate.
 
 | Inventory | Advisory records | Distinct advisory IDs |
 |---|---:|---:|
 | Core | 0 | 0 |
 | Historical training | 53 | 42 |
 | Historical vLLM | 164 | 117 |
+
+The GPU image's broader installed Python inventory is audited separately:
+**161 records / 117 alias-deduplicated identities across 14 packages**. Of 147
+installed distributions, the local application is explicitly excluded; all 146
+third-party versions were submitted, with 140 covered and six missing-PyPI skips.
+The [full image audit](../evidence/polish/dependencies/gpu-container-full-index-002.json)
+includes historical GPU packages and base-image tools/libraries. Its findings and
+coverage gaps remain unresolved. The zero-match 40-package Python 3.11 CPU-layer
+lock does not describe the whole image, and neither audit scans native CUDA,
+OS packages or drivers. The historical image remains **trusted-local-only**.
 
 These are database matches, not counts of demonstrated platform exploits. Records
 can repeat or share CVE aliases, and version ranges can cover features absent from
@@ -94,8 +120,11 @@ isolation. Never share its cache across private or mutually untrusted workloads.
 Use the preserved GPU stack for isolated, trusted local reproduction. Before
 exposing inference to untrusted users, migrate to a reviewed patched dependency
 stack and revalidate quality, compatibility, cancellation and GPU performance on
-the deployment hardware. Such a migration has not been performed here. The CPU
-scan's zero matches and a clean project review do not certify the GPU dependencies.
+the deployment hardware. Only the limited training/Transformers compatibility
+migration described above has been completed; the legacy vLLM path and broader
+production approval remain unresolved. Python-package audits exclude native CUDA,
+driver and OS vulnerabilities. Zero matches and a clean project review do not
+prove the absence of vulnerabilities or confer deployment approval.
 
 ## Logging and retained data
 

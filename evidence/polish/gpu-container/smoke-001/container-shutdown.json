@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "docker",
+    "inspect",
+    "d513bec8474fc57c816c9ce079e4415216cd8ebf58e88585af78495fb6c758e7",
+    "--format",
+    "{{json .State}}"
+  ],
+  "started_at_unix": 1793682342.3111396,
+  "seconds": 0.11106705665588379,
+  "returncode": 0,
+  "stdout": "{\"Status\":\"exited\",\"Running\":false,\"Paused\":false,\"Restarting\":false,\"OOMKilled\":false,\"Dead\":false,\"Pid\":0,\"ExitCode\":0,\"Error\":\"\",\"StartedAt\":\"2026-11-03T05:04:28.306826041Z\",\"FinishedAt\":\"2026-11-03T05:05:41.954824424Z\"}\n",
+  "stderr": ""
+}

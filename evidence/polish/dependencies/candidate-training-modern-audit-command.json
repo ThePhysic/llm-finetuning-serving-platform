@@ -1,0 +1,33 @@
+{
+  "name": "candidate-training-modern",
+  "command": [
+    "uvx",
+    "--from",
+    "pip-audit==2.10.1",
+    "pip-audit",
+    "--no-deps",
+    "--disable-pip",
+    "-r",
+    "C:\\Users\\ridle\\llm-finetuning-serving-platform\\evidence\\polish\\dependencies\\query-inputs\\candidate-training-modern.txt",
+    "--format",
+    "json"
+  ],
+  "exit_code": 0,
+  "stderr": "WARNING:pip_audit._cli:--no-deps is supported, but users are encouraged to fully hash their pinned dependencies\nWARNING:pip_audit._cli:Consider using a tool like `pip-compile`: https://pip-tools.readthedocs.io/en/latest/#using-hashes\nNo known vulnerabilities found\n",
+  "source_inventory": "requirements/candidate-training-modern-integrated-resolved-linux.txt",
+  "source_sha256": "ebf6042dc68ccb9154e239de364d5d4928867dc953dd3c9f0941f2b8eb43f557",
+  "query_input": "evidence/polish/dependencies/query-inputs/candidate-training-modern.txt",
+  "query_sha256": "2d2c719092212ed5b87904291a3c5a6f30f4e60fffda0c51cac6a6be02218514",
+  "normalizations": [
+    {
+      "installed_version": "torch==2.14.1+cu126",
+      "advisory_query": "torch==2.14.1"
+    }
+  ],
+  "audit_status": "completed_without_matches",
+  "audit_file": "evidence/polish/dependencies/candidate-training-modern-audit.json",
+  "raw_advisory_records": 0,
+  "distinct_primary_ids": 0,
+  "affected_packages": [],
+  "skipped": []
+}

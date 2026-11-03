@@ -1,0 +1,147 @@
+[
+  {
+    "argv": [
+      "docker",
+      "version",
+      "--format",
+      "{{json .}}"
+    ],
+    "started_at_unix": 1793682267.7193651,
+    "seconds": 0.10694456100463867,
+    "returncode": 0,
+    "stdout": "{\"Client\":{\"Version\":\"29.9.1\",\"ApiVersion\":\"1.56\",\"DefaultAPIVersion\":\"1.56\",\"GitCommit\":\"dfc520d\",\"GoVersion\":\"go1.26.9\",\"Os\":\"windows\",\"Arch\":\"amd64\",\"BuildTime\":\"Wed Oct 14 18:34:24 2026\",\"Context\":\"desktop-linux\"},\"Server\":{\"Platform\":{\"Name\":\"Docker Desktop 4.96.0 (243774)\"},\"Version\":\"29.9.1\",\"ApiVersion\":\"1.56\",\"MinAPIVersion\":\"1.40\",\"Os\":\"linux\",\"Arch\":\"amd64\",\"Components\":[{\"Name\":\"Engine\",\"Version\":\"29.9.1\",\"Details\":{\"ApiVersion\":\"1.56\",\"Arch\":\"amd64\",\"BuildTime\":\"Wed Oct 14 18:32:24 2026\",\"Experimental\":\"false\",\"GitCommit\":\"b26fb77\",\"GoVersion\":\"go1.26.9\",\"KernelVersion\":\"6.18.54.1-microsoft-standard-WSL2\",\"MinAPIVersion\":\"1.40\",\"Module\":\"github.com/moby/moby/v2\",\"ModuleVersion\":\"v2.0.0+unknown\",\"Os\":\"linux\"}},{\"Name\":\"containerd\",\"Version\":\"v2.4.2\",\"Details\":{\"GitCommit\":\"b7a25261e029d68978bbf290df0a62fc819b3c51\"}},{\"Name\":\"runc\",\"Version\":\"1.5.2\",\"Details\":{\"GitCommit\":\"v1.5.2-0-g29dd3dc2\"}},{\"Name\":\"docker-init\",\"Version\":\"0.19.0\",\"Details\":{\"GitCommit\":\"de40ad0\"}}],\"GitCommit\":\"b26fb77\",\"GoVersion\":\"go1.26.9\",\"KernelVersion\":\"6.18.54.1-microsoft-standard-WSL2\",\"BuildTime\":\"2026-10-14T18:32:24.000000000+00:00\"}}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "nvidia-smi",
+      "--query-gpu=name,uuid,driver_version,memory.total",
+      "--format=csv,noheader"
+    ],
+    "started_at_unix": 1793682267.8279843,
+    "seconds": 0.0823214054107666,
+    "returncode": 0,
+    "stdout": "NVIDIA GeForce RTX 4060 Laptop GPU, GPU-af03e140-b0f2-5030-4a2b-7d19084fdd8e, 566.36, 8188 MiB\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "docker",
+      "run",
+      "--detach",
+      "--name",
+      "llm-gpu-verify-f6a15f4a0b0648588c687b81889e8866",
+      "--gpus",
+      "all",
+      "--publish",
+      "127.0.0.1::8000",
+      "--env",
+      "LLM_API_KEY",
+      "--env",
+      "LLM_ADMIN_KEY",
+      "--env",
+      "HF_HUB_OFFLINE=1",
+      "--env",
+      "TRANSFORMERS_OFFLINE=1",
+      "--tmpfs",
+      "/runtime:rw,uid=10001,gid=10001,mode=0700,size=256m",
+      "--mount",
+      "type=bind,source=C:\\Users\\ridle\\llm-finetuning-serving-platform\\runtime\\quality-002\\base-package,target=/inputs/base,readonly",
+      "--mount",
+      "type=bind,source=C:\\Users\\ridle\\llm-finetuning-serving-platform\\evidence\\adapter-package,target=/inputs/adapter,readonly",
+      "--mount",
+      "type=bind,source=C:\\Users\\ridle\\llm-finetuning-serving-platform\\runtime\\huggingface,target=/runtime/huggingface",
+      "--mount",
+      "type=bind,source=C:\\Users\\ridle\\llm-finetuning-serving-platform\\evidence\\polish\\gpu-container\\build-004\\source\\scripts\\gpu_container_entry.py,target=/bootstrap.py,readonly",
+      "--entrypoint",
+      "python",
+      "sha256:15a5cde723527525ea9fee3ac16d45d3a50df64eb48d5857ca45424a7cdfcd68",
+      "/bootstrap.py"
+    ],
+    "started_at_unix": 1793682267.9143076,
+    "seconds": 1.515972375869751,
+    "returncode": 0,
+    "stdout": "d513bec8474fc57c816c9ce079e4415216cd8ebf58e88585af78495fb6c758e7\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "docker",
+      "inspect",
+      "d513bec8474fc57c816c9ce079e4415216cd8ebf58e88585af78495fb6c758e7",
+      "--format",
+      "{{json .NetworkSettings.Ports}}"
+    ],
+    "started_at_unix": 1793682269.431918,
+    "seconds": 0.09644699096679688,
+    "returncode": 0,
+    "stdout": "{\"8000/tcp\":[{\"HostIp\":\"127.0.0.1\",\"HostPort\":\"51767\"}]}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "docker",
+      "exec",
+      "d513bec8474fc57c816c9ce079e4415216cd8ebf58e88585af78495fb6c758e7",
+      "cat",
+      "/runtime/container-proof.json"
+    ],
+    "started_at_unix": 1793682339.7492,
+    "seconds": 0.19199609756469727,
+    "returncode": 0,
+    "stdout": "{\n  \"uid\": 10001,\n  \"gid\": 10001,\n  \"python\": \"3.11.11\",\n  \"versions\": {\n    \"torch\": \"2.6.0+cu124\",\n    \"transformers\": \"4.51.3\",\n    \"peft\": \"0.15.2\",\n    \"accelerate\": \"1.6.0\",\n    \"safetensors\": \"0.5.3\"\n  },\n  \"installed_distributions\": {\n    \"Brotli\": \"1.1.0\",\n    \"Jinja2\": \"3.1.5\",\n    \"MarkupSafe\": \"3.0.2\",\n    \"PySocks\": \"1.7.1\",\n    \"PyYAML\": \"6.0.3\",\n    \"Pygments\": \"2.21.0\",\n    \"accelerate\": \"1.6.0\",\n    \"annotated-doc\": \"0.0.5\",\n    \"annotated-types\": \"0.8.0\",\n    \"anyio\": \"4.16.0\",\n    \"archspec\": \"0.2.5\",\n    \"asttokens\": \"3.0.0\",\n    \"astunparse\": \"1.6.3\",\n    \"attrs\": \"25.1.0\",\n    \"beautifulsoup4\": \"4.12.3\",\n    \"boltons\": \"24.0.0\",\n    \"certifi\": \"2026.10.23\",\n    \"cffi\": \"1.17.1\",\n    \"chardet\": \"5.2.0\",\n    \"charset-normalizer\": \"3.5.2\",\n    \"click\": \"8.5.0\",\n    \"cmake\": \"3.31.4\",\n    \"colorama\": \"0.4.6\",\n    \"conda\": \"25.1.0\",\n    \"conda-build\": \"25.1.1\",\n    \"conda-libmamba-solver\": \"25.1.1\",\n    \"conda-package-handling\": \"2.4.0\",\n    \"conda_index\": \"0.5.0\",\n    \"conda_package_streaming\": \"0.11.0\",\n    \"decorator\": \"5.1.1\",\n    \"distro\": \"1.9.0\",\n    \"dnspython\": \"2.7.0\",\n    \"exceptiongroup\": \"1.2.2\",\n    \"executing\": \"2.1.0\",\n    \"expecttest\": \"0.3.0\",\n    \"fastapi\": \"0.162.0\",\n    \"filelock\": \"4.2.7\",\n    \"frozendict\": \"2.4.6\",\n    \"fsspec\": \"2026.9.0\",\n    \"h11\": \"0.16.0\",\n    \"h2\": \"4.1.0\",\n    \"hf-xet\": \"1.8.0\",\n    \"hpack\": \"4.0.0\",\n    \"httpcore\": \"1.0.9\",\n    \"httpx\": \"0.28.1\",\n    \"huggingface_hub\": \"0.36.2\",\n    \"hyperframe\": \"6.0.1\",\n    \"hypothesis\": \"6.124.7\",\n    \"idna\": \"3.20\",\n    \"importlib_resources\": \"6.5.2\",\n    \"iniconfig\": \"2.3.1\",\n    \"ipython\": \"8.31.0\",\n    \"jedi\": \"0.19.2\",\n    \"jsonpatch\": \"1.33\",\n    \"jsonpointer\": \"3.0.0\",\n    \"jsonschema\": \"4.23.0\",\n    \"jsonschema-specifications\": \"2024.10.1\",\n    \"libarchive-c\": \"5.1\",\n    \"libmambapy\": \"2.0.5\",\n    \"lief\": \"0.14.1\",\n    \"lintrunner\": \"0.12.7\",\n    \"llm-finetuning-serving-platform\": \"0.1.0\",\n    \"markdown-it-py\": \"4.2.0\",\n    \"matplotlib-inline\": \"0.1.7\",\n    \"mdurl\": \"0.1.2\",\n    \"menuinst\": \"2.2.0\",\n    \"more-itertools\": \"10.6.0\",\n    \"mpmath\": \"1.3.0\",\n    \"networkx\": \"3.4.2\",\n    \"ninja\": \"1.11.1.3\",\n    \"numpy\": \"2.4.6\",\n    \"nvidia-cublas-cu12\": \"12.4.5.8\",\n    \"nvidia-cuda-cupti-cu12\": \"12.4.127\",\n    \"nvidia-cuda-nvrtc-cu12\": \"12.4.127\",\n    \"nvidia-cuda-runtime-cu12\": \"12.4.127\",\n    \"nvidia-cudnn-cu12\": \"9.1.0.70\",\n    \"nvidia-cufft-cu12\": \"11.2.1.3\",\n    \"nvidia-curand-cu12\": \"10.3.5.147\",\n    \"nvidia-cusolver-cu12\": \"11.6.1.9\",\n    \"nvidia-cusparse-cu12\": \"12.3.1.170\",\n    \"nvidia-cusparselt-cu12\": \"0.6.2\",\n    \"nvidia-nccl-cu12\": \"2.21.5\",\n    \"nvidia-nvjitlink-cu12\": \"12.4.127\",\n    \"nvidia-nvtx-cu12\": \"12.4.127\",\n    \"opentelemetry-api\": \"1.45.2\",\n    \"optree\": \"0.14.0\",\n    \"packaging\": \"26.3\",\n    \"parso\": \"0.8.4\",\n    \"peft\": \"0.15.2\",\n    \"pexpect\": \"4.9.0\",\n    \"pickleshare\": \"0.7.5\",\n    \"pillow\": \"11.0.0\",\n    \"pip\": \"24.3.1\",\n    \"pkginfo\": \"1.12.0\",\n    \"pkgutil_resolve_name\": \"1.3.10\",\n    \"platformdirs\": \"4.3.6\",\n    \"pluggy\": \"1.7.0\",\n    \"prometheus_client\": \"0.26.0\",\n    \"prompt_toolkit\": \"3.0.50\",\n    \"psutil\": \"6.1.1\",\n    \"ptyprocess\": \"0.7.0\",\n    \"pure_eval\": \"0.2.3\",\n    \"pycosat\": \"0.6.6\",\n    \"pycparser\": \"2.22\",\n    \"pydantic\": \"2.14.2\",\n    \"pydantic_core\": \"2.50.2\",\n    \"pytest\": \"9.2.0\",\n    \"pytest-asyncio\": \"1.4.1.post1\",\n    \"python-etcd\": \"0.4.5\",\n    \"pytz\": \"2024.2\",\n    \"referencing\": \"0.36.2\",\n    \"regex\": \"2026.9.29\",\n    \"requests\": \"2.34.2\",\n    \"rich\": \"15.0.0\",\n    \"rpds-py\": \"0.22.3\",\n    \"ruamel.yaml\": \"0.18.10\",\n    \"ruamel.yaml.clib\": \"0.2.8\",\n    \"ruff\": \"0.17.3\",\n    \"safetensors\": \"0.5.3\",\n    \"setuptools\": \"75.8.0\",\n    \"shellingham\": \"1.5.4\",\n    \"six\": \"1.17.0\",\n    \"sortedcontainers\": \"2.4.0\",\n    \"soupsieve\": \"2.5\",\n    \"stack_data\": \"0.6.3\",\n    \"starlette\": \"1.10.0\",\n    \"sympy\": \"1.13.1\",\n    \"tokenizers\": \"0.21.4\",\n    \"torch\": \"2.6.0+cu124\",\n    \"torchaudio\": \"2.6.0+cu124\",\n    \"torchelastic\": \"0.2.2\",\n    \"torchvision\": \"0.21.0+cu124\",\n    \"tqdm\": \"4.70.1\",\n    \"traitlets\": \"5.14.3\",\n    \"transformers\": \"4.51.3\",\n    \"triton\": \"3.2.0\",\n    \"truststore\": \"0.10.0\",\n    \"typer\": \"0.27.3\",\n    \"types-dataclasses\": \"0.6.6\",\n    \"typing-inspection\": \"0.4.4\",\n    \"typing_extensions\": \"4.16.0\",\n    \"urllib3\": \"2.8.0\",\n    \"uvicorn\": \"0.54.0\",\n    \"wcwidth\": \"0.2.13\",\n    \"wheel\": \"0.45.1\",\n    \"zipp\": \"3.21.0\",\n    \"zstandard\": \"0.23.0\"\n  },\n  \"cuda_runtime\": \"12.4\",\n  \"cuda_device\": \"NVIDIA GeForce RTX 4060 Laptop GPU\",\n  \"cuda_probe_allocated_bytes\": 4096,\n  \"cuda_probe_sum\": 1024.0,\n  \"security_scope\": \"historical dependencies; trusted local artifacts only\",\n  \"installed_source_sha256\": {\n    \"src/llm_platform/__init__.py\": \"345fc34c2323ca08d5799bc4a7c7b17c2b3b2a59d77f903d3ad8db18970c36d1\",\n    \"src/llm_platform/backends/__init__.py\": \"6ac08ec30729dfc90e99dcb1605ded4aa9aaabfa4d9ba55b576db189c39a27a5\",\n    \"src/llm_platform/backends/launch_vllm.py\": \"07adb16495385b207e5de7a2fcc1aa34edfc6e222af046ae2e1321dbe2a3701b\",\n    \"src/llm_platform/backends/precision.py\": \"bee8fb279e72cf3ad4095b7c97d7b6abcfd838be93c5a9bb22c0eaab37561706\",\n    \"src/llm_platform/backends/transformers_backend.py\": \"f2d12439af12da8ab6899ac0bb85c33bd2d26973b574f1bc5b6239c84d4bffb6\",\n    \"src/llm_platform/backends/vllm_backend.py\": \"20ad4c01218d0506cb2ce00bf3939588d75be4a66808b117a3f7fbf3fac4e748\",\n    \"src/llm_platform/benchmark.py\": \"c0632f79d21654d228425300cb5c798b32276c8944fbdf7da1ab9553971773b1\",\n    \"src/llm_platform/cli.py\": \"f6cdad3f3fc806193a59b76ddf5107fb178ae6dae60eba214162a6d6c8546a93\",\n    \"src/llm_platform/contracts.py\": \"d2f3a180e2877ec9664eb3e61ebec6a33419a42ec2c633bcb4dbaf22ce5cb903\",\n    \"src/llm_platform/data.py\": \"62abe835e5eb65e1a070fd047ad024de5cc947c7055e08dcaf41370129fb196f\",\n    \"src/llm_platform/evaluation.py\": \"aa8a4c3bc6b59e63d8d68291192f922cb50dc6a046e268984441be9848ca7805\",\n    \"src/llm_platform/evidence.py\": \"b1e00c1b3dfd41c208815bb77ba8be297e0cb121aebc10de9d578bc121a580d1\",\n    \"src/llm_platform/prompts.py\": \"b9d57c5183197f15476bdd5149ebfccdbc1eaa984c5e46ccdae4f599198487c2\",\n    \"src/llm_platform/provenance.py\": \"c627ff10df363c6b8be2ba4420ee610bd7c95877e9af0c041f14f75250df1014\",\n    \"src/llm_platform/registry.py\": \"c2eb7b0b1cf5792cdb27695f9496f67e55ac8c16445d9d265b456318d3c15849\",\n    \"src/llm_platform/serving.py\": \"ffd3c85c4922ef3535d74b9c22e360886e1362c9c518963b10440c0b98c1a55a\",\n    \"src/llm_platform/synthetic.py\": \"5949bcf822ec93b14db8fbfb2d0b54540b03e2642f6f4ef4aee86766aab32add\",\n    \"src/llm_platform/tokenization.py\": \"1f5b06896a98826838cc448e932998eba397cb1584bbd48ddb9bfd99858c7d51\",\n    \"src/llm_platform/training.py\": \"d6ad7080841b763cd03cd8879b2e9fdfc50cb7327393b68a92ef969aa739c06f\"\n  },\n  \"registered\": {\n    \"base\": \"b4d8a201e94315bff4f5b030336d6644691da18fc6d050f04a8e095ae9d484ad\",\n    \"adapter\": \"1183832f233f3a2f720a98efad446cffb2ada613cc59860fedd58e186af6838c\"\n  }\n}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "docker",
+      "logs",
+      "d513bec8474fc57c816c9ce079e4415216cd8ebf58e88585af78495fb6c758e7"
+    ],
+    "started_at_unix": 1793682340.0304425,
+    "seconds": 0.1067960262298584,
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "INFO:     Started server process [1]\nINFO:     Waiting for application startup.\nSliding Window Attention is enabled but not implemented for `sdpa`; unexpected results may be encountered.\nINFO:     Application startup complete.\nINFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)\n/opt/conda/lib/python3.11/site-packages/transformers/generation/configuration_utils.py:653: UserWarning: `do_sample` is set to `False`. However, `top_k` is set to `0` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `top_k`.\n  warnings.warn(\n"
+  },
+  {
+    "argv": [
+      "docker",
+      "stop",
+      "--time",
+      "30",
+      "d513bec8474fc57c816c9ce079e4415216cd8ebf58e88585af78495fb6c758e7"
+    ],
+    "started_at_unix": 1793682340.1388595,
+    "seconds": 2.1706442832946777,
+    "returncode": 0,
+    "stdout": "Flag --time has been deprecated, use --timeout instead\nd513bec8474fc57c816c9ce079e4415216cd8ebf58e88585af78495fb6c758e7\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "docker",
+      "inspect",
+      "d513bec8474fc57c816c9ce079e4415216cd8ebf58e88585af78495fb6c758e7",
+      "--format",
+      "{{json .State}}"
+    ],
+    "started_at_unix": 1793682342.3111396,
+    "seconds": 0.11106705665588379,
+    "returncode": 0,
+    "stdout": "{\"Status\":\"exited\",\"Running\":false,\"Paused\":false,\"Restarting\":false,\"OOMKilled\":false,\"Dead\":false,\"Pid\":0,\"ExitCode\":0,\"Error\":\"\",\"StartedAt\":\"2026-11-03T05:04:28.306826041Z\",\"FinishedAt\":\"2026-11-03T05:05:41.954824424Z\"}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "docker",
+      "rm",
+      "d513bec8474fc57c816c9ce079e4415216cd8ebf58e88585af78495fb6c758e7"
+    ],
+    "started_at_unix": 1793682342.4252338,
+    "seconds": 0.1831209659576416,
+    "returncode": 0,
+    "stdout": "d513bec8474fc57c816c9ce079e4415216cd8ebf58e88585af78495fb6c758e7\n",
+    "stderr": ""
+  }
+]

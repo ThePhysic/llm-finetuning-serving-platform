@@ -23,5 +23,3 @@ registry/
 .cache/
 # Local agent guidance stays on disk and out of future repository trees.
 AGENTS.md
-# Retain the fresh review's model mapping locally until judgments are complete.
-/evidence/independent-human-review/review_key.json

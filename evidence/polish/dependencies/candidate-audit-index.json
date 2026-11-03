@@ -1,0 +1,237 @@
+{
+  "queried_at_utc": "2026-11-03T04:34:38.192358+00:00",
+  "scope": "Known advisory lookup only, not exploitation proof, native-driver scan or GPU compatibility test.",
+  "results": [
+    {
+      "name": "historical-training-current",
+      "command": [
+        "uvx",
+        "--from",
+        "pip-audit==2.10.1",
+        "pip-audit",
+        "--no-deps",
+        "--disable-pip",
+        "-r",
+        "C:\\Users\\ridle\\llm-finetuning-serving-platform\\evidence\\polish\\dependencies\\query-inputs\\historical-training-current.txt",
+        "--format",
+        "json"
+      ],
+      "exit_code": 1,
+      "stderr": "WARNING:pip_audit._cli:--no-deps is supported, but users are encouraged to fully hash their pinned dependencies\nWARNING:pip_audit._cli:Consider using a tool like `pip-compile`: https://pip-tools.readthedocs.io/en/latest/#using-hashes\nFound 53 known vulnerabilities in 3 packages\n",
+      "source_inventory": "requirements/train-resolved-linux.txt",
+      "source_sha256": "f7ac488376afd813cbe2556ed2908ce9ae55419a6536b5900a7c93a956438a41",
+      "query_input": "evidence/polish/dependencies/query-inputs/historical-training-current.txt",
+      "query_sha256": "57d15eacf477c005c5c2b6edc7ea45df3163f5b6905c657d153009aa1a59e53c",
+      "normalizations": [
+        {
+          "installed_version": "torch==2.6.0+cu124",
+          "advisory_query": "torch==2.6.0"
+        }
+      ],
+      "audit_status": "completed_with_findings",
+      "audit_file": "evidence/polish/dependencies/historical-training-current-audit.json",
+      "raw_advisory_records": 53,
+      "distinct_primary_ids": 42,
+      "affected_packages": [
+        "accelerate",
+        "torch",
+        "transformers"
+      ],
+      "skipped": []
+    },
+    {
+      "name": "historical-vllm-current",
+      "command": [
+        "uvx",
+        "--from",
+        "pip-audit==2.10.1",
+        "pip-audit",
+        "--no-deps",
+        "--disable-pip",
+        "-r",
+        "C:\\Users\\ridle\\llm-finetuning-serving-platform\\evidence\\polish\\dependencies\\query-inputs\\historical-vllm-current.txt",
+        "--format",
+        "json"
+      ],
+      "exit_code": 1,
+      "stderr": "WARNING:pip_audit._cli:--no-deps is supported, but users are encouraged to fully hash their pinned dependencies\nWARNING:pip_audit._cli:Consider using a tool like `pip-compile`: https://pip-tools.readthedocs.io/en/latest/#using-hashes\nFound 164 known vulnerabilities in 7 packages\n",
+      "source_inventory": "requirements/vllm-resolved-linux.txt",
+      "source_sha256": "00b32d90ab8ccf32b21bb9acce5d8ab0df857ea5166ebad65ebb1a201e9781d6",
+      "query_input": "evidence/polish/dependencies/query-inputs/historical-vllm-current.txt",
+      "query_sha256": "fb71040502949a2677a0aa35f9bd82d2a7986f14d768a07e631f3c5aee12d5fe",
+      "normalizations": [
+        {
+          "installed_version": "torch==2.6.0+cu124",
+          "advisory_query": "torch==2.6.0"
+        },
+        {
+          "installed_version": "torchaudio==2.6.0+cu124",
+          "advisory_query": "torchaudio==2.6.0"
+        },
+        {
+          "installed_version": "torchvision==0.21.0+cu124",
+          "advisory_query": "torchvision==0.21.0"
+        }
+      ],
+      "audit_status": "completed_with_findings",
+      "audit_file": "evidence/polish/dependencies/historical-vllm-current-audit.json",
+      "raw_advisory_records": 164,
+      "distinct_primary_ids": 117,
+      "affected_packages": [
+        "diskcache",
+        "opentelemetry-api",
+        "protobuf",
+        "torch",
+        "transformers",
+        "vllm",
+        "xgrammar"
+      ],
+      "skipped": []
+    },
+    {
+      "name": "candidate-training-compatible",
+      "command": [
+        "uvx",
+        "--from",
+        "pip-audit==2.10.1",
+        "pip-audit",
+        "--no-deps",
+        "--disable-pip",
+        "-r",
+        "C:\\Users\\ridle\\llm-finetuning-serving-platform\\evidence\\polish\\dependencies\\query-inputs\\candidate-training-compatible.txt",
+        "--format",
+        "json"
+      ],
+      "exit_code": 1,
+      "stderr": "WARNING:pip_audit._cli:--no-deps is supported, but users are encouraged to fully hash their pinned dependencies\nWARNING:pip_audit._cli:Consider using a tool like `pip-compile`: https://pip-tools.readthedocs.io/en/latest/#using-hashes\nFound 9 known vulnerabilities in 1 package\n",
+      "source_inventory": "requirements/candidate-training-compatible-resolved-linux.txt",
+      "source_sha256": "3922863de73f041579a90ece9aa9fe398dcd730be2a1077814bacb87aa7cc4ab",
+      "query_input": "evidence/polish/dependencies/query-inputs/candidate-training-compatible.txt",
+      "query_sha256": "14893b590495ff291435ef50d6a8706d5586dc724e81358d914155a4cefcff99",
+      "normalizations": [
+        {
+          "installed_version": "torch==2.14.1+cu126",
+          "advisory_query": "torch==2.14.1"
+        }
+      ],
+      "audit_status": "completed_with_findings",
+      "audit_file": "evidence/polish/dependencies/candidate-training-compatible-audit.json",
+      "raw_advisory_records": 9,
+      "distinct_primary_ids": 6,
+      "affected_packages": [
+        "transformers"
+      ],
+      "skipped": []
+    },
+    {
+      "name": "candidate-training-modern",
+      "command": [
+        "uvx",
+        "--from",
+        "pip-audit==2.10.1",
+        "pip-audit",
+        "--no-deps",
+        "--disable-pip",
+        "-r",
+        "C:\\Users\\ridle\\llm-finetuning-serving-platform\\evidence\\polish\\dependencies\\query-inputs\\candidate-training-modern.txt",
+        "--format",
+        "json"
+      ],
+      "exit_code": 0,
+      "stderr": "WARNING:pip_audit._cli:--no-deps is supported, but users are encouraged to fully hash their pinned dependencies\nWARNING:pip_audit._cli:Consider using a tool like `pip-compile`: https://pip-tools.readthedocs.io/en/latest/#using-hashes\nNo known vulnerabilities found\n",
+      "source_inventory": "requirements/candidate-training-modern-integrated-resolved-linux.txt",
+      "source_sha256": "ebf6042dc68ccb9154e239de364d5d4928867dc953dd3c9f0941f2b8eb43f557",
+      "query_input": "evidence/polish/dependencies/query-inputs/candidate-training-modern.txt",
+      "query_sha256": "2d2c719092212ed5b87904291a3c5a6f30f4e60fffda0c51cac6a6be02218514",
+      "normalizations": [
+        {
+          "installed_version": "torch==2.14.1+cu126",
+          "advisory_query": "torch==2.14.1"
+        }
+      ],
+      "audit_status": "completed_without_matches",
+      "audit_file": "evidence/polish/dependencies/candidate-training-modern-audit.json",
+      "raw_advisory_records": 0,
+      "distinct_primary_ids": 0,
+      "affected_packages": [],
+      "skipped": []
+    },
+    {
+      "name": "candidate-vllm-compatible",
+      "command": [
+        "uvx",
+        "--from",
+        "pip-audit==2.10.1",
+        "pip-audit",
+        "--no-deps",
+        "--disable-pip",
+        "-r",
+        "C:\\Users\\ridle\\llm-finetuning-serving-platform\\evidence\\polish\\dependencies\\query-inputs\\candidate-vllm-compatible.txt",
+        "--format",
+        "json"
+      ],
+      "exit_code": 1,
+      "stderr": "WARNING:pip_audit._cli:--no-deps is supported, but users are encouraged to fully hash their pinned dependencies\nWARNING:pip_audit._cli:Consider using a tool like `pip-compile`: https://pip-tools.readthedocs.io/en/latest/#using-hashes\nFound 96 known vulnerabilities in 5 packages\n",
+      "source_inventory": "requirements/candidate-vllm-compatible-resolved-linux.txt",
+      "source_sha256": "90df95347e7057ca54ad40a52ab509e95155991ecee0709d3540d580e2a8c6a8",
+      "query_input": "evidence/polish/dependencies/query-inputs/candidate-vllm-compatible.txt",
+      "query_sha256": "0afc8f884a8056cffcbb1ba7e5fe285306ef5052eb9d751d0d71b06892a7db9e",
+      "normalizations": [
+        {
+          "installed_version": "torch==2.10.0+cu126",
+          "advisory_query": "torch==2.10.0"
+        },
+        {
+          "installed_version": "torchaudio==2.10.0+cu126",
+          "advisory_query": "torchaudio==2.10.0"
+        },
+        {
+          "installed_version": "torchvision==0.25.0+cu126",
+          "advisory_query": "torchvision==0.25.0"
+        }
+      ],
+      "audit_status": "completed_with_findings",
+      "audit_file": "evidence/polish/dependencies/candidate-vllm-compatible-audit.json",
+      "raw_advisory_records": 96,
+      "distinct_primary_ids": 72,
+      "affected_packages": [
+        "diskcache",
+        "setuptools",
+        "torch",
+        "transformers",
+        "vllm"
+      ],
+      "skipped": []
+    },
+    {
+      "name": "candidate-vllm-modern",
+      "command": [
+        "uvx",
+        "--from",
+        "pip-audit==2.10.1",
+        "pip-audit",
+        "--no-deps",
+        "--disable-pip",
+        "-r",
+        "C:\\Users\\ridle\\llm-finetuning-serving-platform\\evidence\\polish\\dependencies\\query-inputs\\candidate-vllm-modern.txt",
+        "--format",
+        "json"
+      ],
+      "exit_code": 1,
+      "stderr": "WARNING:pip_audit._cli:--no-deps is supported, but users are encouraged to fully hash their pinned dependencies\nWARNING:pip_audit._cli:Consider using a tool like `pip-compile`: https://pip-tools.readthedocs.io/en/latest/#using-hashes\nFound 3 known vulnerabilities in 1 package\n",
+      "source_inventory": "requirements/candidate-vllm-modern-standalone-resolved-linux.txt",
+      "source_sha256": "ea9edce451f95164b5ae4e26d73abc65b83b6f2ad38afa729755b0c76d50373a",
+      "query_input": "evidence/polish/dependencies/query-inputs/candidate-vllm-modern.txt",
+      "query_sha256": "7fa89a4890b97ae863c3f04edd4ce3d1d1b7f4e633ac414c01fb383ad407ba4f",
+      "normalizations": [],
+      "audit_status": "completed_with_findings",
+      "audit_file": "evidence/polish/dependencies/candidate-vllm-modern-audit.json",
+      "raw_advisory_records": 3,
+      "distinct_primary_ids": 2,
+      "affected_packages": [
+        "setuptools"
+      ],
+      "skipped": []
+    }
+  ]
+}

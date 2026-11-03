@@ -1,0 +1,15 @@
+{
+  "source_revision": "ae04ce0fdce67634d3a171378e743fe354a283d3",
+  "started_at_utc": "2026-11-03T05:07:39.837810+00:00",
+  "finished_at_utc": "2026-11-03T05:08:33.945399+00:00",
+  "python_executable": "C:\\Users\\ridle\\llm-finetuning-serving-platform\\.venv\\Scripts\\python.exe",
+  "cuda_visible_devices": "",
+  "scope": "Final full CPU suite, not GPU performance evidence",
+  "command": [
+    "C:\\Users\\ridle\\llm-finetuning-serving-platform\\.venv\\Scripts\\python.exe",
+    "-c",
+    "import os; assert os.environ.get('CUDA_VISIBLE_DEVICES') == ''; import pytest; r=pytest.main(['-q']); import sys; t=sys.modules.get('torch'); assert t is None or not t.cuda.is_initialized(); print('CUDA_CONTEXT_INITIALIZED=False'); raise SystemExit(r)"
+  ],
+  "exit_code": 0,
+  "log_sha256": "5ce2e93bb98fc6677d511e97ce638a3c3142fbfd412d725077e9af03f9830b5e"
+}

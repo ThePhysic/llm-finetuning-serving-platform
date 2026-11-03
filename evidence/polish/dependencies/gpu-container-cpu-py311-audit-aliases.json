@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "method": "Transitive union of every primary ID and alias across all supplied inventories",
+  "scope": "Counts are advisory-database matches, not demonstrated exploitable platform defects. Skips are not clean results.",
+  "raw_occurrences": 0,
+  "alias_deduplicated_advisories": 0,
+  "inventories": {
+    "gpu-container-cpu-py311": {
+      "dependencies_queried": 40,
+      "raw_occurrences": 0,
+      "distinct_primary_ids": 0,
+      "alias_deduplicated_advisories": 0,
+      "affected_packages": {},
+      "skipped": []
+    }
+  },
+  "clusters": [],
+  "created_at_utc": "2026-11-03T05:01:00.499630+00:00",
+  "sources": {
+    "gpu-container-cpu-py311": {
+      "path": "C:/Users/ridle/llm-finetuning-serving-platform/evidence/polish/dependencies/gpu-container-cpu-py311-audit.json",
+      "sha256": "2cc93dce2319e687c8a6483fd4cffdc11f05cecc3839538ad2804818d4ba3117"
+    }
+  },
+  "source_sha256": "8a23f11247c5c20eeec99d50205ad5d917939232a362ef6b76adb88e7ff5ee26"
+}

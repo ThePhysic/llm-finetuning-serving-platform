@@ -1,0 +1,14 @@
+FROM pytorch/pytorch:2.6.0-cuda12.4-cudnn9-runtime
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 HF_HOME=/runtime/huggingface
+WORKDIR /app
+COPY requirements /app/requirements
+# The publisher's Torch 2.6 image uses Python 3.11. The original CPU lock's
+# NumPy 2.5.4 requires Python >=3.12; preserve it and use the explicit variant.
+RUN pip install --no-cache-dir --require-hashes -r requirements/gpu-container-cpu-py311.lock && pip install --no-cache-dir -r requirements/train.txt
+COPY pyproject.toml /app/
+COPY src /app/src
+RUN pip install --no-cache-dir --no-deps . && useradd --uid 10001 --create-home platform && mkdir /runtime && chown platform /runtime
+USER platform
+EXPOSE 8000
+ENTRYPOINT ["llm-platform"]
+CMD ["serve", "--registry", "/runtime/registry", "--host", "0.0.0.0"]

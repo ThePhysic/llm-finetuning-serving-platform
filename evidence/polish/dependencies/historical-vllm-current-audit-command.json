@@ -1,0 +1,49 @@
+{
+  "name": "historical-vllm-current",
+  "command": [
+    "uvx",
+    "--from",
+    "pip-audit==2.10.1",
+    "pip-audit",
+    "--no-deps",
+    "--disable-pip",
+    "-r",
+    "C:\\Users\\ridle\\llm-finetuning-serving-platform\\evidence\\polish\\dependencies\\query-inputs\\historical-vllm-current.txt",
+    "--format",
+    "json"
+  ],
+  "exit_code": 1,
+  "stderr": "WARNING:pip_audit._cli:--no-deps is supported, but users are encouraged to fully hash their pinned dependencies\nWARNING:pip_audit._cli:Consider using a tool like `pip-compile`: https://pip-tools.readthedocs.io/en/latest/#using-hashes\nFound 164 known vulnerabilities in 7 packages\n",
+  "source_inventory": "requirements/vllm-resolved-linux.txt",
+  "source_sha256": "00b32d90ab8ccf32b21bb9acce5d8ab0df857ea5166ebad65ebb1a201e9781d6",
+  "query_input": "evidence/polish/dependencies/query-inputs/historical-vllm-current.txt",
+  "query_sha256": "fb71040502949a2677a0aa35f9bd82d2a7986f14d768a07e631f3c5aee12d5fe",
+  "normalizations": [
+    {
+      "installed_version": "torch==2.6.0+cu124",
+      "advisory_query": "torch==2.6.0"
+    },
+    {
+      "installed_version": "torchaudio==2.6.0+cu124",
+      "advisory_query": "torchaudio==2.6.0"
+    },
+    {
+      "installed_version": "torchvision==0.21.0+cu124",
+      "advisory_query": "torchvision==0.21.0"
+    }
+  ],
+  "audit_status": "completed_with_findings",
+  "audit_file": "evidence/polish/dependencies/historical-vllm-current-audit.json",
+  "raw_advisory_records": 164,
+  "distinct_primary_ids": 117,
+  "affected_packages": [
+    "diskcache",
+    "opentelemetry-api",
+    "protobuf",
+    "torch",
+    "transformers",
+    "vllm",
+    "xgrammar"
+  ],
+  "skipped": []
+}

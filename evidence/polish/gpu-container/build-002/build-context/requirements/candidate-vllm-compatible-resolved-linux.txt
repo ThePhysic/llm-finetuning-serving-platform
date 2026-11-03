@@ -1,0 +1,682 @@
+accelerate==1.15.0
+    # via
+    #   -r requirements/candidate-vllm-compatible-cu126.in
+    #   peft
+agent-detector==2.0.0
+    # via fastapi-cloud-cli
+aiohappyeyeballs==2.7.1
+    # via aiohttp
+aiohttp==3.14.5
+    # via vllm
+aiosignal==1.4.0
+    # via aiohttp
+annotated-doc==0.0.5
+    # via
+    #   fastapi
+    #   typer
+annotated-types==0.8.0
+    # via pydantic
+anthropic==2.4.0
+    # via vllm
+anyio==4.16.0
+    # via
+    #   anthropic
+    #   httpx
+    #   httpx2
+    #   mcp
+    #   openai
+    #   sse-starlette
+    #   starlette
+    #   watchfiles
+apache-tvm-ffi==0.1.15.post2
+    # via
+    #   flashinfer-python
+    #   quack-kernels
+    #   xgrammar
+astor==0.8.1
+    # via depyf
+attrs==26.1.0
+    # via
+    #   aiohttp
+    #   jsonschema
+    #   referencing
+blake3==1.0.11
+    # via vllm
+cachetools==7.2.8
+    # via vllm
+cbor2==6.2.0.post2
+    # via vllm
+certifi==2026.10.23
+    # via
+    #   httpcore
+    #   httpx
+    #   requests
+    #   sentry-sdk
+cffi==2.1.1
+    # via cryptography
+charset-normalizer==3.5.2
+    # via requests
+click==8.5.0
+    # via
+    #   flashinfer-python
+    #   rich-toolkit
+    #   uvicorn
+cloudpickle==3.1.2
+    # via vllm
+compressed-tensors==0.13.0
+    # via vllm
+cryptography==50.0.2
+    # via pyjwt
+cuda-bindings==12.9.4
+    # via
+    #   nvidia-cutlass-dsl-libs-base
+    #   nvidia-cutlass-dsl-libs-core
+    #   nvidia-cutlass-dsl-libs-cu12
+    #   torch
+cuda-pathfinder==1.8.5
+    # via cuda-bindings
+depyf==0.20.0
+    # via vllm
+detect-installer==0.2.1
+    # via fastapi-cloud-cli
+dill==0.4.1
+    # via depyf
+diskcache==5.6.3
+    # via vllm
+distro==1.9.0
+    # via openai
+dnspython==2.9.1
+    # via email-validator
+docstring-parser==0.18.0
+    # via anthropic
+einops==0.8.2
+    # via
+    #   flashinfer-python
+    #   quack-kernels
+    #   vllm
+email-validator==2.3.0
+    # via
+    #   fastapi
+    #   pydantic
+fastapi==0.162.0
+    # via
+    #   llm-finetuning-serving-platform (pyproject.toml)
+    #   model-hosting-container-standards
+    #   vllm
+fastapi-cli==0.0.32
+    # via fastapi
+fastapi-cloud-cli==0.26.0
+    # via fastapi-cli
+fastar==0.12.0
+    # via
+    #   fastapi
+    #   fastapi-cloud-cli
+filelock==4.2.7
+    # via
+    #   huggingface-hub
+    #   torch
+    #   transformers
+    #   vllm
+flashinfer-python==0.6.6
+    # via vllm
+frozenlist==1.8.0
+    # via
+    #   aiohttp
+    #   aiosignal
+fsspec==2026.9.0
+    # via
+    #   huggingface-hub
+    #   torch
+gguf==0.19.0
+    # via vllm
+googleapis-common-protos==1.76.0
+    # via
+    #   opentelemetry-exporter-otlp-proto-grpc
+    #   opentelemetry-exporter-otlp-proto-http
+grpcio==1.85.1
+    # via opentelemetry-exporter-otlp-proto-grpc
+h11==0.16.0
+    # via
+    #   httpcore
+    #   httpcore2
+    #   uvicorn
+hf-xet==1.8.0
+    # via huggingface-hub
+httpcore==1.0.9
+    # via httpx
+httpcore2==2.16.0
+    # via httpx2
+httptools==0.9.0
+    # via uvicorn
+httpx==0.28.1
+    # via
+    #   llm-finetuning-serving-platform (pyproject.toml)
+    #   fastapi
+    #   fastapi-cloud-cli
+    #   model-hosting-container-standards
+    #   openai
+httpx2==2.16.0
+    # via
+    #   anthropic
+    #   fastapi
+    #   mcp
+huggingface-hub==0.36.2
+    # via
+    #   llm-finetuning-serving-platform (pyproject.toml)
+    #   accelerate
+    #   peft
+    #   tokenizers
+    #   transformers
+idna==3.20
+    # via
+    #   anyio
+    #   email-validator
+    #   httpx
+    #   httpx2
+    #   requests
+    #   yarl
+ijson==3.6.0
+    # via vllm
+iniconfig==2.3.1
+    # via pytest
+interegular==0.3.3
+    # via lm-format-enforcer
+jinja2==3.1.6
+    # via
+    #   fastapi
+    #   torch
+jiter==0.18.0
+    # via
+    #   anthropic
+    #   openai
+jmespath==1.1.0
+    # via model-hosting-container-standards
+jsonschema==4.26.0
+    # via
+    #   mcp
+    #   mistral-common
+jsonschema-specifications==2025.9.1
+    # via jsonschema
+lark==1.2.2
+    # via vllm
+llguidance==1.3.0
+    # via vllm
+llvmlite==0.44.0
+    # via numba
+lm-format-enforcer==0.11.3
+    # via vllm
+loguru==0.7.3
+    # via compressed-tensors
+markdown-it-py==4.2.0
+    # via rich
+markupsafe==3.0.4
+    # via jinja2
+mcp==2.3.0
+    # via vllm
+mcp-types==2.3.0
+    # via mcp
+mdurl==0.1.2
+    # via markdown-it-py
+mistral-common==1.13.1
+    # via vllm
+model-hosting-container-standards==0.1.16
+    # via vllm
+mpmath==1.3.0
+    # via sympy
+msgspec==0.22.0
+    # via vllm
+multidict==7.2.1
+    # via
+    #   aiohttp
+    #   yarl
+networkx==3.7
+    # via torch
+ninja==1.13.2
+    # via
+    #   flashinfer-python
+    #   vllm
+numba==0.61.2
+    # via vllm
+numpy==2.2.6
+    # via
+    #   llm-finetuning-serving-platform (pyproject.toml)
+    #   accelerate
+    #   flashinfer-python
+    #   gguf
+    #   mistral-common
+    #   numba
+    #   opencv-python-headless
+    #   peft
+    #   torchvision
+    #   transformers
+    #   vllm
+    #   xgrammar
+nvidia-cublas-cu12==12.6.4.1
+    # via
+    #   nvidia-cudnn-cu12
+    #   nvidia-cusolver-cu12
+    #   torch
+nvidia-cuda-cupti-cu12==12.6.80
+    # via torch
+nvidia-cuda-nvrtc-cu12==12.6.77
+    # via torch
+nvidia-cuda-runtime-cu12==12.6.77
+    # via torch
+nvidia-cudnn-cu12==9.10.2.21
+    # via torch
+nvidia-cudnn-frontend==1.18.0
+    # via
+    #   flashinfer-python
+    #   vllm
+nvidia-cufft-cu12==11.3.0.4
+    # via torch
+nvidia-cufile-cu12==1.11.1.6
+    # via torch
+nvidia-curand-cu12==10.3.7.77
+    # via torch
+nvidia-cusolver-cu12==11.7.1.2
+    # via torch
+nvidia-cusparse-cu12==12.5.4.2
+    # via
+    #   nvidia-cusolver-cu12
+    #   torch
+nvidia-cusparselt-cu12==0.7.1
+    # via torch
+nvidia-cutlass-dsl==4.8.1
+    # via
+    #   flashinfer-python
+    #   quack-kernels
+    #   vllm
+nvidia-cutlass-dsl-libs-base==4.8.1
+    # via
+    #   nvidia-cutlass-dsl
+    #   nvidia-cutlass-dsl-libs-cu12
+nvidia-cutlass-dsl-libs-core==4.8.1
+    # via nvidia-cutlass-dsl-libs-base
+nvidia-cutlass-dsl-libs-cu12==4.8.1
+    # via nvidia-cutlass-dsl
+nvidia-ml-py==13.615.71
+    # via flashinfer-python
+nvidia-nccl-cu12==2.27.5
+    # via torch
+nvidia-nvjitlink-cu12==12.6.85
+    # via
+    #   nvidia-cufft-cu12
+    #   nvidia-cusolver-cu12
+    #   nvidia-cusparse-cu12
+    #   torch
+nvidia-nvshmem-cu12==3.4.5
+    # via torch
+nvidia-nvtx-cu12==12.6.77
+    # via torch
+openai==2.24.0
+    # via vllm
+openai-harmony==0.0.8
+    # via vllm
+opencv-python-headless==5.0.0.93
+    # via
+    #   mistral-common
+    #   vllm
+opentelemetry-api==1.45.2
+    # via
+    #   anthropic
+    #   fastapi
+    #   mcp
+    #   opentelemetry-exporter-http-transport
+    #   opentelemetry-exporter-otlp-proto-grpc
+    #   opentelemetry-exporter-otlp-proto-http
+    #   opentelemetry-sdk
+    #   opentelemetry-semantic-conventions
+    #   vllm
+opentelemetry-exporter-http-transport==0.66b2
+    # via opentelemetry-exporter-otlp-proto-http
+opentelemetry-exporter-otlp==1.45.2
+    # via vllm
+opentelemetry-exporter-otlp-common==0.66b2
+    # via
+    #   opentelemetry-exporter-otlp-proto-grpc
+    #   opentelemetry-exporter-otlp-proto-http
+opentelemetry-exporter-otlp-proto-common==1.45.2
+    # via
+    #   opentelemetry-exporter-otlp-proto-grpc
+    #   opentelemetry-exporter-otlp-proto-http
+opentelemetry-exporter-otlp-proto-grpc==1.45.2
+    # via opentelemetry-exporter-otlp
+opentelemetry-exporter-otlp-proto-http==1.45.2
+    # via
+    #   fastapi
+    #   opentelemetry-exporter-otlp
+opentelemetry-proto==1.45.2
+    # via
+    #   opentelemetry-exporter-otlp-proto-common
+    #   opentelemetry-exporter-otlp-proto-grpc
+    #   opentelemetry-exporter-otlp-proto-http
+opentelemetry-sdk==1.45.2
+    # via
+    #   fastapi
+    #   opentelemetry-exporter-otlp-common
+    #   opentelemetry-exporter-otlp-proto-grpc
+    #   opentelemetry-exporter-otlp-proto-http
+    #   opentelemetry-semantic-conventions-ai
+    #   vllm
+opentelemetry-semantic-conventions==0.66b2
+    # via
+    #   opentelemetry-sdk
+    #   opentelemetry-semantic-conventions-ai
+opentelemetry-semantic-conventions-ai==0.5.1
+    # via vllm
+outlines-core==0.2.11
+    # via vllm
+packaging==26.3
+    # via
+    #   accelerate
+    #   flashinfer-python
+    #   huggingface-hub
+    #   lm-format-enforcer
+    #   peft
+    #   pytest
+    #   transformers
+partial-json-parser==0.2.1.1.post7
+    # via vllm
+peft==0.21.2
+    # via -r requirements/candidate-vllm-compatible-cu126.in
+pillow==13.0.0
+    # via
+    #   mistral-common
+    #   torchvision
+    #   vllm
+pluggy==1.7.0
+    # via pytest
+prometheus-client==0.26.0
+    # via
+    #   llm-finetuning-serving-platform (pyproject.toml)
+    #   prometheus-fastapi-instrumentator
+    #   vllm
+prometheus-fastapi-instrumentator==8.1.0
+    # via vllm
+propcache==0.5.4
+    # via
+    #   aiohttp
+    #   yarl
+protobuf==7.36.2
+    # via
+    #   googleapis-common-protos
+    #   nvidia-cutlass-dsl-libs-base
+    #   nvidia-cutlass-dsl-libs-core
+    #   nvidia-cutlass-dsl-libs-cu12
+    #   opentelemetry-proto
+    #   vllm
+psutil==7.2.2
+    # via
+    #   accelerate
+    #   peft
+    #   vllm
+py-cpuinfo==9.0.0
+    # via vllm
+pybase64==1.5.1
+    # via vllm
+pycountry==26.2.16
+    # via pydantic-extra-types
+pycparser==3.12
+    # via cffi
+pydantic==2.14.2
+    # via
+    #   llm-finetuning-serving-platform (pyproject.toml)
+    #   anthropic
+    #   compressed-tensors
+    #   fastapi
+    #   fastapi-cloud-cli
+    #   lm-format-enforcer
+    #   mcp
+    #   mcp-types
+    #   mistral-common
+    #   model-hosting-container-standards
+    #   openai
+    #   openai-harmony
+    #   pydantic-extra-types
+    #   pydantic-settings
+    #   vllm
+    #   xgrammar
+pydantic-core==2.50.2
+    # via pydantic
+pydantic-extra-types==2.11.1
+    # via
+    #   fastapi
+    #   mistral-common
+pydantic-settings==2.16.2
+    # via fastapi
+pygments==2.21.0
+    # via
+    #   pytest
+    #   rich
+pyjwt==2.15.1
+    # via mcp
+pytest==9.2.0
+    # via
+    #   llm-finetuning-serving-platform (pyproject.toml)
+    #   pytest-asyncio
+pytest-asyncio==1.4.1.post1
+    # via llm-finetuning-serving-platform (pyproject.toml)
+python-dotenv==1.2.4
+    # via
+    #   pydantic-settings
+    #   uvicorn
+python-json-logger==4.2.0
+    # via vllm
+python-multipart==0.0.33
+    # via
+    #   fastapi
+    #   mcp
+pyyaml==6.0.3
+    # via
+    #   accelerate
+    #   gguf
+    #   huggingface-hub
+    #   lm-format-enforcer
+    #   peft
+    #   transformers
+    #   uvicorn
+    #   vllm
+pyzmq==27.2.0
+    # via vllm
+quack-kernels==0.6.5
+    # via vllm
+referencing==0.37.0
+    # via
+    #   jsonschema
+    #   jsonschema-specifications
+regex==2026.9.29
+    # via
+    #   tiktoken
+    #   transformers
+    #   vllm
+requests==2.34.2
+    # via
+    #   flashinfer-python
+    #   gguf
+    #   huggingface-hub
+    #   mistral-common
+    #   opentelemetry-exporter-http-transport
+    #   opentelemetry-exporter-otlp-proto-http
+    #   tiktoken
+    #   transformers
+    #   vllm
+rich==15.0.0
+    # via
+    #   rich-toolkit
+    #   typer
+rich-toolkit==0.20.6
+    # via
+    #   fastapi-cli
+    #   fastapi-cloud-cli
+rignore==0.8.1
+    # via fastapi-cloud-cli
+rpds-py==2026.9.1
+    # via
+    #   jsonschema
+    #   referencing
+ruff==0.17.3
+    # via llm-finetuning-serving-platform (pyproject.toml)
+safetensors==0.8.0
+    # via
+    #   -r requirements/candidate-vllm-compatible-cu126.in
+    #   accelerate
+    #   peft
+    #   transformers
+sentencepiece==0.2.2
+    # via vllm
+sentry-sdk==2.73.0
+    # via fastapi-cloud-cli
+setproctitle==1.3.8
+    # via vllm
+setuptools==80.10.2
+    # via
+    #   model-hosting-container-standards
+    #   torch
+    #   vllm
+shellingham==1.5.4
+    # via typer
+six==1.17.0
+    # via vllm
+sniffio==1.3.1
+    # via
+    #   anthropic
+    #   openai
+sse-starlette==3.6.0
+    # via mcp
+starlette==1.10.0
+    # via
+    #   fastapi
+    #   mcp
+    #   model-hosting-container-standards
+    #   prometheus-fastapi-instrumentator
+    #   sse-starlette
+supervisor==4.3.0
+    # via model-hosting-container-standards
+sympy==1.14.0
+    # via torch
+tabulate==0.10.0
+    # via flashinfer-python
+tiktoken==0.14.0
+    # via
+    #   mistral-common
+    #   vllm
+tokenizers==0.22.2
+    # via
+    #   transformers
+    #   vllm
+torch==2.10.0+cu126
+    # via
+    #   -r requirements/candidate-vllm-compatible-cu126.in
+    #   accelerate
+    #   compressed-tensors
+    #   flashinfer-python
+    #   peft
+    #   quack-kernels
+    #   torch-c-dlpack-ext
+    #   torchaudio
+    #   torchvision
+    #   vllm
+    #   xgrammar
+torch-c-dlpack-ext==0.1.5
+    # via quack-kernels
+torchaudio==2.10.0+cu126
+    # via vllm
+torchvision==0.25.0+cu126
+    # via vllm
+tqdm==4.70.1
+    # via
+    #   flashinfer-python
+    #   gguf
+    #   huggingface-hub
+    #   openai
+    #   peft
+    #   transformers
+    #   vllm
+transformers==4.57.6
+    # via
+    #   -r requirements/candidate-vllm-compatible-cu126.in
+    #   compressed-tensors
+    #   peft
+    #   vllm
+    #   xgrammar
+triton==3.6.0
+    # via
+    #   torch
+    #   xgrammar
+truststore==0.10.5
+    # via
+    #   httpcore2
+    #   httpx2
+typer==0.27.3
+    # via
+    #   llm-finetuning-serving-platform (pyproject.toml)
+    #   fastapi-cli
+    #   fastapi-cloud-cli
+typing-extensions==4.16.0
+    # via
+    #   aiohttp
+    #   aiosignal
+    #   anthropic
+    #   anyio
+    #   apache-tvm-ffi
+    #   fastapi
+    #   grpcio
+    #   httpx2
+    #   huggingface-hub
+    #   mcp
+    #   mcp-types
+    #   nvidia-cutlass-dsl-libs-base
+    #   nvidia-cutlass-dsl-libs-core
+    #   nvidia-cutlass-dsl-libs-cu12
+    #   openai
+    #   opentelemetry-api
+    #   opentelemetry-exporter-otlp-proto-grpc
+    #   opentelemetry-exporter-otlp-proto-http
+    #   opentelemetry-sdk
+    #   opentelemetry-semantic-conventions
+    #   pydantic
+    #   pydantic-core
+    #   pydantic-extra-types
+    #   pydantic-settings
+    #   pytest-asyncio
+    #   referencing
+    #   rich-toolkit
+    #   starlette
+    #   torch
+    #   typing-inspection
+    #   vllm
+    #   xgrammar
+typing-inspection==0.4.4
+    # via
+    #   fastapi
+    #   mcp
+    #   pydantic
+    #   pydantic-settings
+urllib3==2.8.0
+    # via
+    #   requests
+    #   sentry-sdk
+uvicorn==0.54.0
+    # via
+    #   llm-finetuning-serving-platform (pyproject.toml)
+    #   fastapi
+    #   fastapi-cli
+    #   fastapi-cloud-cli
+    #   mcp
+uvloop==0.23.0
+    # via uvicorn
+vllm==0.18.0
+    # via
+    #   -r requirements/candidate-vllm-compatible-cu126.in
+    #   llm-finetuning-serving-platform (pyproject.toml)
+watchfiles==1.3.0
+    # via
+    #   uvicorn
+    #   vllm
+websockets==17.4
+    # via uvicorn
+xgrammar==0.2.8
+    # via vllm
+yarl==1.25.1
+    # via aiohttp

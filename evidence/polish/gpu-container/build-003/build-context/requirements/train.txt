@@ -1,0 +1,7 @@
+# Driver 566.36 / RTX 4060 reference stack. Install into an isolated Linux Python 3.12 venv.
+--extra-index-url https://download.pytorch.org/whl/cu124
+torch==2.6.0+cu124
+transformers==4.51.3
+peft==0.15.2
+accelerate==1.6.0
+safetensors==0.5.3
