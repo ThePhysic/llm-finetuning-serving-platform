@@ -192,3 +192,26 @@ async def test_timeout_closes_iterator_before_returning(tmp_path):
                                   tmp_path / "run", timeout_s=0.01)
     assert backend.closed
     assert report["scores"][0]["error"] == "TimeoutError"
+
+
+@pytest.mark.asyncio
+async def test_historical_runtime_error_is_not_a_semantic_judgment(tmp_path):
+    row = generate_records()[0]
+
+    class Backend:
+        def count_tokens(self, messages):
+            return 15
+
+        async def stream(self, messages, config, request_id):
+            yield TokenChunk(json.dumps(row["target"]), 10, "stop")
+
+        async def cancel(self, request_id):
+            pass
+
+        def health(self):
+            return {"ready": True, "last_error": "PreviousOutOfMemoryError"}
+
+    report = await run_evaluation(Backend(), [row], "zero_shot", GenerationConfig(), tmp_path / "run")
+    assert report["classification"]["accuracy"] == 1
+    assert report["scores"][0]["error"] is None
+    assert report["metadata"]["backend_health"]["last_error"] == "PreviousOutOfMemoryError"
