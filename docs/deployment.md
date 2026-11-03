@@ -3,6 +3,10 @@
 Run one gateway process per local registry. The supported execution target is a
 single GPU on Linux/WSL2; CPU operation is a lightweight validation path.
 
+The pinned GPU reference stack has known upstream advisories and is intended for
+isolated trusted reproduction. Read the [dependency findings and worker controls](security.md)
+before any non-local use. Gateway authentication does not patch its execution engine.
+
 1. Verify the frozen dataset and the exported package. Register a package with
    `llm-platform registry register PACKAGE --registry runtime/registry`.
 2. Set distinct inference/admin keys through environment variables or the
@@ -39,6 +43,11 @@ gateway's selected artifact does not mutate an unrelated running engine.
 Bind public access through TLS and enforce network policy. The vLLM worker's
 loopback port is a trusted private boundary, not an independently hardened public
 service. Body contents are untrusted data. No recommendation is executed.
+
+When launching vLLM directly, provide `VLLM_API_KEY` in the worker environment and
+the matching `LLM_VLLM_API_KEY` in the gateway environment. The launcher rejects an
+absent/invalid worker key and disables browser CORS. Ordinary service configurations
+keep prefix caching disabled; the isolated synthetic benchmark opts in separately.
 
 For GPU containers, mount `/runtime` writable and supply NVIDIA device access.
 The CPU image's `doctor` default cannot serve a real model until the training or

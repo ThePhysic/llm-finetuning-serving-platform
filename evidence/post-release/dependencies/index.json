@@ -1,0 +1,273 @@
+{
+  "scanned_at_utc": "2026-11-03T03:50:55.374810+00:00",
+  "tool": "pip-audit 2.10.1",
+  "core_command": "uvx pip-audit --path .venv/Lib/site-packages --format json",
+  "gpu_command": "uvx pip-audit --no-deps --disable-pip -r INPUT --format json",
+  "gpu_inputs": "Full committed requirements/{train,vllm}-resolved-linux.txt inventory; +cu124 local labels removed only from advisory query versions, never installed packages or recorded environments.",
+  "scope": "Known advisory lookup, not exploitation proof or exhaustive vulnerability assessment. GPU records may include duplicate identifiers, aliases and broad version ranges. Neither these counts nor mitigation notes assert that each upstream issue is reachable through this gateway.",
+  "results": {
+    "core": {
+      "path": "core.json",
+      "sha256": "2037a8eaa0df019a2a74d10d607a21eb9fe6091e9df81099d4e117430a7fa02b",
+      "dependencies_queried": 41,
+      "advisory_records": 0,
+      "distinct_advisory_ids": 0,
+      "affected_packages": [],
+      "skipped": [
+        {
+          "name": "llm-finetuning-serving-platform",
+          "skip_reason": "Dependency not found on PyPI and could not be audited: llm-finetuning-serving-platform (0.1.0)"
+        }
+      ]
+    },
+    "training": {
+      "path": "training.json",
+      "sha256": "034c0f929a00293e053b7aec4159f323f7b8cf6673c5378e87cfb97162d9bffc",
+      "dependencies_queried": 68,
+      "advisory_records": 53,
+      "distinct_advisory_ids": 42,
+      "affected_packages": [
+        {
+          "name": "accelerate",
+          "version": "1.6.0",
+          "advisory_records": 1,
+          "distinct_ids": [
+            "PYSEC-2026-3804"
+          ]
+        },
+        {
+          "name": "torch",
+          "version": "2.6.0",
+          "advisory_records": 24,
+          "distinct_ids": [
+            "PYSEC-2025-189",
+            "PYSEC-2025-190",
+            "PYSEC-2025-191",
+            "PYSEC-2025-192",
+            "PYSEC-2025-193",
+            "PYSEC-2025-194",
+            "PYSEC-2025-195",
+            "PYSEC-2025-198",
+            "PYSEC-2025-199",
+            "PYSEC-2025-200",
+            "PYSEC-2025-201",
+            "PYSEC-2025-202",
+            "PYSEC-2025-203",
+            "PYSEC-2025-204",
+            "PYSEC-2025-205",
+            "PYSEC-2025-206",
+            "PYSEC-2025-207",
+            "PYSEC-2025-208",
+            "PYSEC-2025-209",
+            "PYSEC-2026-139",
+            "PYSEC-2026-1970",
+            "PYSEC-2026-2286"
+          ]
+        },
+        {
+          "name": "transformers",
+          "version": "4.51.3",
+          "advisory_records": 28,
+          "distinct_ids": [
+            "PYSEC-2025-211",
+            "PYSEC-2025-212",
+            "PYSEC-2025-213",
+            "PYSEC-2025-214",
+            "PYSEC-2025-215",
+            "PYSEC-2025-216",
+            "PYSEC-2025-217",
+            "PYSEC-2025-218",
+            "PYSEC-2026-1977",
+            "PYSEC-2026-1980",
+            "PYSEC-2026-1981",
+            "PYSEC-2026-1983",
+            "PYSEC-2026-1986",
+            "PYSEC-2026-1988",
+            "PYSEC-2026-2288",
+            "PYSEC-2026-2289",
+            "PYSEC-2026-2290",
+            "PYSEC-2026-3929",
+            "PYSEC-2026-4174"
+          ]
+        }
+      ],
+      "skipped": []
+    },
+    "vllm": {
+      "path": "vllm.json",
+      "sha256": "315123987f97834906bb7c1db057bd431c3a81a0b2ec44e71b61493f9c137864",
+      "dependencies_queried": 156,
+      "advisory_records": 164,
+      "distinct_advisory_ids": 117,
+      "affected_packages": [
+        {
+          "name": "diskcache",
+          "version": "5.6.3",
+          "advisory_records": 2,
+          "distinct_ids": [
+            "PYSEC-2026-2447"
+          ]
+        },
+        {
+          "name": "opentelemetry-api",
+          "version": "1.26.0",
+          "advisory_records": 1,
+          "distinct_ids": [
+            "CVE-2026-114603"
+          ]
+        },
+        {
+          "name": "protobuf",
+          "version": "4.25.9",
+          "advisory_records": 2,
+          "distinct_ids": [
+            "PYSEC-2026-1805"
+          ]
+        },
+        {
+          "name": "torch",
+          "version": "2.6.0",
+          "advisory_records": 24,
+          "distinct_ids": [
+            "PYSEC-2025-189",
+            "PYSEC-2025-190",
+            "PYSEC-2025-191",
+            "PYSEC-2025-192",
+            "PYSEC-2025-193",
+            "PYSEC-2025-194",
+            "PYSEC-2025-195",
+            "PYSEC-2025-198",
+            "PYSEC-2025-199",
+            "PYSEC-2025-200",
+            "PYSEC-2025-201",
+            "PYSEC-2025-202",
+            "PYSEC-2025-203",
+            "PYSEC-2025-204",
+            "PYSEC-2025-205",
+            "PYSEC-2025-206",
+            "PYSEC-2025-207",
+            "PYSEC-2025-208",
+            "PYSEC-2025-209",
+            "PYSEC-2026-139",
+            "PYSEC-2026-1970",
+            "PYSEC-2026-2286"
+          ]
+        },
+        {
+          "name": "transformers",
+          "version": "4.51.3",
+          "advisory_records": 28,
+          "distinct_ids": [
+            "PYSEC-2025-211",
+            "PYSEC-2025-212",
+            "PYSEC-2025-213",
+            "PYSEC-2025-214",
+            "PYSEC-2025-215",
+            "PYSEC-2025-216",
+            "PYSEC-2025-217",
+            "PYSEC-2025-218",
+            "PYSEC-2026-1977",
+            "PYSEC-2026-1980",
+            "PYSEC-2026-1981",
+            "PYSEC-2026-1983",
+            "PYSEC-2026-1986",
+            "PYSEC-2026-1988",
+            "PYSEC-2026-2288",
+            "PYSEC-2026-2289",
+            "PYSEC-2026-2290",
+            "PYSEC-2026-3929",
+            "PYSEC-2026-4174"
+          ]
+        },
+        {
+          "name": "vllm",
+          "version": "0.8.5.post1",
+          "advisory_records": 103,
+          "distinct_ids": [
+            "CVE-2025-71379",
+            "CVE-2026-114050",
+            "CVE-2026-114053",
+            "CVE-2026-114055",
+            "CVE-2026-115913",
+            "CVE-2026-115915",
+            "PYSEC-2025-43",
+            "PYSEC-2025-50",
+            "PYSEC-2025-53",
+            "PYSEC-2025-54",
+            "PYSEC-2025-55",
+            "PYSEC-2026-143",
+            "PYSEC-2026-144",
+            "PYSEC-2026-2011",
+            "PYSEC-2026-2012",
+            "PYSEC-2026-2013",
+            "PYSEC-2026-2015",
+            "PYSEC-2026-2017",
+            "PYSEC-2026-2019",
+            "PYSEC-2026-2020",
+            "PYSEC-2026-2021",
+            "PYSEC-2026-2023",
+            "PYSEC-2026-2026",
+            "PYSEC-2026-226",
+            "PYSEC-2026-227",
+            "PYSEC-2026-2298",
+            "PYSEC-2026-2299",
+            "PYSEC-2026-2300",
+            "PYSEC-2026-2301",
+            "PYSEC-2026-2302",
+            "PYSEC-2026-2304",
+            "PYSEC-2026-2306",
+            "PYSEC-2026-3403",
+            "PYSEC-2026-3404",
+            "PYSEC-2026-3405",
+            "PYSEC-2026-3407",
+            "PYSEC-2026-3408",
+            "PYSEC-2026-3409",
+            "PYSEC-2026-3933",
+            "PYSEC-2026-3934",
+            "PYSEC-2026-3935",
+            "PYSEC-2026-3936",
+            "PYSEC-2026-3937",
+            "PYSEC-2026-3985",
+            "PYSEC-2026-3996",
+            "PYSEC-2026-3997",
+            "PYSEC-2026-3998",
+            "PYSEC-2026-3999",
+            "PYSEC-2026-4000",
+            "PYSEC-2026-4003",
+            "PYSEC-2026-4004",
+            "PYSEC-2026-4005",
+            "PYSEC-2026-4006",
+            "PYSEC-2026-4007",
+            "PYSEC-2026-4008",
+            "PYSEC-2026-4178",
+            "PYSEC-2026-4179",
+            "PYSEC-2026-4184",
+            "PYSEC-2026-4186",
+            "PYSEC-2026-4197",
+            "PYSEC-2026-4198",
+            "PYSEC-2026-4199",
+            "PYSEC-2026-4306",
+            "PYSEC-2026-4308",
+            "PYSEC-2026-4309",
+            "PYSEC-2026-4319",
+            "PYSEC-2026-4325",
+            "PYSEC-2026-4345",
+            "PYSEC-2026-4347",
+            "PYSEC-2026-4348",
+            "PYSEC-2026-565"
+          ]
+        },
+        {
+          "name": "xgrammar",
+          "version": "0.1.18",
+          "advisory_records": 4,
+          "distinct_ids": [
+            "PYSEC-2026-2054",
+            "PYSEC-2026-2322"
+          ]
+        }
+      ],
+      "skipped": []
+    }
+  }
+}

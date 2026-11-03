@@ -1,0 +1,201 @@
+{
+  "driver_sha256": "11eabcfd3994984c476541bdf131de06db4c197c194eb7be86acac14dba216c0",
+  "execution_source_snapshot_sha256": "e08f4bef79461adbec32204e2ddb8b245b86cd343ea581731149ec39ddf8284a",
+  "gpu_inventory": [
+    "NVIDIA GeForce RTX 4060 Laptop GPU, 566.36, 8188"
+  ],
+  "results": [
+    {
+      "artifact_id": "1183832f233f3a2f720a98efad446cffb2ada613cc59860fedd58e186af6838c",
+      "engine": "transformers",
+      "ready_engine": {
+        "active_requests": 0,
+        "adapter_compute_dtype": "bfloat16",
+        "adapter_storage_dtype": "float32",
+        "backend": "transformers",
+        "base_compute_dtype": "bfloat16",
+        "cleanup_pending": false,
+        "cuda_allocated_bytes": 997403136,
+        "cuda_peak_allocated_bytes": 999565824,
+        "cuda_reserved_bytes": 1042284544,
+        "decoding_policy": {
+          "bad_words_ids": null,
+          "bos_token_id": 151643,
+          "constraints": null,
+          "eos_policy": "packaged-tokenizer-single-eos",
+          "eos_token_ids": [
+            151645
+          ],
+          "forced_token_ids": null,
+          "frequency_penalty": 0.0,
+          "ignore_eos": false,
+          "length_penalty": 1.0,
+          "min_new_tokens": 0,
+          "min_p": "disabled",
+          "no_repeat_ngram_size": 0,
+          "num_beams": 1,
+          "num_return_sequences": 1,
+          "pad_token_id": 151643,
+          "presence_penalty": 0.0,
+          "publisher_generation_config": "ignored",
+          "repetition_penalty": 1.0,
+          "sha256": "aaa5a1cdd345cdb0c00a74169e019c4823a6e8555400fdc67ae2e69096c484eb",
+          "top_k": "disabled",
+          "top_p": 1.0,
+          "version": "platform-serving-v1"
+        },
+        "device": "cuda",
+        "dtype": "bfloat16",
+        "last_error": null,
+        "max_model_len": 32768,
+        "precision_source": "actual-runtime-parameters-and-safetensors-header",
+        "ready": true
+      },
+      "ready_status": 200,
+      "streamed": {
+        "content_events": 1,
+        "error": null,
+        "finish_reason": "length",
+        "index": 0,
+        "input_tokens": 147,
+        "inter_content_event_seconds": [],
+        "latency_seconds": 0.46711940999739454,
+        "model": "1183832f233f3a2f720a98efad446cffb2ada613cc59860fedd58e186af6838c",
+        "output_sha256": "2a65eb6dc61438a8da0016410ca8de07d9c7a51389e1ac01c9efbdaade739206",
+        "output_tokens": 8,
+        "status_code": 200,
+        "success": true,
+        "tpot_seconds": null,
+        "ttft_seconds": 0.46108710800035624
+      },
+      "sync": {
+        "choices": [
+          {
+            "finish_reason": "length",
+            "index": 0,
+            "message": {
+              "content": "{\"category\":\"inventory_discrepancy",
+              "role": "assistant"
+            }
+          }
+        ],
+        "created": 1793678604,
+        "id": "chatcmpl-7ddd8883f67c41e7b501325073157b15",
+        "metadata": {
+          "artifact_id": "1183832f233f3a2f720a98efad446cffb2ada613cc59860fedd58e186af6838c",
+          "backend": "transformers",
+          "base_model_revision": "7ae557604adf67be50417f59c2c2f167def9a775",
+          "request_id": "req-60615b8e93664d968866500b7f3eb971",
+          "tokenizer_revision": "7ae557604adf67be50417f59c2c2f167def9a775"
+        },
+        "model": "1183832f233f3a2f720a98efad446cffb2ada613cc59860fedd58e186af6838c",
+        "object": "chat.completion",
+        "system_fingerprint": "1183832f233f3a2f720a98efad446cffb2ada613cc59860fedd58e186af6838c",
+        "usage": {
+          "completion_tokens": 8,
+          "prompt_tokens": 147,
+          "total_tokens": 155
+        }
+      }
+    },
+    {
+      "artifact_id": "92af4579267e9998caed9bdb0ce465eeaa7273d3b48cead7ba2cc541ad7ec8d5",
+      "engine": "vllm",
+      "ready_engine": {
+        "active_requests": 0,
+        "adapter_compute_dtype": "bfloat16",
+        "adapter_storage_dtype": "float32",
+        "backend": "vllm",
+        "base_compute_dtype": "bfloat16",
+        "decoding_policy": {
+          "bad_words_ids": null,
+          "bos_token_id": 151643,
+          "constraints": null,
+          "eos_policy": "packaged-tokenizer-single-eos",
+          "eos_token_ids": [
+            151645
+          ],
+          "forced_token_ids": null,
+          "frequency_penalty": 0.0,
+          "ignore_eos": false,
+          "length_penalty": 1.0,
+          "min_new_tokens": 0,
+          "min_p": "disabled",
+          "no_repeat_ngram_size": 0,
+          "num_beams": 1,
+          "num_return_sequences": 1,
+          "pad_token_id": 151643,
+          "presence_penalty": 0.0,
+          "publisher_generation_config": "ignored",
+          "repetition_penalty": 1.0,
+          "sha256": "aaa5a1cdd345cdb0c00a74169e019c4823a6e8555400fdc67ae2e69096c484eb",
+          "top_k": "disabled",
+          "top_p": 1.0,
+          "version": "platform-serving-v1"
+        },
+        "last_error": null,
+        "max_model_len": 2048,
+        "precision_source": "trusted-launch-configuration-and-safetensors-header; not hardware attestation",
+        "ready": true,
+        "runtime_bound": true
+      },
+      "ready_status": 200,
+      "streamed": {
+        "content_events": 8,
+        "error": null,
+        "finish_reason": "length",
+        "index": 0,
+        "input_tokens": 147,
+        "inter_content_event_seconds": [
+          0.08064254100099788,
+          0.08121232600024086,
+          0.08797958899958758,
+          0.06034654299946851,
+          0.1135546229997999,
+          0.09400710000045365,
+          0.09035319300164701
+        ],
+        "latency_seconds": 0.8617170610014,
+        "model": "92af4579267e9998caed9bdb0ce465eeaa7273d3b48cead7ba2cc541ad7ec8d5",
+        "output_sha256": "2a65eb6dc61438a8da0016410ca8de07d9c7a51389e1ac01c9efbdaade739206",
+        "output_tokens": 8,
+        "status_code": 200,
+        "success": true,
+        "tpot_seconds": 0.08687084500031363,
+        "ttft_seconds": 0.2449599239989766
+      },
+      "sync": {
+        "choices": [
+          {
+            "finish_reason": "length",
+            "index": 0,
+            "message": {
+              "content": "{\"category\":\"inventory_discrepancy",
+              "role": "assistant"
+            }
+          }
+        ],
+        "created": 1793678678,
+        "id": "chatcmpl-d619f34c70a9466fb130a4a82ab7f45c",
+        "metadata": {
+          "artifact_id": "92af4579267e9998caed9bdb0ce465eeaa7273d3b48cead7ba2cc541ad7ec8d5",
+          "backend": "vllm",
+          "base_model_revision": "7ae557604adf67be50417f59c2c2f167def9a775",
+          "request_id": "req-5fde7dd658ab410fac387065105e075b",
+          "tokenizer_revision": "7ae557604adf67be50417f59c2c2f167def9a775"
+        },
+        "model": "92af4579267e9998caed9bdb0ce465eeaa7273d3b48cead7ba2cc541ad7ec8d5",
+        "object": "chat.completion",
+        "system_fingerprint": "92af4579267e9998caed9bdb0ce465eeaa7273d3b48cead7ba2cc541ad7ec8d5",
+        "usage": {
+          "completion_tokens": 8,
+          "prompt_tokens": 147,
+          "total_tokens": 155
+        }
+      }
+    }
+  ],
+  "scope": "Real RTX 4060 CUDA adapter loading and synchronous/SSE HTTP smoke after code fixes; no new quality or comparative performance claim.",
+  "source_revision": "030d61d39742100bb0b7f0769cc348e7ee96d589",
+  "status": "pass"
+}

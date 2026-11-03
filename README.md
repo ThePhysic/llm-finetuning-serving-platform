@@ -42,6 +42,8 @@ four, base-model output throughput was 15.50 tokens/s with Transformers and
 98.66 tokens/s with vLLM; the corrected BF16 adapter comparison was 9.09 versus
 30.89 tokens/s. These are medians of two small runs under documented runtime
 configurations. Prefix caching reduced throughput in its measured workload.
+The [follow-up audit](docs/post-release-audit.md) records subsequently discovered
+bugs, fixes, regression coverage and remaining dependency risks.
 
 ## Repository map
 
@@ -142,6 +144,13 @@ dependencies to replace a working training environment. See
 `scripts/run_serving_experiments.py` for measured API comparisons and lifecycle
 checks. The platform integrates vLLM; it does not implement its scheduler,
 PagedAttention, batching kernels, or native attention algorithms.
+
+The preserved GPU dependency versions have known upstream security advisories.
+They support isolated, trusted reproduction of these measurements; review the
+[dependency findings and mitigations](docs/security.md) before non-local use.
+The vLLM launcher now requires an environment-only worker key and disables browser
+CORS. A patched GPU-stack migration and fresh GPU validation remain necessary for
+untrusted deployment.
 
 ## Containers and operational boundaries
 

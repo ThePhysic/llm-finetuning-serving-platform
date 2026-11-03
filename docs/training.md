@@ -32,6 +32,9 @@ The conditioning prompt is exactly `messages_for(record, 'lora')`, identical to
 the zero-shot evaluation system prompt. Prompt tokens receive loss label `-100`;
 only the assistant completion, including its chat terminator, is supervised.
 The tokenizer must preserve the prompt prefix when adding the assistant message.
+Only one nonempty string chat template is supported. Named template dictionaries
+are rejected immediately after loading, before any tokenizer save, model load,
+or training, including dictionary names that resemble filesystem paths.
 Overlong sequences are rejected before training; targets are never silently
 truncated. General-instruction regressions are never accepted as SFT data.
 
@@ -65,7 +68,21 @@ datasets, base revision and training topology are rejected. The new `max_steps`
 must exceed the saved step. Increasing that horizon changes the future learning
 rate schedule and is a new continuation experiment, not a claim of bitwise
 equivalence to an uninterrupted run with a different original horizon. Use a new
-output directory for a continuation that should keep the original export intact.
+empty output directory for every continuation. Nonempty run directories and
+completed exports are refused before importing/loading model dependencies or
+writing new configuration. An old checkpoint is read without modifying its run.
+The new events log first records the verified checkpoint history exactly once,
+then appends new steps; its full history agrees with exported metrics. A real
+tiny-model CPU integration verifies exact resumed weights for an unchanged
+training horizon and lossless preservation of the original run. This CPU check
+does not establish GPU training performance.
+
+Configuration parsing rejects duplicate keys and nonfinite numbers. Seeds and
+warm-up steps have strict integer bounds; clipping must be finite and positive,
+weight decay finite and nonnegative, and boolean flags must be actual booleans.
+The direct training-data reader shares strict parsing rather than silently
+overriding duplicate fields. Dataset verification honors the manifest's recorded
+character budget.
 
 ## QLoRA versus serving quantization
 
@@ -91,14 +108,24 @@ text. Cancellation stops generation and joins the worker before releasing the
 execution lock. Candidate loading similarly waits for its worker thread even
 when an asynchronous load is cancelled, preventing orphaned GPU allocations.
 
-`VLLMBackend` connects to a separately managed vLLM OpenAI server. Start that
-server using the verified launcher, in the vLLM environment:
+`VLLMBackend` connects to a separately managed vLLM OpenAI server. Supply a randomly
+generated worker secret through the worker environment's `VLLM_API_KEY`, and supply
+the same secret through the gateway environment's `LLM_VLLM_API_KEY`. Use your
+secret manager/environment setup; do not put the value in a command, manifest,
+identity file or source. This is separate from gateway inference/admin credentials.
+In a dedicated worker terminal using the vLLM environment, run:
 
 ```bash
 python -m llm_platform.backends.launch_vllm \
   --package artifacts/qwen05b-vllm \
   --identity runtime/vllm-identity.json --port 8001 \
   --max-model-len 2048 --gpu-memory-utilization 0.60 --max-num-seqs 8
+```
+
+The worker stays in the foreground. In the separate gateway terminal, with the
+matching `LLM_VLLM_API_KEY` already configured, set its non-secret connection values:
+
+```bash
 export LLM_VLLM_URL=http://127.0.0.1:8001
 export LLM_VLLM_IDENTITY="$PWD/runtime/vllm-identity.json"
 ```
@@ -106,8 +133,12 @@ export LLM_VLLM_IDENTITY="$PWD/runtime/vllm-identity.json"
 The launcher accepts only a `runtime.backend=vllm` package, passes exact model
 and tokenizer revisions, uses the immutable artifact ID as the public served
 model name, supports LoRA module loading, and disables request-body logging.
-Default eager execution avoids CUDA-graph capture memory on constrained GPUs.
-`--prefix-caching` and `--cuda-graphs` are explicit experimental toggles. The
+The launcher requires a worker key and disables browser CORS. Default eager
+execution avoids CUDA-graph capture memory on constrained GPUs. `--cuda-graphs`
+is an explicit experiment; prefix caching requires both `--prefix-caching` and
+`--isolated-prefix-cache` on a dedicated synthetic, single-trust workload because
+the preserved engine has a cache timing advisory. See [security](security.md)
+for the known dependency risks. The
 identity file records the actual exec arguments, version and settings. It is a
 trusted-local-launcher record, not remote cryptographic attestation. The gateway
 verifies it against the package and checks discovery for the expected served ID.

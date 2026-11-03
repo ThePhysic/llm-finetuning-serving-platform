@@ -13,7 +13,7 @@ Humans remain responsible for checking evidence and authorizing actual actions.
 | User messages and incident logs | Untrusted text passed to a model; bounded by body/token limits |
 | Generated recommendations | Untrusted advisory text; structured validation and evaluation do not authorize execution |
 | Registry storage and model cache | Trusted operator-controlled filesystem; integrity hashes detect changed bytes, not malicious publishers |
-| Public model repositories | Load by immutable revision with remote Python code disabled; confirm license and provenance |
+| Public model repositories | Trusted operator-selected publishers only; immutable revisions and disabled remote Python do not neutralize malicious model/configuration files |
 | Dataset sources | Use only licensed public, authored synthetic, or authorized user-owned content |
 | vLLM worker and identity file | Trusted private runtime, isolated from untrusted clients; identity binding comes from its launcher |
 | API/admin keys | Runtime secrets supplied through environment, never repository content |
@@ -24,6 +24,11 @@ subset. Adapters load from safetensors and must match recorded configuration and
 immutable base identity. Do not accept arbitrary user-uploaded model packages or
 PyTorch checkpoints. Training resumes local operator-owned checkpoint state using
 `torch.load(..., weights_only=True)`; treat checkpoint origin as trusted too.
+
+Only a nonempty string chat template is supported. Packaging and training reject
+named-template dictionaries before saving tokenizer files. This prevents that
+unsupported path from reaching the pinned Transformers tokenizer-save traversal
+issue; it does not certify arbitrary downloaded model files as safe.
 
 ## Network access
 
@@ -41,6 +46,56 @@ gateway key provides no protection if clients can bypass it and reach an open
 vLLM port. The local registry is not a distributed multi-tenant store; run a
 single gateway worker per GPU/registry. Queue and token bounds reduce overload;
 they are not per-user quotas or a complete denial-of-service defense.
+
+The vLLM launcher requires an ASCII `VLLM_API_KEY` without whitespace in the worker
+environment and disables allowed browser origins. Configure the gateway's
+`LLM_VLLM_API_KEY` with the same worker secret. This secret is separate from the
+gateway's inference/admin keys and never appears in the launch command or identity
+file. Loopback binding alone does not protect an unauthenticated worker from
+browser-origin requests. The benchmark orchestrator generates all three secrets
+in memory. Keep the worker inaccessible to untrusted local users too.
+
+## Known dependency advisories
+
+The reference GPU versions are preserved for replay of the recorded experiments;
+they are **not a current, vulnerability-free production dependency baseline**.
+The follow-up scan and [raw results](../evidence/post-release/dependencies/index.json)
+record pip-audit 2.10.1 queries against the complete installed core inventory and
+both recorded Linux inventories. CUDA `+cu124` labels were removed only in advisory
+query inputs to match upstream releases. No measured environment was upgraded.
+
+| Inventory | Advisory records | Distinct advisory IDs |
+|---|---:|---:|
+| Core | 0 | 0 |
+| Historical training | 53 | 42 |
+| Historical vLLM | 164 | 117 |
+
+These are database matches, not counts of demonstrated platform exploits. Records
+can repeat or share CVE aliases, and version ranges can cover features absent from
+the supported workload. The repository itself is not a PyPI package and was
+skipped by the core package scan; its code is reviewed and tested separately.
+
+Concrete exposure reductions include required worker authentication, disabled
+browser CORS, strict text-only gateway fields, explicit SDPA, bounded model/context
+settings, trusted immutable Qwen weights, safetensors adapters and rejection of
+named tokenizer templates before saving. Tool calls, arbitrary chat-template
+arguments, multimodal inputs and guided schemas are rejected by the gateway.
+This narrows exposure; it does not resolve every upstream advisory. See the
+[vLLM localhost/CORS advisory](https://github.com/vllm-project/vllm/security/advisories/GHSA-vvpg-rrww-wpmh)
+and [Transformers tokenizer-save advisory](https://github.com/advisories/GHSA-xrqw-3rrv-vx5w).
+
+Prefix caching is disabled by default. The legacy engine's
+[timing side channel](https://github.com/vllm-project/vllm/security/advisories/GHSA-4qjh-9fv9-r85r)
+can reveal whether another request used a guessed prefix. Enabling it now requires
+the explicit `--isolated-prefix-cache` launcher option and a dedicated synthetic,
+single-trust benchmark. That option is an operator assertion, not automatic tenant
+isolation. Never share its cache across private or mutually untrusted workloads.
+
+Use the preserved GPU stack for isolated, trusted local reproduction. Before
+exposing inference to untrusted users, migrate to a reviewed patched dependency
+stack and revalidate quality, compatibility, cancellation and GPU performance on
+the deployment hardware. Such a migration has not been performed here. The CPU
+scan's zero matches and a clean project review do not certify the GPU dependencies.
 
 ## Logging and retained data
 

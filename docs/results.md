@@ -1,5 +1,9 @@
 # Recorded results and their limits
 
+The later [follow-up audit](post-release-audit.md) records additional bug fixes,
+unchanged rescoring of all historical outputs and known GPU dependency advisories.
+The GPU measurements below retain their original source/version scope.
+
 These measurements used the RTX 4060 Laptop GPU (8 GB), Qwen2.5-0.5B-Instruct
 revision `7ae557604adf67be50417f59c2c2f167def9a775`, and the frozen synthetic
 `triage-v3` dataset. [Hardware](../evidence/hardware.json),

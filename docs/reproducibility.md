@@ -189,6 +189,11 @@ shell transcripts, source control, and benchmark metadata.
 For vLLM, package the same base/adapter bytes for the vLLM runtime and launch with
 `python -m llm_platform.backends.launch_vllm --package ... --identity ...`. Point the
 gateway's `LLM_VLLM_URL` and `LLM_VLLM_IDENTITY` at that trusted local engine. The
+worker environment must provide `VLLM_API_KEY`, and the gateway environment must
+provide the same secret as `LLM_VLLM_API_KEY`; the launcher refuses an absent key.
+Browser CORS is disabled. Prefix caching stays off outside a dedicated synthetic
+benchmark with the explicit isolation option. Read [security](security.md) for
+the preserved GPU stack's known advisories and deployment limits. The
 runtime manifest must declare vLLM; a Transformers artifact ID cannot simply be
 relabelled as another engine. Preserve the new package's source-weight provenance
 to establish that the engine comparison uses equivalent weights.

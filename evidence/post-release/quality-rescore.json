@@ -1,0 +1,37 @@
+{
+  "status": "pass",
+  "recorded_at_utc": "2026-11-03T04:03:30.189257+00:00",
+  "source_revision": "030d61d39742100bb0b7f0769cc348e7ee96d589",
+  "scorer_sources_sha256": {
+    "src/llm_platform/data.py": "014cd9c2c76427c65f79c7a368c13f40ae85b2383e04b80881df633f85f63523",
+    "src/llm_platform/evaluation.py": "0a1f239b56f20421e1a636e6b325ca728b7ce8ee08025d49171e540b0aa4524b",
+    "src/llm_platform/prompts.py": "b9d57c5183197f15476bdd5149ebfccdbc1eaa984c5e46ccdae4f599198487c2"
+  },
+  "scope": "All144storedoutputs rescored with corrected support/JSON/case rules; no GPU regeneration, original report metadata/bytes preserved. Exact equality of all eight score sections, not merely rounded aggregate scores.",
+  "runs": {
+    "zero_shot": {
+      "examples": 48,
+      "changed_sections": [],
+      "original_report_sha256": "7120c03b2595cfe8545a2dd7f9a356df8e3844de523892fe29f7360ff0812a13",
+      "raw_outputs_sha256": "135f88aaa8590b52e907c7e653c995d272a970c392bd37fee6a4ea4988e9e33a",
+      "historical_scores_digest": "b607bbbcf768ffe13d434c5c5ae30d07cb095e53d82c879fac1394b6498f9b4a",
+      "hardened_scores_digest": "b607bbbcf768ffe13d434c5c5ae30d07cb095e53d82c879fac1394b6498f9b4a"
+    },
+    "prompted": {
+      "examples": 48,
+      "changed_sections": [],
+      "original_report_sha256": "25d2897e7b5ab7fc95facfa6b97e8d817cdc0aef4877b41c1bc5b585b9346979",
+      "raw_outputs_sha256": "6aceb8120d9d5e8156d8ead63d8aa74184c6657efb2fcccb5c79a3112f98dd54",
+      "historical_scores_digest": "7fb72bdb6677384bda79006da5e7aadb46f70e843e650878af5e517b3c4ed1ce",
+      "hardened_scores_digest": "7fb72bdb6677384bda79006da5e7aadb46f70e843e650878af5e517b3c4ed1ce"
+    },
+    "lora": {
+      "examples": 48,
+      "changed_sections": [],
+      "original_report_sha256": "600b2ca2ca1e633f377d48e9c249e436ec1dca807d150240a87a863fdcabfdac",
+      "raw_outputs_sha256": "422db82db19789152421264c763f1aca16ac96c59e6c4a9787ece58cb7ce456d",
+      "historical_scores_digest": "c62a71c0e707cc598c3892d6cd0a457f713f4752baa3f096a23e0fe0148afc86",
+      "hardened_scores_digest": "c62a71c0e707cc598c3892d6cd0a457f713f4752baa3f096a23e0fe0148afc86"
+    }
+  }
+}
