@@ -391,6 +391,8 @@ def _adapter_precision(metadata: dict[str, Any]) -> None:
 def _precision_correction(root: Path) -> dict[str, Any]:
     serving = root / "evidence" / "serving"
     amendment = _read(serving / "precision-correction.json")
+    _require(amendment["expected_precision"] == {"base_compute_dtype": "bfloat16", "adapter_compute_dtype": "bfloat16",
+                                               "adapter_storage_dtype": "float32"}, "Precision amendment target changed")
     _require(amendment["original_archive"]["path"] == "../serving-original", "Precision amendment archive binding differs")
     archive = root / "evidence" / "serving-original"
     original = _tree_hashes(archive)
@@ -404,6 +406,11 @@ def _precision_correction(root: Path) -> dict[str, Any]:
                     for rep in range(protocol["repetitions"]) for workload in protocol["workloads"]}
     retained = {name.replace("-adapter-", "-base-") for name in replacements}
     retained |= {f"prefix-{toggle}-r{rep}" for toggle in ("off", "on") for rep in range(protocol["repetitions"])}
+    original_index = _read(archive / "index.json")
+    expected_reports = {f"runs/{name}/report.json" for name in replacements | retained}
+    _require(original_index["completed_runs"] == 28 and set(original_index["all_run_reports"]) == expected_reports
+             and {path.parent.name for path in (archive / "runs").glob("*/report.json")} == replacements | retained,
+             "Original archive does not contain the complete bound 28-run matrix")
     _require(len(replacements) == 12 and len(retained) == 16
              and set(amendment["replacement_runs"]) == replacements and set(amendment["retained_runs"]) == retained,
              "Precision amendment changes the affected/retained experiment inventory")
@@ -419,6 +426,7 @@ def _precision_correction(root: Path) -> dict[str, Any]:
     _require(amendment["status"] in {"in_progress", "complete"}, "Precision correction is explicitly incomplete/failed")
     if amendment["status"] != "complete":
         raise PendingEvidence("Adapter precision correction is in progress; original observations are archived")
+    _require(not (serving / "precision-correction-incomplete.json").exists(), "Precision correction retains an active failure marker")
     _require(set(amendment["completed_replacement_runs"]) == replacements
              and len(amendment["completed_replacement_runs"]) == 12, "Precision correction omits replacement runs")
     _require(amendment["unchanged_original_files_sha256"] == untouched, "Retained-file amendment inventory differs")
@@ -455,6 +463,184 @@ def _precision_correction(root: Path) -> dict[str, Any]:
              "Final serving index is not bound to the completed precision amendment")
     return {"replacement_runs": 12, "retained_runs": 16, "original_tree_sha256": identity,
             "compute": "BF16 base and adapter; FP32 serialized adapter", "protocol": "Original retained; post-discovery amendment explicitly recorded"}
+
+
+def _known_probe_end(root: Path) -> float:
+    isolation = _read(root / "evidence" / "measurement-isolation.json")
+    return max(datetime.fromisoformat(row["conservative_window_utc"][1]).timestamp() for row in isolation["incidents"])
+
+
+def _isolated_samples(root: Path, samples: list[dict[str, Any]]) -> None:
+    times = [row["time"] for row in samples]
+    _require(bool(times), "No measurement timestamps for isolation checks")
+    for value in times:
+        _positive(value, "measurement wall-clock timestamp")
+    isolation = _read(root / "evidence" / "measurement-isolation.json")
+    for incident in isolation["incidents"]:
+        begin, end = [datetime.fromisoformat(value).timestamp() for value in incident["conservative_window_utc"]]
+        _require(max(times) < begin or min(times) > end, "Active measurement samples overlap an excluded CUDA probe window")
+
+
+def _startup_summary(summary: dict[str, Any], results: list[dict[str, Any]]) -> None:
+    first = [row["measurements"][0]["load_seconds"] for row in results]
+    warm = [row["measurements"][1]["load_seconds"] for row in results]
+    unloads = [measurement["unload_seconds"] for row in results for measurement in row["measurements"]]
+    for key, values in (("first_load_seconds", first), ("warm_reload_seconds", warm)):
+        expected = {"raw": values, "median": statistics.median(values), "min": min(values), "max": max(values)}
+        _require(summary[key] == expected, f"Startup {key} summary differs from raw repetitions")
+    _require(summary["unload_seconds"] == {"raw": unloads, "median": statistics.median(unloads)}
+             and summary["paired_first_over_warm_ratios"] == [a / b for a, b in zip(first, warm, strict=True)],
+             "Startup unload or paired-ratio summary differs")
+
+
+def _startup(root: Path) -> dict[str, Any]:
+    directory = root / "evidence" / "startup"
+    protocol, summary = _read(directory / "protocol.json"), _read(directory / "summary.json")
+    _require(not (directory / "incomplete.json").exists(), "Startup experiment is explicitly incomplete")
+    _require(protocol["repetitions"] == summary["repetitions"] == 3, "Startup requires three paired repetitions")
+    _require(protocol["frozen_unix_seconds"] > _known_probe_end(root), "Startup series predates the clean post-probe rerun")
+    identity, base = protocol["workload_identity"], _base(root)
+    expected_identity = {"artifact_id": base["artifact_id"], "base_model": base["base_model"], "tokenizer": base["tokenizer"],
+                         "runtime": base["runtime"], "package_files": base["files"],
+                         "generation": {"max_tokens": 8, "temperature": 0.0, "seed": 42, "stop": []},
+                         "synthetic_prompt_sha256": hashlib.sha256(json.dumps([
+                             {"role": "user", "content": "Reply with the single word READY."}], sort_keys=True).encode()).hexdigest()}
+    _require(identity == summary["workload_identity"] == expected_identity, "Startup package or readiness workload identity differs")
+    results, policies = [], set()
+    for repetition in range(3):
+        result = _read(directory / f"repetition-{repetition}.json")
+        _require(result["repetition"] == repetition and result["workload_identity"] == identity
+                 and result["source"]["source_sha256"] == protocol["source"]["source_sha256"],
+                 "Startup child changes repetition, workload, or source")
+        _require(len(result["measurements"]) == 2, "Startup child lacks its paired load")
+        for index, measurement in enumerate(result["measurements"]):
+            _require(measurement["sequence_index"] == index and measurement["condition"] == (
+                "first_load_fresh_process" if index == 0 else "warm_reload_same_process"), "Startup condition ordering differs")
+            _positive(measurement["load_seconds"], "startup load time")
+            _positive(measurement["unload_seconds"], "startup unload time", allow_zero=True)
+            health = measurement["health_after_load"]
+            _require(measurement["served_artifact_id"] == base["artifact_id"] and health["ready"] is True
+                     and str(health["device"]).startswith("cuda") and bool(measurement["cuda_device"])
+                     and bool(measurement["cuda_runtime"]), "Startup does not record actual CUDA model readiness")
+            policy = measurement["decoding_policy"]
+            _serving_policy({"decoding_policy": policy, "decoding_policy_sha256": policy["sha256"],
+                             "actual_startup": {"ready_engine_state": health}})
+            policies.add(policy["sha256"])
+            generation = measurement["generation"]
+            _require(type(generation["completion_tokens"]) is int and 1 <= generation["completion_tokens"] <= 8
+                     and generation["finish_reason"] in {"stop", "length"}
+                     and re.fullmatch(r"[0-9a-f]{64}", generation["content_sha256"]) is not None,
+                     "Startup readiness generation is incomplete or lacks measured usage")
+            _positive(generation["seconds"], "startup readiness generation time")
+            _positive(generation["ttft_seconds"], "startup readiness TTFT", allow_zero=True)
+            _require(measurement["health_before_unload"]["ready"] is True
+                     and measurement["health_after_unload"]["ready"] is False, "Startup unload readiness did not change")
+            for key in ("cuda_allocated_before_unload_bytes", "cuda_reserved_before_unload_bytes",
+                        "cuda_allocated_after_unload_bytes", "cuda_reserved_after_unload_bytes"):
+                _positive(measurement[key], key, allow_zero=True)
+            _require(measurement["cuda_allocated_after_unload_bytes"] < measurement["cuda_allocated_before_unload_bytes"],
+                     "Startup unload did not release model allocations")
+        results.append(result)
+    _require(len(policies) == 1 and summary["decoding_policy_sha256"] in policies, "Startup changes effective decoding policy")
+    _require(summary["source"] == protocol["source"], "Startup summary source differs from protocol")
+    _source_hashes(root, protocol["source"]["source_sha256"], "startup", code_revision=protocol["source"]["code_revision"])
+    children = summary["owned_children"]
+    _require(len(children) == 3 and len({row["pid"] for row in results}) == 3, "Startup did not use three fresh child processes")
+    for repetition, child in enumerate(children):
+        _require(child["repetition"] == repetition and child["pid"] == results[repetition]["pid"]
+                 and child["exit_code"] == 0 and child["forced_shutdown"] is False, "Startup child did not finish cleanly")
+    _startup_summary(summary, results)
+    return {"paired_repetitions": 3, "real_loads": 6, "first_load_median_seconds": summary["first_load_seconds"]["median"],
+            "warm_reload_median_seconds": summary["warm_reload_seconds"]["median"],
+            "scope": "Fresh-process imports/CUDA context versus same-process reload; cached weights and uncontrolled OS cache, not disk-cold startup."}
+
+
+def _pacing(rows: list[dict[str, Any]], rate: float, before: dict[str, Any], after: dict[str, Any]) -> dict[str, Any]:
+    delays = sorted(row["client_schedule_delay_seconds"] for row in rows)
+    for value in delays:
+        _positive(value, "client pacing delay", allow_zero=True)
+    dispatch = [row["index"] / rate + row["client_schedule_delay_seconds"] for row in rows]
+    span = max(dispatch) - min(dispatch) if len(dispatch) > 1 else 0
+    total, count = None, None
+    if all(snapshot.get(key) is not None for snapshot in (before, after) for key in ("queue_seconds_sum", "queue_seconds_count")):
+        delta, observations = after["queue_seconds_sum"] - before["queue_seconds_sum"], after["queue_seconds_count"] - before["queue_seconds_count"]
+        if delta >= 0 and observations >= 0:
+            total, count = delta, observations
+    return {"configured_request_rate": rate, "dispatch_span_requests_per_second": (len(dispatch) - 1) / span if span > 0 else None,
+            "client_schedule_delay_seconds": {"median": statistics.median(delays) if delays else None,
+                                               "maximum": max(delays) if delays else None, "total": sum(delays)},
+            "gateway_queue_seconds_sum_including_warmup": total, "gateway_queue_samples_including_warmup": count,
+            "gateway_queue_mean_seconds_including_warmup": total / count if total is not None and count else None}
+
+
+def _raw_benchmark(path: Path) -> tuple[dict[str, Any], list[dict[str, Any]], list[dict[str, Any]]]:
+    report = _read(path)
+    rows = load_records(path.parent / "requests.jsonl")
+    _require(len(rows) == report["config"]["requests"] and [row["index"] for row in rows] == list(range(len(rows))),
+             "Rate-arm request inventory differs")
+    recomputed = summarize(rows, report["summary"]["wall_seconds"])
+    _require(all(canonical_json(report["summary"][key]) == canonical_json(value) for key, value in recomputed.items()),
+             "Rate-arm summary differs from raw observations")
+    _serving_policy(report["metadata"])
+    samples = load_records(path.parent / "gpu.jsonl")
+    _runtime_memory(samples, report["summary"])
+    return report, rows, samples
+
+
+def _load_rates(root: Path) -> dict[str, Any]:
+    directory = root / "evidence" / "load-rates"
+    protocol, index = _read(directory / "protocol.json"), _read(directory / "index.json")
+    _require(not (directory / "incomplete.json").exists(), "Rate sweep is explicitly incomplete")
+    rates = protocol["rates_in_order"]
+    _require(len(rates) == len(set(rates)) == 2 and index["completed_runs"] == index["expected_runs"] == 4,
+             "Rate sweep lacks its four distinct engine/rate arms")
+    _require(index["rates"] == rates and index["requests_per_arm"] == protocol["requests_per_arm"]
+             and protocol["client_concurrency"] == 4 and protocol["stream"] is True
+             and protocol["max_tokens"] == 32 and protocol["warmup_per_arm"] == 2, "Rate sweep protocol/index workload differs")
+    for rate in rates:
+        _positive(rate, "configured request rate")
+    paths = index["run_reports"]
+    _require(len(paths) == len(set(paths)) == 4, "Rate-arm report inventory differs")
+    expected_ids = _semantic_ids(_base(root))
+    reports, groups = [], {rate: [] for rate in rates}
+    for name in paths:
+        path = _within(directory, name)
+        report, rows, samples = _raw_benchmark(path)
+        metadata, config = report["metadata"], report["config"]
+        engine, rate = metadata["engine"], config["request_rate"]
+        _require(engine in {"transformers", "vllm"} and rate in rates and config["concurrency"] == 4
+                 and config["stream"] is True and config["max_tokens"] == 32
+                 and config["requests"] == protocol["requests_per_arm"] and config["warmup"] == 2,
+                 "Rate arm changes its configured workload")
+        _require(report["model"] == protocol["packages"][engine]["artifact_id"]
+                 and all(metadata[key] == value == protocol["packages"][engine][key] for key, value in expected_ids.items()),
+                 "Rate arm changes immutable weights/tokenizer")
+        prompt_hash = hashlib.sha256(json.dumps(protocol["prompts"], sort_keys=True, ensure_ascii=False, allow_nan=False).encode()).hexdigest()
+        _require(metadata["prompt_set_sha256"] == prompt_hash, "Rate-arm prompt differs from protocol")
+        expected = _pacing(rows, rate, _read(path.parent / "queue-before.json"), _read(path.parent / "queue-after.json"))
+        _require(all(report["pacing_observations"][key] == value for key, value in expected.items()),
+                 "Rate-arm pacing/queue observations disagree with raw records")
+        _isolated_samples(root, samples)
+        reports.append(report)
+        groups[rate].append(report)
+    for position, rate in enumerate(rates):
+        _require(len(groups[rate]) == 2 and {row["metadata"]["engine"] for row in groups[rate]} == {"transformers", "vllm"},
+                 "Rate sweep lacks a same-rate engine pair")
+        expected = compare_reports(groups[rate])
+        _require(_read(directory / "comparisons" / f"rate-{position:02d}-{rate:g}.json") == expected,
+                 "Saved same-rate comparison differs")
+    for engine in ("transformers", "vllm"):
+        session = directory / "sessions" / engine
+        startup = _read(session / "startup.json")
+        _require(all(row["metadata"]["actual_startup"] == startup for row in reports if row["metadata"]["engine"] == engine),
+                 "Rate-arm startup differs from its actual engine session")
+        _graceful_shutdown(session / "shutdown.json")
+    _require(index["total_measured_requests"] == sum(row["summary"]["requests"] for row in reports)
+             and index["successful_measured_requests"] == sum(row["summary"]["successful_requests"] for row in reports),
+             "Rate sweep index accounting differs")
+    _source_hashes(root, protocol["source"]["source_files_sha256"], "rate sweep", code_revision=protocol["source"]["code_revision"])
+    return {"arms": 4, "rates": rates, "requests": index["total_measured_requests"],
+            "scope": "Bounded paced workers with observed scheduling delay; no independent open-loop offered-load claim."}
 
 
 def _benchmarks(root: Path) -> dict[str, Any]:
@@ -514,6 +700,7 @@ def _benchmarks(root: Path) -> dict[str, Any]:
         _require(engine_state["ready"] is True and engine_state["backend"] == metadata["engine"],
                  "Benchmark engine did not report ready under the expected backend")
         gpu = load_records(path.parent / "gpu.jsonl")
+        _isolated_samples(root, gpu)
         memory = [device["device_used_memory_mib"] for sample in gpu for device in sample["devices"]]
         _require(bool(memory) and all(type(value) in {int, float} and value > 0 for value in memory),
                  "Benchmark lacks measured GPU memory observations")
@@ -565,6 +752,15 @@ def _shutdown_inventory(serving: Path, expected: int) -> list[Path]:
     return sessions
 
 
+def _graceful_shutdown(path: Path) -> None:
+    children = _read(path)
+    _require(isinstance(children, list) and bool(children), "Owned server shutdown record has no child processes")
+    for child in children:
+        _require(child["forced_shutdown"] is False and type(child["exit_code"]) is int,
+                 "Owned server required forced shutdown or has no recorded exit")
+        _positive(child["shutdown_seconds"], "server shutdown duration", allow_zero=True)
+
+
 def _lifecycle(root: Path) -> dict[str, Any]:
     directory = root / "evidence" / "serving" / "lifecycle"
     facts = _read(directory / "lifecycle.json")
@@ -597,9 +793,7 @@ def _lifecycle(root: Path) -> dict[str, Any]:
     protocol = _read(root / "evidence" / "serving" / "protocol.json")
     sessions = _shutdown_inventory(root / "evidence" / "serving", 5 * protocol["repetitions"])
     for path in sessions:
-        for child in _read(path):
-            _require(child["forced_shutdown"] is False, "Owned server required forced shutdown")
-            _positive(child["shutdown_seconds"], "server shutdown duration", allow_zero=True)
+        _graceful_shutdown(path)
     return {"models": [base_id, adapter_id], "shutdown_sessions": len(sessions),
             "checks": "Recorded sync/SSE identity, authorization, limits, promotion, rollback, corruption refusal, disconnect cleanup and overload recovery."}
 
@@ -616,6 +810,7 @@ def _human(root: Path) -> dict[str, Any]:
         raise PendingEvidence("Blinded packet exists; genuine human annotations have not been supplied")
     result = import_human_review(annotated, key)
     _require(set(result["runs"]) == set(VARIANTS), "Human review omits one comparison variant")
+    _require(_read(directory / "report.json") == result, "Imported human report differs from actual annotated packet")
     return {"status": "complete", "result": result,
             "trust_boundary": "Importer checks contents and annotations, not humanity; operator must retain genuine human provenance."}
 
@@ -631,6 +826,8 @@ def validate_evidence(root: Path) -> dict[str, Any]:
         "frozen_dataset": _dataset, "execution_snapshot": _execution_snapshot,
         "gpu_training": _training, "adapter_reload": _reload,
         "controlled_quality": _quality, "gpu_benchmarks_and_optimization": _benchmarks,
+        "adapter_precision_correction": _precision_correction, "paired_cuda_startup": _startup,
+        "bounded_request_rate_comparison": _load_rates,
         "http_lifecycle_and_recovery": _lifecycle, "blinded_human_review": _human,
     }
     criteria = {}

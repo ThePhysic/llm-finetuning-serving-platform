@@ -13,8 +13,9 @@ import pytest
 from llm_platform.data import file_hash, load_records, write_jsonl
 from llm_platform.contracts import serving_decoding_policy
 from llm_platform.evaluation import make_blinded_review
-from llm_platform.evidence import (PendingEvidence, _execution_snapshot, _runtime_memory, _serving_policy,
-                                   _shutdown_inventory, _source_hashes, _within, validate_evidence)
+from llm_platform.evidence import (PendingEvidence, _adapter_precision, _execution_snapshot, _graceful_shutdown, _isolated_samples,
+                                   _pacing, _runtime_memory, _serving_policy, _shutdown_inventory,
+                                   _source_hashes, _startup_summary, _tree_hashes, _within, validate_evidence)
 from llm_platform.provenance import capture_source_snapshot
 
 
@@ -337,3 +338,71 @@ def test_complete_shutdown_inventory_can_pass_before_final_index_is_written(tmp_
         session.mkdir(parents=True)
         (session / "shutdown.json").write_text("[]", encoding="utf-8")
     assert len(_shutdown_inventory(tmp_path, expected=10)) == 10
+
+
+def test_identical_storage_does_not_hide_adapter_compute_precision_mismatch():
+    precision = {"base_compute_dtype": "bfloat16", "adapter_compute_dtype": "bfloat16", "adapter_storage_dtype": "float32",
+                 "precision_source": "actual-runtime-parameters-and-safetensors-header"}
+    metadata = {"weight_label": "adapter", **precision, "engine_settings": dict(precision),
+                "actual_startup": {"ready_engine_state": dict(precision)}}
+    _adapter_precision(metadata)
+    metadata["actual_startup"]["ready_engine_state"]["adapter_compute_dtype"] = "float32"
+    with pytest.raises(ValueError, match="actual ready engine"):
+        _adapter_precision(metadata)
+
+
+def test_tree_inventory_detects_archive_byte_mutation(tmp_path):
+    directory = tmp_path / "archive"
+    directory.mkdir()
+    raw = directory / "requests.jsonl"
+    raw.write_bytes(b'{"latency":1}\n')
+    frozen = _tree_hashes(directory)
+    raw.write_bytes(b'{"latency":2}\n')
+    assert _tree_hashes(directory) != frozen
+
+
+def test_startup_aggregate_recomputes_paired_raw_loads_and_ratios():
+    results = [{"measurements": [{"load_seconds": first, "unload_seconds": 0.1},
+                                  {"load_seconds": warm, "unload_seconds": 0.2}]}
+               for first, warm in [(9, 3), (6, 3), (12, 4)]]
+    summary = {"first_load_seconds": {"raw": [9, 6, 12], "median": 9, "min": 6, "max": 12},
+               "warm_reload_seconds": {"raw": [3, 3, 4], "median": 3, "min": 3, "max": 4},
+               "unload_seconds": {"raw": [0.1, 0.2] * 3, "median": 0.15000000000000002},
+               "paired_first_over_warm_ratios": [3, 2, 3]}
+    _startup_summary(summary, results)
+    summary["warm_reload_seconds"]["median"] = 2
+    with pytest.raises(ValueError, match="differs from raw repetitions"):
+        _startup_summary(summary, results)
+
+
+def test_target_pacing_does_not_become_invented_achieved_rate():
+    rows = [{"index": index, "client_schedule_delay_seconds": delay} for index, delay in enumerate([0, 0.5, 1.0])]
+    before, after = {"queue_seconds_sum": 10, "queue_seconds_count": 20}, {"queue_seconds_sum": 13, "queue_seconds_count": 23}
+    result = _pacing(rows, 2, before, after)
+    assert result["configured_request_rate"] == 2
+    assert result["dispatch_span_requests_per_second"] == 1
+    assert result["client_schedule_delay_seconds"] == {"median": 0.5, "maximum": 1, "total": 1.5}
+    assert result["gateway_queue_mean_seconds_including_warmup"] == 1
+
+
+def test_measurement_isolation_rejects_even_boundary_overlap(tmp_path):
+    from datetime import datetime
+
+    directory = tmp_path / "evidence"
+    directory.mkdir()
+    begin, end = "2026-11-03T02:56:35+00:00", "2026-11-03T02:57:00+00:00"
+    (directory / "measurement-isolation.json").write_text(json.dumps({
+        "incidents": [{"conservative_window_utc": [begin, end]}]}), encoding="utf-8")
+    boundary = datetime.fromisoformat(begin).timestamp()
+    _isolated_samples(tmp_path, [{"time": boundary - 2}, {"time": boundary - 1}])
+    with pytest.raises(ValueError, match="overlap an excluded CUDA probe"):
+        _isolated_samples(tmp_path, [{"time": boundary - 1}, {"time": boundary}])
+
+
+def test_empty_shutdown_file_cannot_count_as_recorded_graceful_process_exit(tmp_path):
+    path = tmp_path / "shutdown.json"
+    path.write_text("[]", encoding="utf-8")
+    with pytest.raises(ValueError, match="no child processes"):
+        _graceful_shutdown(path)
+    path.write_text(json.dumps([{"forced_shutdown": False, "exit_code": -15, "shutdown_seconds": 0.25}]), encoding="utf-8")
+    _graceful_shutdown(path)

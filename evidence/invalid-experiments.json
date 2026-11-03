@@ -1,13 +1,40 @@
 {
   "schema_version": 1,
-  "experiments": [{
-    "identity": "quality-001-aborted-before-training",
-    "dataset": "triage-v2",
-    "status": "invalid",
-    "reason": "Synthetic case identifiers disclosed target category in input text.",
-    "training_started": false,
-    "use_for_quality_claims": false,
-    "resolution": "Frozen triage-v3 uses neutral opaque identifiers independent of labels; leakage regressions added. The unchanged training configuration and prompts were retained. Old manifests and source remain identifiable in git history.",
-    "limitation": "Prototype inspection exposed related authored scenarios during development. The final frozen split controls scenario-family overlap but is not an independently collected blind external dataset."
-  }]
+  "experiments": [
+    {
+      "identity": "quality-001-aborted-before-training",
+      "dataset": "triage-v2",
+      "status": "invalid",
+      "reason": "Synthetic case identifiers disclosed target category in input text.",
+      "training_started": false,
+      "use_for_quality_claims": false,
+      "resolution": "Frozen triage-v3 uses neutral opaque identifiers independent of labels; leakage regressions added. The unchanged training configuration and prompts were retained. Old manifests and source remain identifiable in git history.",
+      "limitation": "Prototype inspection exposed related authored scenarios during development. The final frozen split controls scenario-family overlap but is not an independently collected blind external dataset."
+    },
+    {
+      "identity": "serving-original-adapter-precision",
+      "status": "exploratory-invalid-for-fair-adapter-comparison",
+      "reason": "Transformers PEFT inference used FP32 adapter computation; vLLM used BF16. Raw serialized adapter identity alone did not control compute precision.",
+      "preservation": "evidence/serving-original (created by correction workflow)",
+      "resolution": "Rerun all adapter conditions with verified BF16 computation and preserve initial raw measurements."
+    },
+    {
+      "identity": "startup-initial-interference",
+      "status": "invalid",
+      "reason": "A separate intended-CPU PEFT validation initialized a transient CUDA context during the initial startup series.",
+      "conservative_window_utc": [
+        "2026-11-03T02:56:35Z",
+        "2026-11-03T02:57:00Z"
+      ],
+      "preservation": "evidence/startup-original",
+      "resolution": "Repeat all three paired first/warm load measurements with other validation CUDA-hidden and no concurrent GPU work."
+    },
+    {
+      "identity": "load-rates-original-dirty-source",
+      "status": "provenance-incomplete",
+      "reason": "The recorded helper source hash matched neither the later checkout nor its recorded Git revision because the helper was edited during startup. Raw timing/accounting remain preserved but cannot satisfy strict reproducibility.",
+      "preservation": "evidence/load-rates-original",
+      "resolution": "Repeat all four request-rate arms using frozen committed sources after the aligned adapter and clean startup measurements."
+    }
+  ]
 }

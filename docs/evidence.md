@@ -29,8 +29,11 @@ operators, source review, and live external verification remain necessary.
 | Adapter reload | `evidence/adapter-package` passes package integrity/compatibility validation and the LoRA report records readiness and completed generation under that exact artifact ID. |
 | Controlled quality | All three reports have matching raw-output/score hashes; every example is rescored from actual stored output; per-example scores, metrics, uncertainty, failures, and slices agree; frozen test, prompts, decoding, base/tokenizer, precision, and variant artifact identities match the protocol. Empty or incomplete responses cannot count as successful evidence. |
 | GPU benchmarks and optimization | The serving index/protocol and complete repeated run matrix agree; request counts and summaries are recomputed from raw observations; weight/tokenizer identities match the quality artifacts; full effective decoding policy and digest match the ready engine and explicit platform defaults; prompt hashes match the protocol; device-wide and runtime-memory summaries match raw samples; saved engine/cache comparisons recompute correctly. |
+| Adapter precision correction | The exact original archive and immutable protocol are bound to twelve replacements, four replacement sessions, and sixteen unchanged retained runs. Actual ready-engine, metadata, and engine settings establish BF16 base/adapter compute; safetensors headers establish FP32 storage. Old/new file hashes, source identities, derived comparisons, and the final amended index agree. |
+| Paired CUDA startup | Three fresh child processes each perform first/warm loads of the same base package and policy, real bounded readiness generation, and unload. Source/workload identities, CUDA readiness, raw timings, medians, paired ratios, child exits, and clean post-probe scheduling agree. These are process/import/context conditions with cached weights, not disk-cold startup. |
+| Bounded request-rate comparison | Four engine/rate arms preserve base weights, tokenization, prompts, generation, and effective policy. Raw accounting, observed client scheduling delay, gateway queue deltas including warmup, same-rate cross-engine comparisons, isolation intervals, and recorded source hashes are verified. Configured pace is not represented as achieved open-loop load. |
 | HTTP lifecycle and recovery | Actual recorded response identities/usage, sync/SSE completion, access-control status codes, generation limit rejection, promotion, rollback, corruption refusal, disconnect cleanup, overload refusal/recovery, metrics, and owned-process graceful shutdown records satisfy the documented assertions. |
-| Blinded human review | The original packet remains intact while pending. Completion requires `evidence/human-review/annotated.jsonl`, validated against its separate review key using the actual importer. A `complete` flag without annotations fails. All three variants must be reviewed. |
+| Blinded human review | Completion requires `evidence/human-review/annotated.jsonl`, validated against its separate review key using the actual importer. A `complete` flag without annotations fails. All three variants must be reviewed. Original human replies and reviewer provenance accompany the completed two-case subset. |
 
 Historical training and scoring source hashes must match this checkout or the raw
 bytes at the exact recorded immutable Git revision and path. Branch names,
@@ -73,10 +76,40 @@ the stronger prompt, but every alternative failed required abstention and scored
 or justification for unattended deployment. See the [model card](model-card.md)
 and raw per-example reports for failures and wide family-based uncertainty.
 
-The pending primary human packet currently selects two independent families and
-six model responses. The importer/auditor use the packet key's actual inventory,
-not a fixed response count. A completed packet requires actual human annotations;
-neither a request to a person nor an AI review fills that requirement.
+The primary human packet selects two independent families and six model responses.
+The user supplied all six blinded annotations and the standard importer validated
+them. The [human report](../evidence/human-review/report.json) and original replies
+are separate from immutable automatic reports, whose human fields still reflect
+their original pending state. The importer/auditor use the key's actual inventory,
+not a fixed response count. These small, deliberately selected cases do not
+establish population-level action quality or a zero hallucination rate.
+
+## Precision amendment and measurement isolation
+
+Adversarial review found that original Transformers LoRA inference used FP32
+adapter compute while vLLM used BF16. Identical FP32 artifact storage did not make
+the executed precisions equivalent. The original 28-run tree is preserved under
+`evidence/serving-original/`. The post-discovery amendment replaces twelve adapter
+runs and four adapter sessions, preserves sixteen base/cache runs byte-for-byte,
+keeps the original protocol immutable, and regenerates the primary index only
+after corrected comparisons pass. Old/new trees, source identities, runtime
+precision, and derived report hashes are bound by
+`evidence/serving/precision-correction.json`. A partial correction remains pending.
+
+[measurement-isolation.json](../evidence/measurement-isolation.json) records
+conservative intervals for two probes that might have initialized CUDA. One
+original adapter run overlaps a reviewer probe and is superseded with all adapter
+arms. The original startup series overlaps a later validation probe and is
+preserved under `evidence/startup-original/`; only a clean subsequent series can
+satisfy startup evidence. The retained base/cache measurement intervals are
+checked against those windows. Sampling cannot prove no other context existed.
+
+`evidence/startup/` is the clean primary startup destination and
+`evidence/load-rates/` is the separate rate-axis experiment. Missing clean results
+remain pending; a stored aggregate cannot substitute for its raw observations or
+verifiable source identity. An unavailable dirty-source snapshot is not waived
+because its performance numbers look plausible. Corrective experiments must
+preserve earlier observations and record their replacement explicitly.
 
 ## External requirements
 

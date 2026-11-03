@@ -10,6 +10,31 @@ experiments. A passing CPU suite is not GPU evidence. Synthetic labels and
 lexical metrics are not expert human judgments. Recommendations never execute
 operational actions.
 
+## Recorded reference experiment
+
+The RTX 4060 Laptop GPU completed 80 real LoRA optimizer steps in 171.165 seconds.
+The adapter has 540,672 trainable parameters, occupies about 2.2 MB, and was
+exported, reloaded and evaluated. Peak training tensor allocation was 1.49 GiB.
+
+| Alternative | Category accuracy (40 incidents) | Macro F1 | Valid JSON |
+|---|---:|---:|---:|
+| Zero-shot base | 5.0% | 0.020 | 50% |
+| Stronger prompted base | 17.5% | 0.089 | 100% |
+| LoRA | 37.5% | 0.287 | 100% |
+
+These are observations on eight held-out synthetic scenario families, each with
+five correlated variants. LoRA still misclassified 25 of 40 incidents and failed
+all five insufficient-information abstention cases. The model remains an advisory
+demonstration; these results do not justify unattended operational deployment.
+The eight simple general-instruction checks scored 4/8 for every alternative.
+
+Raw generations, uncertainty, failures and training events are preserved under
+`evidence/`. [The model card](docs/model-card.md) describes the limitations.
+[Historical decoding](evidence/quality-decoding-addendum.json) and
+[source provenance](evidence/execution-provenance.json) distinguish this quality
+experiment from the current explicit serving policy. Use the historical source
+instructions in [reproducibility](docs/reproducibility.md) for reference replay.
+
 ## Repository map
 
 | Component | Implementation | Evidence or documentation |
