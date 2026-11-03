@@ -1,0 +1,23 @@
+name: CPU validation
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: requirements/cpu.lock
+      - run: python -m pip install --require-hashes -r requirements/cpu.lock
+      - run: python -m pip install --no-deps -e .
+      - run: ruff check src tests
+      - run: pytest -q
+      - run: llm-platform data verify data/triage-v2
+      - run: llm-platform doctor
