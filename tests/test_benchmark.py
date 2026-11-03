@@ -4,7 +4,8 @@ from copy import deepcopy
 import httpx
 import pytest
 
-from llm_platform.benchmark import BenchmarkConfig, _request, _runtime_gpu_observation, compare_reports, summarize
+from llm_platform.benchmark import (BenchmarkConfig, _adapter_precision, _request,
+                                    _runtime_gpu_observation, compare_reports, summarize)
 
 
 def test_percentiles_and_failed_requests_do_not_count_as_throughput():
@@ -66,3 +67,15 @@ async def test_runtime_memory_sampler_preserves_unavailable_instead_of_fabricati
     async with httpx.AsyncClient(base_url="http://test", transport=httpx.MockTransport(handler)) as client:
         result = await _runtime_gpu_observation(client)
     assert result == {"allocated_bytes": 123, "session_peak_allocated_bytes": 456, "reserved_bytes": None}
+
+
+def test_serialized_weight_identity_does_not_hide_adapter_compute_precision():
+    mixed = {"engine_settings": {"adapter": True, "dtype": "bfloat16", "base_compute_dtype": "bfloat16",
+                                 "adapter_compute_dtype": "float32", "adapter_storage_dtype": "float32"}}
+    with pytest.raises(ValueError, match="compute precision"):
+        _adapter_precision(mixed)
+    del mixed["engine_settings"]["adapter_compute_dtype"]
+    with pytest.raises(ValueError, match="verified"):
+        _adapter_precision(mixed)
+    mixed["engine_settings"]["adapter_compute_dtype"] = "bfloat16"
+    assert _adapter_precision(mixed) == ("bfloat16", "bfloat16", "float32")

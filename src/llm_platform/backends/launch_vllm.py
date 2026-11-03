@@ -15,6 +15,7 @@ import time
 from typing import Any
 
 from llm_platform.registry import verify_package
+from llm_platform.backends.precision import adapter_storage_dtype, normalized_dtype
 
 
 def launch_command(package: Path, manifest: dict[str, Any], port: int = 8001,
@@ -46,8 +47,9 @@ def launch_command(package: Path, manifest: dict[str, Any], port: int = 8001,
     if quantization != "none":
         command.extend(["--quantization", {"bnb4": "bitsandbytes"}.get(quantization, quantization)])
     if manifest["kind"] == "adapter":
+        lora_dtype = normalized_dtype(manifest["runtime"]["dtype"])
         rank = manifest["adapter"]["config"].get("r", 16)
-        command.extend(["--enable-lora", "--max-lora-rank", str(rank),
+        command.extend(["--enable-lora", "--lora-dtype", lora_dtype, "--max-lora-rank", str(rank),
                         "--lora-modules", model_name + "=" + str(package / manifest["adapter"]["path"])])
     identity = {"artifact_id": model_name, "model_name": model_name,
                 "base_revision": manifest["base_model"]["revision"],
@@ -57,6 +59,10 @@ def launch_command(package: Path, manifest: dict[str, Any], port: int = 8001,
                 "prefix_caching": prefix_caching, "enforce_eager": enforce_eager,
                 "max_model_len": max_model_len, "max_num_seqs": max_num_seqs,
                 "gpu_memory_utilization": gpu_memory_utilization, "command": command}
+    if manifest["kind"] == "adapter":
+        identity["precision"] = {"base_compute_dtype": manifest["runtime"]["dtype"],
+            "adapter_compute_dtype": lora_dtype,
+            "adapter_storage_dtype": adapter_storage_dtype(package / manifest["adapter"]["path"] / "adapter_model.safetensors")}
     return command, identity
 
 

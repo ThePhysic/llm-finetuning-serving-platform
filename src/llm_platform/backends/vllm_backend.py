@@ -17,6 +17,7 @@ from typing import Any, AsyncIterator
 import httpx
 
 from llm_platform.contracts import GenerationConfig, TokenChunk, serving_decoding_policy
+from llm_platform.backends.precision import adapter_storage_dtype
 
 
 def verify_runtime_identity(manifest: dict[str, Any], identity: dict[str, Any]) -> str:
@@ -51,6 +52,7 @@ class VLLMBackend:
         self._probe_task: asyncio.Task[None] | None = None
         self.max_model_len: int | None = None
         self._decoding_policy: dict[str, Any] | None = None
+        self._precision: dict[str, Any] = {}
 
     async def load(self, package: Path, manifest: dict[str, Any]) -> None:
         if self.client is not None:
@@ -67,6 +69,22 @@ class VLLMBackend:
             raise ValueError("vLLM requires LLM_VLLM_IDENTITY from the trusted launcher")
         identity = json.loads(Path(self.identity_path).read_text(encoding="utf-8"))
         model_name = verify_runtime_identity(manifest, identity)
+        precision = {"base_compute_dtype": manifest["runtime"]["dtype"], "adapter_compute_dtype": None,
+                     "adapter_storage_dtype": None,
+                     "precision_source": "trusted-launch-configuration-and-safetensors-header; not hardware attestation"}
+        if manifest["kind"] == "adapter":
+            expected_precision = {"base_compute_dtype": manifest["runtime"]["dtype"],
+                "adapter_compute_dtype": manifest["runtime"]["dtype"],
+                "adapter_storage_dtype": adapter_storage_dtype(
+                    Path(package) / manifest["adapter"]["path"] / "adapter_model.safetensors")}
+            if identity.get("precision") != expected_precision:
+                raise ValueError("vLLM adapter runtime precision is missing or differs from package requirements")
+            command = identity.get("command", [])
+            if (not isinstance(command, list) or command.count("--lora-dtype") != 1
+                    or command.index("--lora-dtype") + 1 >= len(command)
+                    or command[command.index("--lora-dtype") + 1] != manifest["runtime"]["dtype"]):
+                raise ValueError("vLLM launch command does not explicitly select the required LoRA dtype")
+            precision.update(expected_precision)
         max_model_len = identity.get("max_model_len")
         if type(max_model_len) is not int or max_model_len <= 0:
             raise ValueError("vLLM identity must declare a positive max_model_len")
@@ -101,6 +119,7 @@ class VLLMBackend:
         self.client, self.tokenizer, self.manifest, self.model_name = client, tokenizer, verified, model_name
         self.max_model_len = max_model_len
         self._decoding_policy = decoding_policy
+        self._precision = precision
         self._ready, self._last_probe = True, time.monotonic()
         self._probe_task = asyncio.create_task(self._probe_health())
 
@@ -150,9 +169,11 @@ class VLLMBackend:
         self.client, self.tokenizer, self.manifest, self.model_name = None, None, None, None
         self.max_model_len = None
         self._decoding_policy = None
+        self._precision = {}
 
     def health(self) -> dict[str, Any]:
-        return {"ready": self.client is not None and self._ready and time.monotonic() - self._last_probe < 8.0,
+        return {**self._precision,
+                "ready": self.client is not None and self._ready and time.monotonic() - self._last_probe < 8.0,
                 "backend": "vllm", "active_requests": len(self._active),
                 "max_model_len": self.max_model_len,
                 "decoding_policy": self._decoding_policy,

@@ -220,6 +220,21 @@ def _distribution(values: list[float]) -> dict[str, float | None]:
     return {"p50": quantile(.5), "p95": quantile(.95), "p99": quantile(.99)}
 
 
+def _adapter_precision(metadata: dict[str, Any]) -> tuple[str, str, str] | None:
+    settings = metadata.get("engine_settings", {})
+    if not isinstance(settings, dict):
+        raise ValueError("Engine settings must be an object")
+    if settings.get("adapter") is not True:
+        return None
+    fields = ("base_compute_dtype", "adapter_compute_dtype", "adapter_storage_dtype")
+    values = tuple(settings.get(field) for field in fields)
+    if any(value not in {"float32", "float16", "bfloat16"} for value in values):
+        raise ValueError("Adapter comparison requires verified compute and storage precision")
+    if values[0] != settings.get("dtype") or values[1] != settings.get("dtype"):
+        raise ValueError("Adapter and base compute precision must match the declared runtime dtype")
+    return values
+
+
 def summarize(observations: list[dict[str, Any]], duration: float) -> dict[str, Any]:
     if duration <= 0:
         raise ValueError("Measured duration must be positive")
@@ -253,6 +268,7 @@ async def run_benchmark(base_url: str, model: str, prompts: list[list[dict[str, 
                      "decoding_policy_sha256"):
         if required not in metadata:
             raise ValueError(f"Benchmark metadata is missing {required}")
+    _adapter_precision(metadata)
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=False)
     prompt_hash = hashlib.sha256(_json(prompts).encode()).hexdigest()
@@ -356,6 +372,7 @@ def compare_reports(reports: list[dict[str, Any]]) -> dict[str, Any]:
     if len(reports) < 2:
         raise ValueError("At least two reports are required")
     first = reports[0]
+    reference_precision = _adapter_precision(first["metadata"])
     for report in reports[1:]:
         for key in ("weights_id", "tokenizer_id", "prompt_set_sha256", "decoding_policy_sha256"):
             if report["metadata"][key] != first["metadata"][key]:
@@ -364,6 +381,8 @@ def compare_reports(reports: list[dict[str, Any]]) -> dict[str, Any]:
                     "request_rate", "timeout_seconds", "gpu_sample_interval"):
             if report["config"][key] != first["config"][key]:
                 raise ValueError(f"Unfair comparison: {key} differs")
+        if _adapter_precision(report["metadata"]) != reference_precision:
+            raise ValueError("Unfair comparison: actual adapter precision differs")
     return {"schema_version": 1, "comparison": [{"model": r["model"], "engine": r["metadata"]["engine"],
         "config": r["config"], "engine_settings": r["metadata"]["engine_settings"],
         "concurrency": r["config"]["concurrency"], "cache_state": r["metadata"]["cache_state"],

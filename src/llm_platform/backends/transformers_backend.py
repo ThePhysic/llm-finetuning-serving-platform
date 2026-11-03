@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any, AsyncIterator
 
 from llm_platform.contracts import GenerationConfig, TokenChunk, serving_decoding_policy
+from llm_platform.backends.precision import adapter_storage_dtype, inspect_lora_compute_dtype, normalized_dtype
 
 
 class TransformersBackend:
@@ -33,6 +34,7 @@ class TransformersBackend:
         self._unloading = False
         self._cleanup_task: asyncio.Task[None] | None = None
         self._decoding_policy: dict[str, Any] | None = None
+        self._precision: dict[str, Any] = {}
 
     async def load(self, package: Path, manifest: dict[str, Any]) -> None:
         if self.model is not None:
@@ -100,6 +102,11 @@ class TransformersBackend:
                 raise ValueError("Tokenizer vocabulary exceeds the base model's input embeddings")
             if quantization == "none":
                 model.to(device)
+            precision = {"base_compute_dtype": normalized_dtype(model.get_input_embeddings().weight.dtype)
+                         if quantization == "none" else dtype_name,
+                         "adapter_compute_dtype": None, "adapter_storage_dtype": None,
+                         "precision_source": "actual-runtime-parameters-and-safetensors-header"
+                         if quantization == "none" else "configured-bnb4-compute-and-actual-adapter-parameters"}
             if manifest["kind"] == "adapter":
                 from peft import PeftModel
 
@@ -111,7 +118,10 @@ class TransformersBackend:
                     raise ValueError("Adapter immutable base revision does not match package")
                 if adapter_config != manifest["adapter"]["config"]:
                     raise ValueError("Adapter topology does not match package metadata")
-                model = PeftModel.from_pretrained(model, adapter_path, is_trainable=False)
+                precision["adapter_storage_dtype"] = adapter_storage_dtype(adapter_path / "adapter_model.safetensors")
+                model = PeftModel.from_pretrained(model, adapter_path, is_trainable=False,
+                                                  autocast_adapter_dtype=False)
+                precision["adapter_compute_dtype"] = inspect_lora_compute_dtype(model, dtype_name)
             model.eval()
             model.config.use_cache = True
             # Discard publisher generation_config.json and any unsupported
@@ -121,6 +131,7 @@ class TransformersBackend:
             self._decoding_policy = serving_decoding_policy(
                 tokenizer.eos_token_id, model.generation_config.bos_token_id, tokenizer.pad_token_id)
             self.device, self.dtype = device, dtype_name
+            self._precision = precision
             self._last_error = None
         except BaseException:
             del model
@@ -156,6 +167,7 @@ class TransformersBackend:
         self.tokenizer = None
         self.manifest = None
         self._decoding_policy = None
+        self._precision = {}
         try:
             import torch
             if torch.cuda.is_available():
@@ -198,6 +210,7 @@ class TransformersBackend:
                                   "active_requests": len(self._workers), "last_error": self._last_error}
         status["cleanup_pending"] = self._unloading
         status["decoding_policy"] = self._decoding_policy
+        status.update(self._precision)
         if self.model is not None:
             import torch
             status["max_model_len"] = getattr(self.model.config, "max_position_embeddings", None)

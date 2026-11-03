@@ -381,9 +381,17 @@ def metadata_for(manifest: dict[str, Any], engine: str, session: dict[str, Any],
     policy = session["startup"]["ready_engine_state"].get("decoding_policy")
     if not isinstance(policy, dict) or not policy.get("sha256"):
         raise RuntimeError("Engine did not report an explicit effective serving decoding policy")
+    health = session["startup"]["ready_engine_state"]
+    precision = {key: health.get(key) for key in ("base_compute_dtype", "adapter_compute_dtype",
+                                                "adapter_storage_dtype", "precision_source")}
+    if manifest["kind"] == "adapter" and (precision["adapter_compute_dtype"] != manifest["runtime"]["dtype"]
+            or not precision["adapter_storage_dtype"] or not precision["precision_source"]):
+        raise RuntimeError("Adapter benchmark requires explicit verified compute and storage precision")
     return {**semantic_ids(manifest), "engine": engine,
+        **precision,
         "decoding_policy": policy, "decoding_policy_sha256": policy["sha256"],
-        "engine_settings": {"dtype": manifest["runtime"]["dtype"], "quantization": manifest["runtime"]["quantization"],
+        "engine_settings": {**precision,
+            "dtype": manifest["runtime"]["dtype"], "quantization": manifest["runtime"]["quantization"],
             "base_model": manifest["base_model"], "adapter": manifest["kind"] == "adapter",
             "gateway_concurrency": 1 if engine == "transformers" else 8, "gateway_queue": 4,
             "reference_execution_serialized": engine == "transformers", "max_model_len":

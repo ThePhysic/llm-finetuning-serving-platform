@@ -3,6 +3,7 @@ import asyncio
 from contextlib import nullcontext
 import hashlib
 import json
+import struct
 import sys
 import time
 from types import SimpleNamespace
@@ -13,6 +14,7 @@ import pytest
 from llm_platform.backends import TransformersBackend, VLLMBackend
 from llm_platform.backends.vllm_backend import verify_runtime_identity
 from llm_platform.backends.launch_vllm import launch_command
+from llm_platform.backends.precision import adapter_storage_dtype, inspect_lora_compute_dtype
 from llm_platform.contracts import GenerationConfig, serving_decoding_policy
 
 
@@ -376,6 +378,7 @@ async def test_cuda_cleanup_runs_off_event_loop_and_retains_ownership_on_cancell
 
 async def test_vllm_rejects_additional_architectural_eos_before_connecting(monkeypatch, tmp_path):
     manifest, identity = identity_fixture()
+    manifest["kind"] = "base"
     manifest["base_model"]["id"] = "base-model"
     manifest["tokenizer"].update(id="base-model", revision=manifest["base_model"]["revision"], path="tokenizer",
                                   chat_template_sha256=hashlib.sha256(b"template").hexdigest())
@@ -395,3 +398,121 @@ async def test_vllm_rejects_additional_architectural_eos_before_connecting(monke
     with pytest.raises(ValueError, match="architectural EOS"):
         await backend.load(tmp_path, manifest)
     assert backend.client is None and not backend.health()["ready"]
+
+
+def write_adapter_weights(path, dtype="F32"):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    header = json.dumps({"layer.lora_A.weight": {"dtype": dtype, "shape": [1], "data_offsets": [0, 4]}}).encode()
+    path.write_bytes(struct.pack("<Q", len(header)) + header + b"\0" * 4)
+
+
+def test_adapter_storage_precision_comes_from_header_not_manifest(tmp_path):
+    path = tmp_path / "adapter_model.safetensors"
+    write_adapter_weights(path, "F32")
+    assert adapter_storage_dtype(path) == "float32"
+    write_adapter_weights(path, "BF16")
+    assert adapter_storage_dtype(path) == "bfloat16"
+    path.write_bytes(b"truncated")
+    with pytest.raises(ValueError, match="header length"):
+        adapter_storage_dtype(path)
+
+
+def test_lora_runtime_parameter_precision_cannot_silently_upcast():
+    model = SimpleNamespace(named_parameters=lambda: iter([
+        ("layer.lora_A.default.weight", SimpleNamespace(dtype="torch.bfloat16")),
+        ("layer.lora_B.default.weight", SimpleNamespace(dtype="torch.float32")),
+    ]))
+    with pytest.raises(ValueError, match="runtime dtype"):
+        inspect_lora_compute_dtype(model, "bfloat16")
+
+
+@pytest.mark.parametrize("ignore_disable_flag", [False, True])
+def test_actual_adapter_loader_disables_peft_upcast_and_checks_parameters(monkeypatch, tmp_path, ignore_disable_flag):
+    adapter_config = {"base_model_name_or_path": "base-model", "revision": "a" * 40, "r": 2}
+    (tmp_path / "adapter").mkdir()
+    (tmp_path / "adapter" / "adapter_config.json").write_text(json.dumps(adapter_config))
+    write_adapter_weights(tmp_path / "adapter" / "adapter_model.safetensors")
+    manifest = {"kind": "adapter", "base_model": {"id": "base-model", "revision": "a" * 40},
+        "tokenizer": {"id": "base-model", "revision": "a" * 40, "path": "tokenizer",
+                      "chat_template_sha256": hashlib.sha256(b"template").hexdigest()},
+        "adapter": {"path": "adapter", "config": adapter_config},
+        "runtime": {"backend": "transformers", "dtype": "bfloat16", "quantization": "none"}}
+    class LoaderTokenizer(FakeTokenizer):
+        chat_template = "template"
+        def __len__(self):
+            return 32
+    class LoaderModel:
+        config = SimpleNamespace()
+        adapter_dtype = "torch.float32"
+        def get_input_embeddings(self):
+            return SimpleNamespace(num_embeddings=64, weight=SimpleNamespace(dtype="torch.bfloat16"))
+        def to(self, device):
+            return self
+        def named_parameters(self):
+            return iter([("layer.lora_A.default.weight", SimpleNamespace(dtype=self.adapter_dtype)),
+                         ("layer.lora_B.default.weight", SimpleNamespace(dtype=self.adapter_dtype))])
+        def eval(self):
+            return self
+    observed = []
+    def peft_load(model, path, **kwargs):
+        observed.append(kwargs)
+        # Reproduce PEFT's default inference upcast when the disable flag is
+        # omitted; the second case emulates a runtime that ignores the flag.
+        model.adapter_dtype = "torch.float32" if kwargs.get("autocast_adapter_dtype", True) or ignore_disable_flag else "torch.bfloat16"
+        return model
+    monkeypatch.setitem(sys.modules, "torch", SimpleNamespace(
+        bfloat16="torch.bfloat16", cuda=SimpleNamespace(is_available=lambda: False)))
+    monkeypatch.setitem(sys.modules, "transformers", SimpleNamespace(
+        AutoModelForCausalLM=SimpleNamespace(from_pretrained=lambda *a, **kw: LoaderModel()),
+        AutoTokenizer=SimpleNamespace(from_pretrained=lambda *a, **kw: LoaderTokenizer()),
+        BitsAndBytesConfig=object))
+    monkeypatch.setitem(sys.modules, "peft", SimpleNamespace(PeftModel=SimpleNamespace(from_pretrained=peft_load)))
+    backend = TransformersBackend(device="cpu", dtype="bfloat16")
+    # Exercise the GPU-style loader without CUDA allocations using a test-only
+    # device string; production accepts only a real available CUDA device.
+    backend.device = "test-device"
+    monkeypatch.setattr(backend, "_generation_parameters", lambda *args: {
+        "generation_config": SimpleNamespace(bos_token_id=7)})
+    if ignore_disable_flag:
+        with pytest.raises(ValueError, match="runtime dtype"):
+            backend._load_sync(tmp_path, manifest)
+        assert backend.model is None
+    else:
+        backend._load_sync(tmp_path, manifest)
+        assert backend.health()["base_compute_dtype"] == "bfloat16"
+        assert backend.health()["adapter_compute_dtype"] == "bfloat16"
+        assert backend.health()["adapter_storage_dtype"] == "float32"
+    assert observed[0]["autocast_adapter_dtype"] is False
+    assert observed[0]["is_trainable"] is False
+
+
+def test_adapter_launcher_explicitly_selects_dtype_and_records_storage(tmp_path):
+    manifest, _ = identity_fixture()
+    manifest.update(kind="adapter", base_model={"id": "base-model", "revision": "b" * 40},
+        tokenizer={"revision": "b" * 40, "path": "tokenizer", "chat_template_sha256": "d" * 64},
+        adapter={"path": "adapter", "config": {"r": 8}},
+        runtime={"backend": "vllm", "quantization": "none", "dtype": "bfloat16"})
+    write_adapter_weights(tmp_path / "adapter" / "adapter_model.safetensors")
+    command, identity = launch_command(tmp_path, manifest)
+    assert command[command.index("--lora-dtype") + 1] == "bfloat16"
+    assert identity["precision"] == {"base_compute_dtype": "bfloat16", "adapter_compute_dtype": "bfloat16",
+                                     "adapter_storage_dtype": "float32"}
+
+
+@pytest.mark.parametrize("missing_precision", [True, False])
+async def test_vllm_rejects_missing_or_inconsistent_adapter_precision(monkeypatch, tmp_path, missing_precision):
+    manifest, identity = identity_fixture()
+    manifest.update(kind="adapter", adapter={"path": "adapter", "config": {"r": 8}},
+                    runtime={"backend": "vllm", "dtype": "bfloat16", "quantization": "none"})
+    write_adapter_weights(tmp_path / "adapter" / "adapter_model.safetensors")
+    if not missing_precision:
+        identity["precision"] = {"base_compute_dtype": "bfloat16", "adapter_compute_dtype": "float32",
+                                 "adapter_storage_dtype": "float32"}
+    identity_path = tmp_path / "identity.json"
+    identity_path.write_text(json.dumps(identity))
+    monkeypatch.setattr("llm_platform.registry.verify_package", lambda path: manifest)
+    monkeypatch.setitem(sys.modules, "transformers", SimpleNamespace(AutoConfig=object, AutoTokenizer=object))
+    backend = VLLMBackend(identity_path=identity_path)
+    with pytest.raises(ValueError, match="runtime precision"):
+        await backend.load(tmp_path, manifest)
+    assert backend.client is None
