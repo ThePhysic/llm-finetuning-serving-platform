@@ -350,7 +350,9 @@ def create_app(settings: Settings | None = None, registry: Registry | None = Non
     active = Gauge("llm_active_requests", "Active backend requests", registry=metrics)
     queued = Gauge("llm_queued_requests", "Requests waiting for an execution slot", registry=metrics)
     model_ready = Gauge("llm_model_ready", "Model runtime health", registry=metrics)
-    gpu_memory = Gauge("llm_gpu_memory_bytes", "Runtime-reported GPU allocated bytes", registry=metrics)
+    gpu_memory = Gauge("llm_gpu_memory_bytes", "Runtime-reported GPU allocated bytes; NaN when unavailable", registry=metrics)
+    gpu_peak = Gauge("llm_gpu_peak_allocated_bytes", "Runtime session peak allocated bytes; NaN when unavailable", registry=metrics)
+    gpu_reserved = Gauge("llm_gpu_reserved_bytes", "Runtime allocator reserved bytes; NaN when unavailable", registry=metrics)
     deployment_info = Gauge("llm_deployment_info", "Current immutable model deployment identity",
                             ["artifact_id", "base_revision", "backend"], registry=metrics)
 
@@ -478,7 +480,23 @@ def create_app(settings: Settings | None = None, registry: Registry | None = Non
         active.set(manager.running)
         queued.set(manager.leases - manager.running)
         model_ready.set(int(bool(health.get("ready"))))
-        gpu_memory.set(float(health.get("gpu_memory_bytes", health.get("cuda_allocated_bytes", 0)) or 0))
+        def observed_memory(*names: str) -> float:
+            for name in names:
+                value = health.get(name)
+                if type(value) not in {int, float}:
+                    continue
+                try:
+                    measured = float(value)
+                except OverflowError:
+                    continue
+                if math.isfinite(measured) and measured >= 0:
+                    return measured
+            # Zero is a measurement, not a fallback for unsupported telemetry.
+            return float("nan")
+
+        gpu_memory.set(observed_memory("gpu_memory_bytes", "cuda_allocated_bytes"))
+        gpu_peak.set(observed_memory("gpu_peak_allocated_bytes", "cuda_peak_allocated_bytes"))
+        gpu_reserved.set(observed_memory("gpu_reserved_bytes", "cuda_reserved_bytes"))
         deployment_info.clear()
         if manager.current:
             manifest = manager.current.manifest

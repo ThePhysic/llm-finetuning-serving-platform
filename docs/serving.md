@@ -134,3 +134,13 @@ transport backpressure; it is not an isolated CUDA-kernel duration. Benchmark
 client end-to-end measurements and engine telemetry provide the corresponding
 transport and execution context. No throughput or low-latency claim follows from
 CPU-only API tests.
+
+GPU gauges expose `llm_gpu_memory_bytes` (currently allocated),
+`llm_gpu_peak_allocated_bytes` (runtime-session peak allocation), and
+`llm_gpu_reserved_bytes` (allocator reservations). Missing or invalid provider
+telemetry is `NaN`, including an external vLLM worker that does not report these
+measurements. An explicitly measured zero remains zero. The session peak may
+include model loading or earlier workloads; it is not automatically a per-benchmark
+peak. Sampled allocations during a benchmark can describe steady-state behavior
+with the sampling/window assumptions recorded separately from device-wide NVML
+memory, reservations, and the runtime-session peak.

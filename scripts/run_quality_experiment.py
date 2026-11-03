@@ -11,7 +11,6 @@ from dataclasses import asdict
 import json
 from pathlib import Path
 import shutil
-import subprocess
 import time
 
 from llm_platform.backends import TransformersBackend
@@ -20,6 +19,7 @@ from llm_platform.contracts import GenerationConfig
 from llm_platform.data import load_records, verify_dataset
 from llm_platform.evaluation import make_blinded_review, run_evaluation
 from llm_platform.prompts import prompt_identity
+from llm_platform.provenance import capture_source_snapshot
 from llm_platform.registry import verify_package
 from llm_platform.training import TrainConfig, train
 
@@ -59,11 +59,13 @@ def main():
     if (args.evidence / "quality-protocol.json").exists():
         raise FileExistsError("Do not overwrite a frozen quality protocol")
     args.work.mkdir(parents=True)
+    source_snapshot = capture_source_snapshot(Path.cwd(), args.evidence / "execution-source")
     generation = GenerationConfig(max_tokens=320, temperature=0, seed=42)
     protocol = {"schema_version": 1, "frozen_at_unix": time.time(), "dataset": data,
         "training_configuration": asdict(config), "decoding": asdict(generation),
         "prompt_identities": {variant: prompt_identity(variant) for variant in ("zero_shot", "prompted", "lora")},
-        "source_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
+        "source_commit": source_snapshot["source_revision"],
+        "execution_source_snapshot_sha256": source_snapshot["snapshot_sha256"],
         "order": ["base zero-shot", "base prompted", "train LoRA fixed configuration", "reload LoRA", "LoRA evaluation"],
         "selection": "Fixed configuration and prompts before baseline generation. Final test is not used to change them.",
         "human_review": "Pending actual human annotation; no agent-generated human labels permitted."}

@@ -4,7 +4,7 @@ from copy import deepcopy
 import httpx
 import pytest
 
-from llm_platform.benchmark import BenchmarkConfig, _request, compare_reports, summarize
+from llm_platform.benchmark import BenchmarkConfig, _request, _runtime_gpu_observation, compare_reports, summarize
 
 
 def test_percentiles_and_failed_requests_do_not_count_as_throughput():
@@ -56,3 +56,13 @@ def test_comparison_rejects_changed_weights():
     changed["metadata"]["weights_id"] = "adapted"
     with pytest.raises(ValueError, match="weights_id"):
         compare_reports([report, changed])
+
+
+async def test_runtime_memory_sampler_preserves_unavailable_instead_of_fabricating_zero():
+    def handler(request):
+        assert request.url.path == "/metrics"
+        return httpx.Response(200, text=("llm_gpu_memory_bytes 123.0\n"
+            "llm_gpu_peak_allocated_bytes 456.0\nllm_gpu_reserved_bytes NaN\n"))
+    async with httpx.AsyncClient(base_url="http://test", transport=httpx.MockTransport(handler)) as client:
+        result = await _runtime_gpu_observation(client)
+    assert result == {"allocated_bytes": 123, "session_peak_allocated_bytes": 456, "reserved_bytes": None}

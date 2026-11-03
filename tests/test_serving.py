@@ -559,3 +559,44 @@ async def test_unreadable_pointer_after_commit_error_reports_uncertain_not_retai
             status = (await client.get("/admin/status", headers={"Authorization": "Bearer admin-fixture"})).json()
             assert status["commit_uncertain"]
             assert status["deployment"]["error"] == "durable_state_unreadable"
+
+
+async def test_gpu_metrics_preserve_reported_allocated_peak_and_reserved_values(tmp_path):
+    class ReportedTelemetryFixture(FixtureBackend):
+        def health(self):
+            # CPU fixture values check the gateway mapping only. They are not
+            # hardware measurements or evidence that a GPU experiment ran.
+            return {"ready": self.ready, "backend": "transformers", "cuda_allocated_bytes": 1024,
+                    "cuda_peak_allocated_bytes": 4096, "cuda_reserved_bytes": 8192}
+
+    async with client_for(tmp_path, ReportedTelemetryFixture()) as (client, app, backend, manifest):
+        metrics = (await client.get("/metrics")).text
+        assert "llm_gpu_memory_bytes 1024.0\n" in metrics
+        assert "llm_gpu_peak_allocated_bytes 4096.0\n" in metrics
+        assert "llm_gpu_reserved_bytes 8192.0\n" in metrics
+
+
+async def test_unreported_gpu_metrics_are_nan_instead_of_invented_zero(tmp_path):
+    class MissingTelemetryFixture(FixtureBackend):
+        def health(self):
+            return {"ready": self.ready, "backend": "vllm"}
+
+    async with client_for(tmp_path, MissingTelemetryFixture()) as (client, app, backend, manifest):
+        metrics = (await client.get("/metrics")).text
+        assert "llm_gpu_memory_bytes NaN\n" in metrics
+        assert "llm_gpu_peak_allocated_bytes NaN\n" in metrics
+        assert "llm_gpu_reserved_bytes NaN\n" in metrics
+
+
+async def test_gpu_metrics_distinguish_explicit_zero_and_invalid_provider_values(tmp_path):
+    class InvalidTelemetryFixture(FixtureBackend):
+        def health(self):
+            return {"ready": self.ready, "gpu_memory_bytes": 0,
+                    "gpu_peak_allocated_bytes": None, "cuda_peak_allocated_bytes": float("inf"),
+                    "gpu_reserved_bytes": -1, "cuda_reserved_bytes": "not measured"}
+
+    async with client_for(tmp_path, InvalidTelemetryFixture()) as (client, app, backend, manifest):
+        metrics = (await client.get("/metrics")).text
+        assert "llm_gpu_memory_bytes 0.0\n" in metrics
+        assert "llm_gpu_peak_allocated_bytes NaN\n" in metrics
+        assert "llm_gpu_reserved_bytes NaN\n" in metrics

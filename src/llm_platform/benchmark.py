@@ -87,6 +87,25 @@ def _gpu_observation() -> list[dict[str, Any]]:
         return []
 
 
+async def _runtime_gpu_observation(client: httpx.AsyncClient) -> dict[str, float | None]:
+    names = {"llm_gpu_memory_bytes": "allocated_bytes",
+             "llm_gpu_peak_allocated_bytes": "session_peak_allocated_bytes",
+             "llm_gpu_reserved_bytes": "reserved_bytes"}
+    values: dict[str, float | None] = {key: None for key in names.values()}
+    try:
+        response = await client.get("/metrics")
+        response.raise_for_status()
+        for line in response.text.splitlines():
+            parts = line.split()
+            if len(parts) == 2 and parts[0] in names:
+                value = float(parts[1])
+                if math.isfinite(value) and value >= 0:
+                    values[names[parts[0]]] = value
+    except (httpx.HTTPError, ValueError):
+        pass
+    return values
+
+
 async def _events(response: httpx.Response):
     """Parse SSE data blocks; token boundaries cannot be inferred from HTTP chunks."""
     lines: list[str] = []
@@ -242,12 +261,19 @@ async def run_benchmark(base_url: str, model: str, prompts: list[list[dict[str, 
     gpu_samples: list[dict[str, Any]] = []
     gpu_stop = asyncio.Event()
     async def sample_gpu():
-        while not gpu_stop.is_set():
-            gpu_samples.append({"time": time.time(), "devices": await asyncio.to_thread(_gpu_observation)})
-            try:
-                await asyncio.wait_for(gpu_stop.wait(), config.gpu_sample_interval)
-            except TimeoutError:
-                pass
+        # A separate connection avoids consuming a measured generation slot.
+        async with httpx.AsyncClient(base_url=base_url.rstrip("/"), headers=headers,
+                                     timeout=min(5, config.timeout_seconds)) as metrics_client:
+            while True:
+                devices, runtime = await asyncio.gather(asyncio.to_thread(_gpu_observation),
+                                                       _runtime_gpu_observation(metrics_client))
+                gpu_samples.append({"time": time.time(), "devices": devices, "runtime": runtime})
+                if gpu_stop.is_set():
+                    break
+                try:
+                    await asyncio.wait_for(gpu_stop.wait(), config.gpu_sample_interval)
+                except TimeoutError:
+                    pass
     async with httpx.AsyncClient(base_url=base_url.rstrip("/"), headers=headers,
                                 timeout=config.timeout_seconds,
                                 limits=httpx.Limits(max_connections=config.concurrency,
@@ -287,6 +313,12 @@ async def run_benchmark(base_url: str, model: str, prompts: list[list[dict[str, 
     memory = [device["device_used_memory_mib"] for sample in gpu_samples for device in sample["devices"]]
     summary["gpu_device_used_peak_mib"] = max(memory) if memory else None
     summary["gpu_device_used_median_mib"] = sorted(memory)[len(memory) // 2] if memory else None
+    allocated = [sample["runtime"]["allocated_bytes"] for sample in gpu_samples
+                 if sample["runtime"]["allocated_bytes"] is not None]
+    session_peaks = [sample["runtime"]["session_peak_allocated_bytes"] for sample in gpu_samples
+                     if sample["runtime"]["session_peak_allocated_bytes"] is not None]
+    summary["runtime_allocated_sample_median_bytes"] = sorted(allocated)[len(allocated) // 2] if allocated else None
+    summary["runtime_session_peak_allocated_bytes"] = max(session_peaks) if session_peaks else None
     if config.compute_price_per_hour is not None:
         price = config.compute_price_per_hour * wall_seconds / 3600
         summary["estimated_compute_cost"] = price
@@ -300,10 +332,11 @@ async def run_benchmark(base_url: str, model: str, prompts: list[list[dict[str, 
             "TPOT": "(last content event time - first content event time)/(reported completion tokens-1); streaming event batching can bias this estimate",
             "inter_content_event": "Time between nonempty SSE content events; events may contain multiple tokens",
             "throughput": "Successful measured requests or reported output tokens divided by full measured workload wall time",
-            "GPU": "nvidia-smi sampled device-wide used memory, includes other processes and runtime reservations; not PyTorch allocated memory",
+            "GPU": "nvidia-smi samples the load-generator host's device-wide used memory and utilization, including other processes and runtime reservations; not tensor allocated memory",
+            "runtime_GPU": "Gateway metrics sample runtime allocated/reserved tensor bytes when available; unsupported values stay null. Peak is the backend process/session high-water mark including warmup and earlier workloads, not an isolated per-request or per-run peak. Sample median is observed during this workload, not a guaranteed equilibrium.",
             "arrival": "Bounded closed-loop workers, optionally paced; late arrivals wait at client and schedule delay is recorded"},
         "limitations": ["Small samples give unstable tail estimates; retain repetitions and raw observations.",
-                         "GPU sampling is best effort and may miss short peaks; it adds monitoring overhead.",
+                         "GPU and gateway-metrics sampling is best effort and may miss short peaks; it adds monitoring overhead through a separate HTTP connection.",
                          "Client software inventory does not establish a remote engine's software; supply engine versions in metadata."]}
     (output_dir / "requests.jsonl").write_text("".join(_json(row) + "\n" for row in raw), encoding="utf-8")
     (output_dir / "gpu.jsonl").write_text("".join(_json(row) + "\n" for row in gpu_samples), encoding="utf-8")
