@@ -209,5 +209,17 @@ def doctor():
     emit(environment())
 
 
+@app.command("audit-evidence")
+def audit_evidence(root: Path = Path(".")):
+    """Check local evidence integrity; external approval/publication remain separate."""
+    from .evidence import validate_evidence
+    result = validate_evidence(root)
+    emit(result)
+    if result["status"] == "fail":
+        raise typer.Exit(code=1)
+    if result["status"] == "pending":
+        raise typer.Exit(code=2)
+
+
 if __name__ == "__main__":
     app()

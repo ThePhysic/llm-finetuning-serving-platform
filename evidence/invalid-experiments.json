@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "experiments": [{
+    "identity": "quality-001-aborted-before-training",
+    "dataset": "triage-v2",
+    "status": "invalid",
+    "reason": "Synthetic case identifiers disclosed target category in input text.",
+    "training_started": false,
+    "use_for_quality_claims": false,
+    "resolution": "Frozen triage-v3 uses neutral opaque identifiers independent of labels; leakage regressions added. The unchanged training configuration and prompts were retained. Old manifests and source remain identifiable in git history.",
+    "limitation": "Prototype inspection exposed related authored scenarios during development. The final frozen split controls scenario-family overlap but is not an independently collected blind external dataset."
+  }]
+}

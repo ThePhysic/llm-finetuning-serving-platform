@@ -1,0 +1,15 @@
+{
+  "platform": "Linux-6.18.54.1-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+  "python": "3.12.16",
+  "client_software": {
+    "torch": "2.6.0+cu124",
+    "transformers": "4.51.3",
+    "peft": "0.15.2",
+    "vllm": null,
+    "httpx": "0.28.1",
+    "fastapi": "0.162.0"
+  },
+  "gpu_inventory_csv": [
+    "NVIDIA GeForce RTX 4060 Laptop GPU, 566.36, 8188"
+  ]
+}
