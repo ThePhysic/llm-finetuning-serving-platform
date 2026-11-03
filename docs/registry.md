@@ -62,10 +62,24 @@ The registry API alone cannot prove GPU loadability. The serving manager first
 drains admitted requests, constructs and loads a candidate backend while retaining
 the old deployment, verifies runtime readiness, persists the verified pointer,
 then changes the active backend. Failed load or pointer persistence leaves the
-prior runtime selected. Model identity remains pinned throughout each request.
+prior runtime selected when the pointer is confirmed unchanged. Pointer writing
+and in-memory adoption form one owned commit: caller cancellation waits for the
+filesystem thread to settle, and no await separates a successful durable write
+from adoption. If a write reports an error after atomic replacement, the gateway
+reads the pointer and adopts the committed candidate when confirmed. Unreadable
+durable state is explicitly `commit_uncertain` and disables inference for operator
+reconciliation instead of claiming that a prior deployment was retained.
+Model identity remains pinned throughout each request.
 The protected HTTP rollback operation follows the same loading protocol using the
 previous identity. Calling the low-level registry CLI changes the next-start
 configuration; use HTTP administration to switch a running gateway.
+
+Cleanup happens after commit and has its own deadline. A late or failed old-runtime
+unload does not roll back the committed pointer; responses/admin status identify
+the new selected version and pending cleanup accurately. Cleanup tasks retain
+their backend resources until they finish. Readiness and inference are blocked
+while cleanup is unresolved. See [serving lifecycle](serving.md) for shutdown
+deadline and recovery semantics.
 
 Staging can temporarily require two resident models. On an 8 GB GPU a switch may
 fail with out-of-memory even when either model fits alone; the gateway preserves

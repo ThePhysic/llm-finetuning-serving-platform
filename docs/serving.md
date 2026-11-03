@@ -54,6 +54,9 @@ HTTP errors distinguish invalid input (`422`), unknown/inactive model (`404`),
 overload (`429`), unavailable engine (`503`), and queue/generation deadline (`504`).
 Authentication failures use `401`/`403`. Prompts and generated contents are not
 logged by default. Generated recommendations have no action-execution pathway.
+Validation errors contain safe field locations, error types, and fixed messages;
+they omit Pydantic's raw input/validator context and mask unknown field names so
+an invalid nested prompt cannot be echoed through an error response.
 
 ## Bounds, cancellation, and lifecycle
 
@@ -85,6 +88,30 @@ loads retain the healthy prior deployment. Promotion waits for all admitted
 requests, including queued requests, to finish before loading a candidate.
 Readiness is unavailable while switching. See [registry behavior](registry.md)
 for memory and downtime tradeoffs.
+
+The load deadline applies to reversible draining/candidate staging. Once durable
+pointer commit starts, an administrative cancellation waits for that owned write
+to settle and for in-memory adoption; it cannot free the candidate while a
+background filesystem thread might still commit it. A cancelled admin request can
+therefore leave the requested deployment successfully selected. Query protected
+`/admin/status` to determine the actual outcome.
+
+Previous-runtime unloading has a separate 15-second cleanup deadline configurable
+with `Settings.cleanup_timeout_seconds`. If cleanup is late or fails **after**
+commit, promotion returns the new committed identity and a `cleanup_pending`
+warning. The manager retains the backend and its cleanup task instead of claiming
+that the old deployment remained selected or dropping GPU ownership. Readiness,
+generation admission, and further switching stay unavailable until cleanup
+finishes; administration reports pending/failed cleanup separately from load
+failure. Successful background cleanup restores readiness. A failed cleanup needs
+operator recovery or process restart.
+
+Shutdown also bounds draining and cleanup waits. `ModelManager.close()` reports
+`incomplete` with retained ownership if resources cannot finish by the deadline;
+it never cancels an unload task merely to pretend resources were released. A
+wedged driver/thread may still require process-level recovery. A durable pointer
+that cannot be reconciled after a write error disables inference and is reported
+as `commit_uncertain`; the gateway does not assert that a prior version survived.
 
 ## Security and operation
 

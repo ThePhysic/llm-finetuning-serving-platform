@@ -1,13 +1,15 @@
 import asyncio
 from contextlib import asynccontextmanager
 import json
+import threading
+import time
 
 import httpx
 import pytest
 
 from llm_platform.contracts import TokenChunk
 from llm_platform.registry import Registry
-from llm_platform.serving import Settings, create_app
+from llm_platform.serving import InferenceFailure, ModelManager, Settings, create_app
 from test_registry import make_package
 
 
@@ -321,3 +323,239 @@ async def test_slow_body_upload_times_out_before_admission_or_promotion(tmp_path
 def test_upload_timeout_must_be_finite_and_positive(timeout):
     with pytest.raises(ValueError, match="deadlines"):
         Settings(body_timeout_seconds=timeout)
+
+
+async def test_cancelled_delayed_pointer_commit_settles_before_candidate_release(tmp_path, monkeypatch):
+    one_package, one = make_package(tmp_path)
+    two_package, two = make_package(tmp_path, "two")
+    registry = Registry(tmp_path / "registry")
+    registry.register(one_package)
+    registry.register(two_package)
+    backends = []
+
+    def factory(manifest):
+        backend = FixtureBackend()
+        backends.append(backend)
+        return backend
+
+    manager = ModelManager(registry, Settings(initial_model=one["artifact_id"],
+                                             switch_timeout_seconds=0.02, cleanup_timeout_seconds=0.05), factory)
+    await manager.start()
+    entered, release = threading.Event(), threading.Event()
+    original = registry.promote
+
+    def delayed_promote(artifact_id):
+        entered.set()
+        if not release.wait(2):
+            raise RuntimeError("Test commit release deadline exceeded")
+        return original(artifact_id)
+
+    monkeypatch.setattr(registry, "promote", delayed_promote)
+    switch = asyncio.create_task(manager.switch(two["artifact_id"]))
+    assert await asyncio.to_thread(entered.wait, 1)
+    switch.cancel()
+    await asyncio.sleep(0.03)  # longer than the reversible-stage deadline
+    switch.cancel()
+    await asyncio.sleep(0.01)
+    assert not switch.done()
+    assert registry.deployment()["current"] == manager.current.manifest["artifact_id"] == one["artifact_id"]
+    assert not backends[1].unloaded
+    release.set()
+    with pytest.raises(asyncio.CancelledError):
+        await switch
+    await asyncio.sleep(0)
+    assert registry.deployment()["current"] == manager.current.manifest["artifact_id"] == two["artifact_id"]
+    assert not backends[1].unloaded
+    assert backends[0].unloaded
+    assert manager.last_switch_status == "committed"
+    assert (await manager.close())["status"] == "complete"
+
+
+async def test_postcommit_old_cleanup_timeout_reports_committed_and_recovers(tmp_path):
+    class GatedUnload(FixtureBackend):
+        def __init__(self):
+            super().__init__()
+            self.release = asyncio.Event()
+            self.cancelled_unload = False
+
+        async def unload(self):
+            try:
+                await self.release.wait()
+                await super().unload()
+            except asyncio.CancelledError:
+                self.cancelled_unload = True
+                raise
+
+    one_package, one = make_package(tmp_path)
+    two_package, two = make_package(tmp_path, "two")
+    registry = Registry(tmp_path / "registry")
+    registry.register(one_package)
+    registry.register(two_package)
+    old = GatedUnload()
+    active = FixtureBackend()
+    settings = Settings(initial_model=one["artifact_id"], admin_key="admin-fixture",
+                        switch_timeout_seconds=0.02, cleanup_timeout_seconds=0.02)
+    app = create_app(settings, registry, lambda manifest: old if manifest["artifact_id"] == one["artifact_id"] else active)
+    async with app.router.lifespan_context(app):
+        async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://fixture") as client:
+            started = time.perf_counter()
+            response = await client.post("/admin/promote", json={"artifact_id": two["artifact_id"]},
+                                         headers={"Authorization": "Bearer admin-fixture"})
+            assert time.perf_counter() - started < 1
+            assert response.status_code == 200
+            state = response.json()
+            assert state["committed"] is True
+            assert state["cleanup_pending"] is True
+            assert state["current"] == registry.deployment()["current"] == app.state.manager.current.manifest["artifact_id"] == two["artifact_id"]
+            assert "committed" in state["warning"]
+            assert "retained" not in state["warning"]
+            assert not old.unloaded and not old.cancelled_unload
+            assert app.state.manager.last_load_error is None
+            assert (await client.get("/health/ready")).status_code == 503
+            status = (await client.get("/admin/status", headers={"Authorization": "Bearer admin-fixture"})).json()
+            assert status["active_model"] == status["deployment"]["current"] == two["artifact_id"]
+            assert status["switch_status"] == "committed"
+            assert status["cleanup"][0]["status"] == "pending"
+            assert (await client.post("/v1/chat/completions", json=body(two))).status_code == 503
+            old.release.set()
+            await asyncio.wait_for(next(iter(app.state.manager._cleanup.values()))["task"], 1)
+            await asyncio.sleep(0)
+            assert old.unloaded and not old.cancelled_unload
+            assert app.state.manager.cleanup_status() == []
+            assert (await client.get("/health/ready")).status_code == 200
+            assert (await client.post("/v1/chat/completions", json=body(two))).status_code == 200
+
+
+async def test_shutdown_cleanup_deadline_retains_backend_task_ownership(tmp_path):
+    class StalledUnload(FixtureBackend):
+        def __init__(self):
+            super().__init__()
+            self.release = asyncio.Event()
+
+        async def unload(self):
+            await self.release.wait()
+            await super().unload()
+
+    package, manifest = make_package(tmp_path)
+    registry = Registry(tmp_path / "registry")
+    registry.register(package)
+    backend = StalledUnload()
+    manager = ModelManager(registry, Settings(initial_model=manifest["artifact_id"], cleanup_timeout_seconds=0.02),
+                           lambda manifest: backend)
+    await manager.start()
+    started = time.perf_counter()
+    state = await manager.close()
+    assert time.perf_counter() - started < 0.5
+    assert state["status"] == "incomplete"
+    assert state["cleanup"][0]["status"] == "pending"
+    record = next(iter(manager._cleanup.values()))
+    assert record["deployment"].backend is backend
+    assert not record["task"].done()
+    assert manager.current.backend is backend
+    assert not backend.unloaded
+    backend.release.set()
+    await asyncio.wait_for(record["task"], 1)
+    await asyncio.sleep(0)
+    assert (await manager.close())["status"] == "complete"
+    assert manager.current is None
+
+
+async def test_pointer_error_after_atomic_commit_reconciles_active_runtime(tmp_path, monkeypatch):
+    one_package, one = make_package(tmp_path)
+    two_package, two = make_package(tmp_path, "two")
+    registry = Registry(tmp_path / "registry")
+    registry.register(one_package)
+    registry.register(two_package)
+    manager = ModelManager(registry, Settings(initial_model=one["artifact_id"]), lambda manifest: FixtureBackend())
+    await manager.start()
+    original = registry.promote
+
+    def postcommit_error(artifact_id):
+        original(artifact_id)
+        raise OSError("fixture failure after atomic replacement")
+
+    monkeypatch.setattr(registry, "promote", postcommit_error)
+    state = await manager.switch(two["artifact_id"])
+    assert state["committed"] is True
+    assert state["warning"] == "Durable commit succeeded but registry completion reported an error"
+    assert state["current"] == registry.deployment()["current"] == manager.current.manifest["artifact_id"] == two["artifact_id"]
+    assert (await manager.close())["status"] == "complete"
+
+
+async def test_nested_validation_errors_do_not_echo_incident_content(tmp_path):
+    secret_marker = "PRIVATE_INCIDENT_MARKER_do_not_echo"
+    async with client_for(tmp_path) as (client, app, backend, manifest):
+        malformed = body(manifest, messages=[{"role": secret_marker, "content": {"private": secret_marker},
+                                              secret_marker: secret_marker}], **{secret_marker: secret_marker})
+        response = await client.post("/v1/chat/completions", json=malformed)
+        assert response.status_code == 422
+        assert secret_marker not in response.text
+        assert '"input"' not in response.text
+        assert '"ctx"' not in response.text
+        error = response.json()["error"]
+        assert error["code"] == "invalid_request"
+        assert error["request_id"] == response.headers["x-request-id"]
+        locations = [detail["loc"] for detail in error["details"]]
+        assert ["body", "messages", 0, "role"] in locations
+        assert ["body", "messages", 0, "content"] in locations
+        assert ["body", "<field>"] in locations
+        assert app.state.manager.leases == 0
+        assert backend.cancelled == []
+        assert (await client.post("/v1/chat/completions", json=body(manifest))).status_code == 200
+
+
+async def test_failed_postcommit_cleanup_retains_explicit_resource_ownership(tmp_path):
+    class FailedUnload(FixtureBackend):
+        async def unload(self):
+            raise RuntimeError("fixture cleanup failure")
+
+    one_package, one = make_package(tmp_path)
+    two_package, two = make_package(tmp_path, "two")
+    registry = Registry(tmp_path / "registry")
+    registry.register(one_package)
+    registry.register(two_package)
+    old, new = FailedUnload(), FixtureBackend()
+    manager = ModelManager(registry, Settings(initial_model=one["artifact_id"], cleanup_timeout_seconds=0.02),
+                           lambda manifest: old if manifest["artifact_id"] == one["artifact_id"] else new)
+    await manager.start()
+    result = await manager.switch(two["artifact_id"])
+    assert result["committed"] and result["cleanup_pending"]
+    assert result["current"] == registry.deployment()["current"] == manager.current.manifest["artifact_id"] == two["artifact_id"]
+    assert result["cleanup"][0]["status"] == "failed"
+    assert result["cleanup"][0]["error"] == "RuntimeError"
+    assert next(iter(manager._cleanup.values()))["deployment"].backend is old
+    with pytest.raises(InferenceFailure) as failure:
+        async with manager.acquire(two["artifact_id"]):
+            pytest.fail("Failed old-runtime cleanup must keep inference unavailable")
+    assert failure.value.status == 503
+    assert (await manager.close())["status"] == "incomplete"
+    assert new.unloaded
+    assert not old.unloaded
+
+
+async def test_unreadable_pointer_after_commit_error_reports_uncertain_not_retained(tmp_path, monkeypatch):
+    one_package, one = make_package(tmp_path)
+    two_package, two = make_package(tmp_path, "two")
+    registry = Registry(tmp_path / "registry")
+    registry.register(one_package)
+    registry.register(two_package)
+    app = create_app(Settings(initial_model=one["artifact_id"], admin_key="admin-fixture"), registry,
+                     lambda manifest: FixtureBackend())
+    async with app.router.lifespan_context(app):
+        def ambiguous_write(artifact_id):
+            registry.state_path.write_text("unreadable deployment fixture")
+            raise OSError("fixture write failure with ambiguous disk outcome")
+
+        monkeypatch.setattr(registry, "promote", ambiguous_write)
+        async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://fixture") as client:
+            response = await client.post("/admin/promote", json={"artifact_id": two["artifact_id"]},
+                                         headers={"Authorization": "Bearer admin-fixture"})
+            assert response.status_code == 503
+            assert response.json()["error"]["code"] == "deployment_state_uncertain"
+            assert "retained" not in response.text
+            assert app.state.manager.commit_uncertain
+            assert (await client.get("/health/ready")).status_code == 503
+            assert (await client.post("/v1/chat/completions", json=body(one))).status_code == 503
+            status = (await client.get("/admin/status", headers={"Authorization": "Bearer admin-fixture"})).json()
+            assert status["commit_uncertain"]
+            assert status["deployment"]["error"] == "durable_state_unreadable"

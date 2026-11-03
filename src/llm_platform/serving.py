@@ -14,6 +14,7 @@ from typing import Any, Callable, Literal
 import uuid
 
 from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse, Response, StreamingResponse
 from pydantic import BaseModel, ConfigDict, Field
 from prometheus_client import CollectorRegistry, Counter, Gauge, Histogram, generate_latest, CONTENT_TYPE_LATEST
@@ -40,6 +41,7 @@ class Settings:
     queue_timeout_seconds: float = 30.0
     request_timeout_seconds: float = 120.0
     switch_timeout_seconds: float = 120.0
+    cleanup_timeout_seconds: float = 15.0
 
     def __post_init__(self) -> None:
         if self.host not in {"127.0.0.1", "localhost", "::1"} and (not self.api_key or not self.admin_key):
@@ -51,7 +53,7 @@ class Settings:
                 raise ValueError("Limits must be positive")
         if self.max_queue < 0 or any(not math.isfinite(value) or value <= 0 for value in (
                 self.body_timeout_seconds, self.queue_timeout_seconds, self.request_timeout_seconds,
-                self.switch_timeout_seconds)):
+                self.switch_timeout_seconds, self.cleanup_timeout_seconds)):
             raise ValueError("Queue capacity and deadlines are invalid")
 
 
@@ -113,6 +115,14 @@ class ModelManager:
         self.switching = False
         self.closing = False
         self.last_load_error: str | None = None
+        self.last_switch_status = "idle"
+        self.commit_uncertain = False
+        self.commit_warning: str | None = None
+        self.shutdown_warning: str | None = None
+        # Retain ownership even if a backend cannot finish unloading by the
+        # response deadline. Cancelling an asyncio task does not stop a thread or
+        # CUDA kernel; these tasks are never cancelled merely to meet a timeout.
+        self._cleanup: dict[int, dict[str, Any]] = {}
         self.leases = 0
         self.running = 0
         self._condition = asyncio.Condition()
@@ -131,15 +141,28 @@ class ModelManager:
         can safely refuse a switch instead of sacrificing its healthy deployment.
         """
         async with self._switch_lock:
+            if self.closing:
+                raise InferenceFailure(503, "shutting_down", "Gateway is shutting down")
+            if self.commit_uncertain:
+                raise InferenceFailure(503, "deployment_state_uncertain", "Deployment state requires operator reconciliation")
             package, manifest = await asyncio.to_thread(self.registry.verify, artifact_id)
             if self.current and self.current.manifest["artifact_id"] == artifact_id:
-                return self.registry.deployment()
+                return self._switch_result(self.registry.deployment())
             async with self._condition:
                 if self.closing:
                     raise InferenceFailure(503, "shutting_down", "Gateway is shutting down")
+                if self.commit_uncertain:
+                    raise InferenceFailure(503, "deployment_state_uncertain", "Deployment state requires operator reconciliation")
+                if self.cleanup_status():
+                    raise InferenceFailure(503, "cleanup_pending", "Previous runtime cleanup must finish before switching")
                 self.switching = True
+                self.last_switch_status = "staging"
+                self.commit_warning = None
             candidate = None
+            committed = False
             try:
+                # Only reversible staging is subject to the load deadline.
+                # The durable commit and old-runtime cleanup are separate stages.
                 async with asyncio.timeout(self.settings.switch_timeout_seconds):
                     async with self._condition:
                         await self._condition.wait_for(lambda: self.leases == 0)
@@ -147,37 +170,114 @@ class ModelManager:
                     await candidate.load(package, manifest)
                     if candidate.health().get("ready") is not True:
                         raise ArtifactError("Candidate backend did not become ready")
-                    # Pointer failures occur before changing the in-memory deployment.
-                    state = await asyncio.to_thread(self.registry.promote, artifact_id)
-                    old = self.current
-                    self.current = Deployment(candidate, package, manifest)
-                    candidate = None
-                    self.last_load_error = None
-                    if old:
+
+                old = self.current
+                deployment = Deployment(candidate, package, manifest)
+
+                async def commit_and_adopt():
+                    self.last_switch_status = "committing"
+                    try:
+                        state = await asyncio.to_thread(self.registry.promote, artifact_id)
+                    except Exception as exc:
+                        # A filesystem exception after atomic replacement (for
+                        # example while removing a lock) does not mean no commit
+                        # happened. Reconcile the durable pointer before deciding.
                         try:
-                            await old.backend.unload()
+                            observed = await asyncio.to_thread(self.registry.deployment)
                         except Exception:
-                            # Serving succeeded, but fail readiness conservatively if
-                            # the prior runtime could not release its GPU allocation.
-                            self.last_load_error = "Previous backend cleanup failed"
+                            self.commit_uncertain = True
+                            self.last_switch_status = "commit_uncertain"
+                            raise InferenceFailure(503, "deployment_state_uncertain",
+                                                   "Cannot reconcile durable deployment state; operator recovery required") from exc
+                        if observed["current"] != artifact_id:
+                            raise
+                        state = observed
+                        self.commit_warning = "Durable commit succeeded but registry completion reported an error"
+                    # No await separates completed durable commit from adoption.
+                    self.current = deployment
+                    self.last_load_error = None
+                    self.last_switch_status = "committed"
                     return state
+
+                commit_task = asyncio.create_task(commit_and_adopt(), name=f"deployment-commit-{artifact_id[:12]}")
+                interrupted = False
+                # A cancelled await cannot stop registry.promote's thread. Wait
+                # for this owned transaction to settle before freeing a candidate
+                # or reporting cancellation to the administrative caller.
+                while not commit_task.done():
+                    try:
+                        await asyncio.shield(commit_task)
+                    except asyncio.CancelledError:
+                        interrupted = True
+                state = commit_task.result()
+                committed = True
+                candidate = None
+                cleanup_task = self._start_cleanup(old, "previous_deployment") if old else None
+                if interrupted:
+                    # Cleanup is already owned by the manager when cancellation
+                    # leaves the request; selection is durably committed.
+                    raise asyncio.CancelledError
+                if cleanup_task:
+                    await asyncio.wait({cleanup_task}, timeout=self.settings.cleanup_timeout_seconds)
+                return self._switch_result(state)
             except BaseException as exc:
-                self.last_load_error = type(exc).__name__
+                if not committed:
+                    self.last_load_error = type(exc).__name__
+                    if not self.commit_uncertain:
+                        self.last_switch_status = "failed_before_commit"
                 raise
             finally:
                 try:
                     if candidate:
-                        await candidate.unload()
+                        task = self._start_cleanup(Deployment(candidate, package, manifest), "failed_candidate")
+                        await asyncio.wait({task}, timeout=self.settings.cleanup_timeout_seconds)
                 finally:
                     async with self._condition:
                         self.switching = False
                         self._condition.notify_all()
 
+    def cleanup_status(self) -> list[dict[str, Any]]:
+        return [{"artifact_id": record["deployment"].manifest["artifact_id"],
+                 "stage": record["stage"], "status": "failed" if record["error"] else "pending",
+                 "error": record["error"]} for record in self._cleanup.values()]
+
+    def _switch_result(self, state: dict[str, Any]) -> dict[str, Any]:
+        cleanup = self.cleanup_status()
+        return {**state, "committed": True, "cleanup_pending": bool(cleanup), "cleanup": cleanup,
+                "warning": self.commit_warning or (
+                    "Deployment committed; runtime cleanup unresolved and inference unavailable until cleanup completes"
+                    if cleanup else None)}
+
+    def _start_cleanup(self, deployment: Deployment | None, stage: str) -> asyncio.Task:
+        if deployment is None:
+            raise ValueError("Cleanup requires an owned deployment")
+        key = id(deployment.backend)
+        if key in self._cleanup:
+            return self._cleanup[key]["task"]
+        task = asyncio.create_task(deployment.backend.unload(), name=f"runtime-cleanup-{stage}")
+        record = {"deployment": deployment, "stage": stage, "task": task, "error": None}
+        self._cleanup[key] = record
+
+        def completed(done: asyncio.Task):
+            # Retrieve exceptions to avoid unobserved task failures. On failure
+            # retain the backend and its explicit recovery state for the operator.
+            if done.cancelled():
+                record["error"] = "CancelledError"
+            elif done.exception() is not None:
+                record["error"] = type(done.exception()).__name__
+            else:
+                self._cleanup.pop(key, None)
+                if self.closing and self.current and self.current.backend is deployment.backend:
+                    self.current = None
+
+        task.add_done_callback(completed)
+        return task
+
     @asynccontextmanager
     async def acquire(self, artifact_id: str):
         queued_at = time.perf_counter()
         async with self._condition:
-            if self.closing or self.switching or self.current is None:
+            if self.closing or self.switching or self.current is None or self.commit_uncertain or self.cleanup_status():
                 raise InferenceFailure(503, "model_unavailable", "Model is not ready")
             if self.current.manifest["artifact_id"] != artifact_id:
                 raise InferenceFailure(404, "model_not_loaded", "Select the active immutable model identifier")
@@ -203,15 +303,34 @@ class ModelManager:
                 self.leases -= 1
                 self._condition.notify_all()
 
-    async def close(self) -> None:
+    async def close(self) -> dict[str, Any]:
         async with self._condition:
             self.closing = True
-        async with self._switch_lock:
-            async with self._condition:
-                await self._condition.wait_for(lambda: self.leases == 0)
+        acquired = False
+        try:
+            async with asyncio.timeout(self.settings.cleanup_timeout_seconds):
+                await self._switch_lock.acquire()
+                acquired = True
+                async with self._condition:
+                    await self._condition.wait_for(lambda: self.leases == 0)
             if self.current:
-                await self.current.backend.unload()
-                self.current = None
+                self._start_cleanup(self.current, "shutdown")
+            tasks = {record["task"] for record in self._cleanup.values() if not record["task"].done()}
+            if tasks:
+                await asyncio.wait(tasks, timeout=self.settings.cleanup_timeout_seconds)
+        except TimeoutError:
+            self.shutdown_warning = "Shutdown drain deadline exceeded; runtime ownership retained for operator recovery"
+        finally:
+            if acquired:
+                self._switch_lock.release()
+        cleanup = self.cleanup_status()
+        incomplete = bool(cleanup or self.leases or self._switch_lock.locked() or self.current)
+        if incomplete and self.shutdown_warning is None:
+            self.shutdown_warning = "Runtime cleanup did not finish; process recovery may be required"
+        if not incomplete:
+            self.shutdown_warning = None
+        return {"status": "incomplete" if incomplete else "complete", "cleanup": cleanup,
+                "warning": self.shutdown_warning}
 
 
 def create_app(settings: Settings | None = None, registry: Registry | None = None,
@@ -295,6 +414,27 @@ def create_app(settings: Settings | None = None, registry: Registry | None = Non
         return JSONResponse({"error": {"code": exc.code, "message": exc.message,
                                        "request_id": request.state.request_id}}, status_code=exc.status)
 
+    @app.exception_handler(RequestValidationError)
+    async def invalid_request(request: Request, exc: RequestValidationError):
+        # Pydantic's default response contains raw `input` and validator context.
+        # Unknown field names can themselves contain incident data, so locations
+        # also use only known schema names and bounded numeric list indexes.
+        allowed_locations = {"body", "query", "path", "header", *ChatRequest.model_fields,
+                             *ChatMessage.model_fields, *PromotionRequest.model_fields}
+        details = []
+        for error in exc.errors():
+            location = [part if (isinstance(part, str) and part in allowed_locations) or
+                         (type(part) is int and 0 <= part < 100_000) else "<field>"
+                         for part in error.get("loc", ())]
+            kind = error.get("type", "invalid_value")
+            if not isinstance(kind, str) or not kind.isascii() or not kind.replace("_", "").isalnum() or len(kind) > 80:
+                kind = "invalid_value"
+            message = {"missing": "Required field missing", "extra_forbidden": "Unsupported field",
+                       "json_invalid": "Malformed JSON"}.get(kind, "Invalid field value")
+            details.append({"loc": location, "type": kind, "message": message})
+        return JSONResponse({"error": {"code": "invalid_request", "message": "Request validation failed",
+                                       "request_id": request.state.request_id, "details": details}}, status_code=422)
+
     def check_key(request: Request, expected: str | None, administrative: bool = False) -> None:
         if expected is None:
             if administrative:
@@ -323,10 +463,13 @@ def create_app(settings: Settings | None = None, registry: Registry | None = Non
     @app.get("/health/ready")
     async def ready():
         healthy = bool(manager.current and manager.current.backend.health().get("ready") and
-                       not manager.switching and not manager.closing)
+                       not manager.switching and not manager.closing and not manager.cleanup_status()
+                       and not manager.commit_uncertain)
         return JSONResponse({"status": "ready" if healthy else "not_ready",
                              "model": manager.current.manifest["artifact_id"] if manager.current else None,
-                             "switching": manager.switching, "last_load_error": manager.last_load_error},
+                             "switching": manager.switching, "last_load_error": manager.last_load_error,
+                             "switch_status": manager.last_switch_status,
+                             "cleanup": manager.cleanup_status(), "commit_uncertain": manager.commit_uncertain},
                             status_code=200 if healthy else 503)
 
     @app.get("/metrics", dependencies=[Depends(authorize)])
@@ -353,8 +496,16 @@ def create_app(settings: Settings | None = None, registry: Registry | None = Non
 
     @app.get("/admin/status", dependencies=[Depends(admin)])
     async def admin_status():
-        return {"deployment": registry.deployment(), "switching": manager.switching,
+        try:
+            durable = registry.deployment()
+        except ArtifactError:
+            durable = {"error": "durable_state_unreadable"}
+        return {"deployment": durable, "switching": manager.switching,
                 "last_load_error": manager.last_load_error,
+                "active_model": manager.current.manifest["artifact_id"] if manager.current else None,
+                "switch_status": manager.last_switch_status, "cleanup": manager.cleanup_status(),
+                "commit_uncertain": manager.commit_uncertain, "commit_warning": manager.commit_warning,
+                "shutdown_warning": manager.shutdown_warning,
                 "engine": manager.current.backend.health() if manager.current else {"ready": False}}
 
     async def perform_switch(artifact_id: str):
