@@ -1,0 +1,21 @@
+{
+  "model_id": "Qwen/Qwen2.5-0.5B-Instruct",
+  "revision": "main",
+  "seed": 42,
+  "max_steps": 80,
+  "batch_size": 1,
+  "gradient_accumulation_steps": 4,
+  "max_seq_length": 768,
+  "learning_rate": 0.0002,
+  "rank": 8,
+  "alpha": 16,
+  "dropout": 0.05,
+  "target_modules": ["q_proj", "v_proj"],
+  "dtype": "bfloat16",
+  "device": "cuda",
+  "gradient_checkpointing": true,
+  "validation_every": 20,
+  "checkpoint_every": 40,
+  "dataset_id": "90525056dba5184c44d78366d83a002aa7204a8fe9d413fe88a7a544fb40b94e",
+  "experiment_id": "qwen05b-lora-sft-4060"
+}
