@@ -269,3 +269,55 @@ async def test_combined_prompt_and_output_context_limit_is_client_error(tmp_path
         assert backend.cancelled == []
         response = await client.post("/v1/chat/completions", json=body(manifest, max_tokens=6))
         assert response.status_code == 200
+
+
+@pytest.mark.parametrize("endpoint", ["/v1/models", "/admin/status"])
+async def test_non_ascii_bearer_is_unauthorized_not_server_error(tmp_path, endpoint):
+    async with client_for(tmp_path, api_key="api-fixture", admin_key="admin-fixture") as (client, app, backend, manifest):
+        response = await client.get(endpoint, headers=[(b"authorization", b"Bearer invalid-\xff")])
+        assert response.status_code == 401
+        assert app.state.registry.deployment()["current"] == manifest["artifact_id"]
+        assert app.state.manager.leases == 0
+
+
+async def test_unauthenticated_admin_body_is_bounded_before_parsing(tmp_path):
+    async with client_for(tmp_path, admin_key="admin-fixture", max_body_bytes=128) as (client, app, backend, manifest):
+        previous = app.state.registry.deployment()
+        response = await client.post("/admin/promote", content=b"x" * 129,
+                                     headers={"Content-Type": "application/json"})
+        assert response.status_code == 413
+        assert response.json()["error"]["code"] == "body_too_large"
+        assert response.headers["x-request-id"] == response.json()["error"]["request_id"]
+        assert app.state.registry.deployment() == previous
+        assert app.state.manager.current.manifest["artifact_id"] == manifest["artifact_id"]
+        metrics = (await client.get("/metrics")).text
+        assert 'llm_http_requests_total{route="/admin/promote",status="413"} 1.0' in metrics
+        # An arbitrary unknown URL contributes only the fixed unmatched label.
+        response = await client.post("/unknown-attacker-label", content=b"x" * 129)
+        assert response.status_code == 413
+        metrics = (await client.get("/metrics")).text
+        assert "unknown-attacker-label" not in metrics
+
+
+@pytest.mark.parametrize("endpoint", ["/v1/chat/completions", "/admin/promote"])
+async def test_slow_body_upload_times_out_before_admission_or_promotion(tmp_path, endpoint):
+    async with client_for(tmp_path, admin_key="admin-fixture", body_timeout_seconds=0.02) as (client, app, backend, manifest):
+        previous = app.state.registry.deployment()
+
+        async def slow_body():
+            yield b'{"partial":'
+            await asyncio.sleep(0.2)
+            yield b'"upload"}'
+
+        response = await client.post(endpoint, content=slow_body(), headers={"Content-Type": "application/json"})
+        assert response.status_code == 408
+        assert response.json()["error"]["code"] == "body_timeout"
+        assert app.state.registry.deployment() == previous
+        assert app.state.manager.leases == backend.running == 0
+        assert backend.cancelled == []
+
+
+@pytest.mark.parametrize("timeout", [float("nan"), float("inf"), 0, -1])
+def test_upload_timeout_must_be_finite_and_positive(timeout):
+    with pytest.raises(ValueError, match="deadlines"):
+        Settings(body_timeout_seconds=timeout)

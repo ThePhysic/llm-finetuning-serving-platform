@@ -7,6 +7,7 @@ from dataclasses import dataclass, field
 import hmac
 import ipaddress
 import json
+import math
 from pathlib import Path
 import time
 from typing import Any, Callable, Literal
@@ -16,6 +17,8 @@ from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse, Response, StreamingResponse
 from pydantic import BaseModel, ConfigDict, Field
 from prometheus_client import CollectorRegistry, Counter, Gauge, Histogram, generate_latest, CONTENT_TYPE_LATEST
+from starlette.requests import ClientDisconnect
+from starlette.routing import Match
 
 from .contracts import Backend, GenerationConfig
 from .registry import ArtifactError, Registry
@@ -33,6 +36,7 @@ class Settings:
     max_body_bytes: int = 128 * 1024
     max_concurrency: int = 1
     max_queue: int = 8
+    body_timeout_seconds: float = 15.0
     queue_timeout_seconds: float = 30.0
     request_timeout_seconds: float = 120.0
     switch_timeout_seconds: float = 120.0
@@ -45,8 +49,9 @@ class Settings:
         for value in (self.max_input_tokens, self.max_output_tokens, self.max_body_bytes, self.max_concurrency):
             if value < 1:
                 raise ValueError("Limits must be positive")
-        if self.max_queue < 0 or min(self.queue_timeout_seconds, self.request_timeout_seconds,
-                                     self.switch_timeout_seconds) <= 0:
+        if self.max_queue < 0 or any(not math.isfinite(value) or value <= 0 for value in (
+                self.body_timeout_seconds, self.queue_timeout_seconds, self.request_timeout_seconds,
+                self.switch_timeout_seconds)):
             raise ValueError("Queue capacity and deadlines are invalid")
 
 
@@ -243,19 +248,40 @@ def create_app(settings: Settings | None = None, registry: Registry | None = Non
     app = FastAPI(title="LLM Adaptation Gateway", version="0.1.0", lifespan=lifespan)
     app.state.manager, app.state.registry, app.state.settings = manager, registry, settings
 
+    def metric_route(request: Request) -> str:
+        # Middleware runs before route resolution. Match only declared routes so
+        # rejected uploads cannot create arbitrary metric-label cardinality.
+        for route in app.router.routes:
+            if route.matches(request.scope)[0] == Match.FULL:
+                return getattr(route, "path", "unmatched")
+        return "unmatched"
+
     @app.middleware("http")
     async def request_metadata(request: Request, call_next):
         request.state.request_id = "req-" + uuid.uuid4().hex
-        if request.url.path == "/v1/chat/completions":
-            # Bound input before Pydantic parses it, including chunked request bodies.
+        if request.method in {"POST", "PUT", "PATCH"}:
+            # Bound all write bodies before parsing or dependency resolution,
+            # including unauthenticated administration and chunked uploads.
             length = 0
             chunks = []
-            async for chunk in request.stream():
-                length += len(chunk)
-                if length > settings.max_body_bytes:
-                    http_requests.labels("/v1/chat/completions", "413").inc()
-                    return JSONResponse({"error": {"code": "body_too_large", "message": "Request body exceeds limit"}}, status_code=413)
-                chunks.append(chunk)
+
+            def upload_error(status: int, code: str, message: str):
+                http_requests.labels(metric_route(request), str(status)).inc()
+                return JSONResponse({"error": {"code": code, "message": message,
+                                               "request_id": request.state.request_id}}, status_code=status,
+                                    headers={"X-Request-ID": request.state.request_id})
+
+            try:
+                async with asyncio.timeout(settings.body_timeout_seconds):
+                    async for chunk in request.stream():
+                        length += len(chunk)
+                        if length > settings.max_body_bytes:
+                            return upload_error(413, "body_too_large", "Request body exceeds limit")
+                        chunks.append(chunk)
+            except TimeoutError:
+                return upload_error(408, "body_timeout", "Request body upload deadline exceeded")
+            except ClientDisconnect:
+                return upload_error(400, "client_disconnected", "Client disconnected before completing request body")
             request._body = b"".join(chunks)
         response = await call_next(request)
         response.headers["X-Request-ID"] = request.state.request_id
@@ -281,7 +307,7 @@ def create_app(settings: Settings | None = None, registry: Registry | None = Non
                 raise HTTPException(status_code=403, detail="Unauthenticated inference is restricted to loopback clients")
             return
         supplied = request.headers.get("authorization", "")
-        if not hmac.compare_digest(supplied, "Bearer " + expected):
+        if not hmac.compare_digest(supplied.encode("utf-8"), ("Bearer " + expected).encode("utf-8")):
             raise HTTPException(status_code=401, detail="Invalid bearer token")
 
     async def authorize(request: Request):
