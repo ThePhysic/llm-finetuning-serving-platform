@@ -344,7 +344,7 @@ async def server_session(engine: str, package: Path, manifest: dict[str, Any],
                 "--identity", str(identity_path), "--port", str(worker_port), "--max-model-len", "2048",
                 "--gpu-memory-utilization", "0.60", "--max-num-seqs", "8"]
             if prefix_cache:
-                command.append("--prefix-caching")
+                command.extend(["--prefix-caching", "--isolated-prefix-cache"])
             # API key passed only through the documented vLLM environment setting.
             worker_key = secrets.token_urlsafe(32)
             worker_env = {**env, "VLLM_API_KEY": worker_key, "VLLM_NO_USAGE_STATS": "1"}

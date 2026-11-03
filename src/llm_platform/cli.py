@@ -69,6 +69,8 @@ def package_base(output: Path, model_id: str = "Qwen/Qwen2.5-0.5B-Instruct",
     from .training import _code_identity
     model = HfApi().model_info(model_id, revision=revision)
     tokenizer = AutoTokenizer.from_pretrained(model_id, revision=model.sha, trust_remote_code=False)
+    if not isinstance(tokenizer.chat_template, str) or not tokenizer.chat_template.strip():
+        raise ValueError("A nonempty string chat template is required; named templates are unsupported")
     code_revision, code_dirty = _code_identity()
     with tempfile.TemporaryDirectory(prefix="llm-base-") as temporary:
         source = Path(temporary)

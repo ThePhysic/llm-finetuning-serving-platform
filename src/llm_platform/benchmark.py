@@ -33,18 +33,26 @@ class BenchmarkConfig:
     compute_price_per_hour: float | None = None
 
     def __post_init__(self) -> None:
-        if min(self.requests, self.concurrency, self.max_tokens) < 1 or self.warmup < 0:
-            raise ValueError("Request, concurrency and token limits must be positive")
+        for name in ("requests", "concurrency", "max_tokens"):
+            if type(getattr(self, name)) is not int or getattr(self, name) < 1:
+                raise ValueError("Request, concurrency and token limits must be positive integers")
+        for name in ("warmup", "repetition"):
+            if type(getattr(self, name)) is not int or getattr(self, name) < 0:
+                raise ValueError("Warmup and repetition must be nonnegative integers")
+        if type(self.seed) is not int or not 0 <= self.seed < 2**32:
+            raise ValueError("Seed must be an unsigned 32-bit integer")
         for value in (self.timeout_seconds, self.gpu_sample_interval):
-            if not math.isfinite(value) or value <= 0:
+            if type(value) not in {int, float} or not math.isfinite(value) or value <= 0:
                 raise ValueError("Deadlines and sampling interval must be finite and positive")
-        if self.request_rate is not None and (not math.isfinite(self.request_rate) or self.request_rate <= 0):
+        if self.request_rate is not None and (type(self.request_rate) not in {int, float}
+                or not math.isfinite(self.request_rate) or self.request_rate <= 0):
             raise ValueError("Request rate must be finite and positive")
         if self.compute_price_per_hour is not None and (
-            not math.isfinite(self.compute_price_per_hour) or self.compute_price_per_hour < 0
+            type(self.compute_price_per_hour) not in {int, float}
+            or not math.isfinite(self.compute_price_per_hour) or self.compute_price_per_hour < 0
         ):
             raise ValueError("Compute price assumption must be finite and nonnegative")
-        if not 0 <= self.temperature <= 2:
+        if type(self.temperature) not in {int, float} or not math.isfinite(self.temperature) or not 0 <= self.temperature <= 2:
             raise ValueError("Temperature must be within [0, 2]")
 
 
@@ -120,6 +128,18 @@ async def _events(response: httpx.Response):
         yield "\n".join(lines)
 
 
+def _response_object(value: Any) -> dict[str, Any]:
+    if not isinstance(value, dict):
+        raise ValueError("invalid_response_shape")
+    return value
+
+
+def _response_choices(value: Any) -> list[dict[str, Any]]:
+    if not isinstance(value, list) or len(value) > 1:
+        raise ValueError("invalid_response_shape")
+    return [_response_object(choice) for choice in value]
+
+
 async def _request(client: httpx.AsyncClient, model: str, messages: list[dict[str, str]],
                    config: BenchmarkConfig, index: int) -> dict[str, Any]:
     started = time.perf_counter()
@@ -147,7 +167,7 @@ async def _request(client: httpx.AsyncClient, model: str, messages: list[dict[st
                         if data == "[DONE]":
                             done = True
                             break
-                        chunk = json.loads(data)
+                        chunk = _response_object(json.loads(data))
                         if "error" in chunk:
                             raise ValueError("backend_stream_error")
                         identity = chunk.get("model")
@@ -157,10 +177,12 @@ async def _request(client: httpx.AsyncClient, model: str, messages: list[dict[st
                             observation["model"] = identity
                         if chunk.get("usage") is not None:
                             usage = chunk["usage"]
-                        for choice in chunk.get("choices", []):
+                        for choice in _response_choices(chunk.get("choices", [])):
                             if choice.get("finish_reason"):
                                 finish = choice["finish_reason"]
-                            text = choice.get("delta", {}).get("content")
+                            text = _response_object(choice.get("delta", {})).get("content")
+                            if text is not None and not isinstance(text, str):
+                                raise ValueError("invalid_response_shape")
                             if text:
                                 now = time.perf_counter()
                                 content.append(text)
@@ -174,12 +196,18 @@ async def _request(client: httpx.AsyncClient, model: str, messages: list[dict[st
                     if not done or finish not in {"stop", "length"}:
                         raise ValueError("incomplete_stream")
                 else:
-                    body = json.loads(await response.aread())
+                    body = _response_object(json.loads(await response.aread()))
                     if "error" in body:
                         raise ValueError("backend_response_error")
                     observation["model"] = body.get("model")
-                    content = [body["choices"][0]["message"]["content"]]
-                    finish = body["choices"][0]["finish_reason"]
+                    choices = _response_choices(body.get("choices"))
+                    if not choices:
+                        raise ValueError("invalid_response_shape")
+                    text = _response_object(choices[0].get("message")).get("content")
+                    if not isinstance(text, str):
+                        raise ValueError("invalid_response_shape")
+                    content = [text]
+                    finish = choices[0].get("finish_reason")
                     usage = body.get("usage")
                     if finish not in {"stop", "length"}:
                         raise ValueError("invalid_finish_reason")

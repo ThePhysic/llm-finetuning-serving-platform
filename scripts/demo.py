@@ -36,6 +36,8 @@ def main():
             {"role": "user", "content": args.report}], "max_tokens": 320,
             "temperature": 0, "seed": 42, "stream": args.stream}
         if args.stream:
+            done = False
+            finish = None
             with client.stream("POST", "/v1/chat/completions", json=payload) as completion:
                 completion.raise_for_status()
                 for line in completion.iter_lines():
@@ -43,18 +45,30 @@ def main():
                         continue
                     data = line[5:].strip()
                     if data == "[DONE]":
+                        done = True
                         break
                     chunk = json.loads(data)
                     if "error" in chunk:
                         print("\nGeneration failed:", chunk["error"].get("code"), file=sys.stderr)
                         raise SystemExit(1)
+                    if chunk.get("model") != model:
+                        raise SystemExit("Generation failed: served model identity mismatch")
                     for choice in chunk.get("choices", []):
+                        if choice.get("finish_reason") is not None:
+                            finish = choice["finish_reason"]
                         print(choice.get("delta", {}).get("content", ""), end="", flush=True)
                 print()
+            if not done or finish not in {"stop", "length"}:
+                raise SystemExit("Generation failed: incomplete stream")
         else:
             completion = client.post("/v1/chat/completions", json=payload)
             completion.raise_for_status()
             result = completion.json()
+            if result.get("model") != model:
+                raise SystemExit("Generation failed: served model identity mismatch")
+            if (not result.get("choices")
+                    or result["choices"][0].get("finish_reason") not in {"stop", "length"}):
+                raise SystemExit("Generation failed: incomplete completion")
             print(result["choices"][0]["message"]["content"])
             print("\nMeasured token usage:", result["usage"])
 

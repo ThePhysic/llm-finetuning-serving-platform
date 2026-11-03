@@ -21,13 +21,16 @@ from llm_platform.backends.precision import adapter_storage_dtype, normalized_dt
 def launch_command(package: Path, manifest: dict[str, Any], port: int = 8001,
                    max_model_len: int = 2048, gpu_memory_utilization: float = 0.60,
                    max_num_seqs: int = 8, prefix_caching: bool = False,
-                   enforce_eager: bool = True) -> tuple[list[str], dict[str, Any]]:
+                   enforce_eager: bool = True,
+                   isolated_prefix_cache: bool = False) -> tuple[list[str], dict[str, Any]]:
     if manifest["runtime"]["backend"] != "vllm":
         raise ValueError("Create a vLLM runtime package before launching")
     if not 1 <= port <= 65535 or max_model_len < 16 or max_num_seqs < 1:
         raise ValueError("Invalid server limits")
     if not 0.1 <= gpu_memory_utilization <= 0.95:
         raise ValueError("GPU memory utilization must be between 0.1 and 0.95")
+    if prefix_caching and not isolated_prefix_cache:
+        raise ValueError("Prefix caching requires an isolated synthetic benchmark; shared private prompts are unsafe")
     package = package.resolve()
     model_name = manifest["artifact_id"]
     served_base = model_name if manifest["kind"] == "base" else "base-" + manifest["base_model"]["revision"]
@@ -39,6 +42,7 @@ def launch_command(package: Path, manifest: dict[str, Any], port: int = 8001,
                "--served-model-name", served_base, "--dtype", manifest["runtime"]["dtype"],
                "--max-model-len", str(max_model_len), "--gpu-memory-utilization", str(gpu_memory_utilization),
                "--max-num-seqs", str(max_num_seqs), "--generation-config", "vllm",
+               "--allowed-origins", "[]",
                "--disable-log-requests", "--disable-uvicorn-access-log", "--uvicorn-log-level", "warning",
                "--enable-prefix-caching" if prefix_caching else "--no-enable-prefix-caching"]
     if enforce_eager:
@@ -57,6 +61,7 @@ def launch_command(package: Path, manifest: dict[str, Any], port: int = 8001,
                 "chat_template_sha256": manifest["tokenizer"]["chat_template_sha256"],
                 "quantization": quantization, "dtype": manifest["runtime"]["dtype"],
                 "prefix_caching": prefix_caching, "enforce_eager": enforce_eager,
+                "isolated_prefix_cache": isolated_prefix_cache, "allowed_origins": [],
                 "max_model_len": max_model_len, "max_num_seqs": max_num_seqs,
                 "gpu_memory_utilization": gpu_memory_utilization, "command": command}
     if manifest["kind"] == "adapter":
@@ -75,12 +80,18 @@ def main() -> None:
     parser.add_argument("--gpu-memory-utilization", type=float, default=0.60)
     parser.add_argument("--max-num-seqs", type=int, default=8)
     parser.add_argument("--prefix-caching", action="store_true")
+    parser.add_argument("--isolated-prefix-cache", action="store_true",
+                        help="Allow prefix caching only for a dedicated synthetic, single-trust benchmark")
     parser.add_argument("--cuda-graphs", action="store_true")
     args = parser.parse_args()
+    worker_key = os.environ.get("VLLM_API_KEY", "")
+    if not worker_key or not worker_key.isascii() or any(character.isspace() for character in worker_key):
+        parser.error("Set a nonempty ASCII VLLM_API_KEY without whitespace in the worker environment")
     manifest = verify_package(args.package)
     command, identity = launch_command(args.package, manifest, args.port, args.max_model_len,
                                        args.gpu_memory_utilization, args.max_num_seqs,
-                                       args.prefix_caching, not args.cuda_graphs)
+                                       args.prefix_caching, not args.cuda_graphs,
+                                       args.isolated_prefix_cache)
     identity.update(pid=os.getpid(), launch_unix_seconds=time.time(),
                     vllm_version=importlib.metadata.version("vllm"))
     args.identity.parent.mkdir(parents=True, exist_ok=True)

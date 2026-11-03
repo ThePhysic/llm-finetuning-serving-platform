@@ -4,6 +4,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 import hashlib
 import json
+import math
 from pathlib import Path
 from typing import Any, AsyncIterator, Protocol
 
@@ -39,6 +40,19 @@ class GenerationConfig:
     temperature: float = 0.0
     seed: int = 42
     stop: tuple[str, ...] = ()
+
+    def __post_init__(self) -> None:
+        if type(self.max_tokens) is not int or not 1 <= self.max_tokens <= 32768:
+            raise ValueError("max_tokens must be an integer within [1, 32768]")
+        if type(self.seed) is not int or not 0 <= self.seed < 2**32:
+            raise ValueError("seed must be an unsigned 32-bit integer")
+        if (type(self.temperature) not in {int, float} or not math.isfinite(self.temperature)
+                or not 0 <= self.temperature <= 2):
+            raise ValueError("temperature must be finite and within [0, 2]")
+        if (not isinstance(self.stop, (tuple, list)) or len(self.stop) > 4
+                or any(not isinstance(value, str) or not value or len(value) > 256 for value in self.stop)):
+            raise ValueError("stop must contain up to four nonempty strings of at most 256 characters")
+        object.__setattr__(self, "stop", tuple(self.stop))
 
 
 @dataclass(frozen=True)

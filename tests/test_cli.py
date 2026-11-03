@@ -3,7 +3,9 @@ import json
 from pathlib import Path
 import subprocess
 import sys
+from types import SimpleNamespace
 
+import pytest
 from typer.testing import CliRunner
 
 from llm_platform.cli import app
@@ -127,3 +129,18 @@ def test_evaluation_rejects_invalid_variant_before_loading_model(tmp_path):
     assert result.exit_code != 0
     assert "Unknown prompt variant" in result.output
     assert not (tmp_path / "output").exists()
+
+
+def test_package_base_rejects_named_templates_before_any_save(tmp_path, monkeypatch):
+    import huggingface_hub
+    from llm_platform.cli import package_base
+
+    tokenizer = SimpleNamespace(chat_template={"../../outside": "untrusted template"},
+                                save_pretrained=lambda path: pytest.fail("must reject before saving"))
+    monkeypatch.setattr(huggingface_hub, "HfApi", lambda: SimpleNamespace(
+        model_info=lambda *args, **kwargs: SimpleNamespace(sha="a" * 40)))
+    monkeypatch.setitem(sys.modules, "transformers", SimpleNamespace(
+        AutoTokenizer=SimpleNamespace(from_pretrained=lambda *args, **kwargs: tokenizer)))
+    with pytest.raises(ValueError, match="string chat template"):
+        package_base(tmp_path / "package")
+    assert not (tmp_path / "package").exists()

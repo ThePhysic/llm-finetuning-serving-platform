@@ -50,6 +50,28 @@ async def test_stream_error_is_not_generated_text_or_success():
     assert "private" not in str(row)
 
 
+@pytest.mark.parametrize("payload", [[], {"choices": [42]}, {"choices": [{"delta": []}]},
+                                     {"choices": [{"delta": {"content": 42}}]}])
+async def test_malformed_sse_is_recorded_as_failure_without_aborting_benchmark(payload):
+    def handler(request):
+        return httpx.Response(200, text="data: " + json.dumps(payload) + "\n\ndata: [DONE]\n\n")
+    async with httpx.AsyncClient(base_url="http://test", transport=httpx.MockTransport(handler)) as client:
+        row = await _request(client, "a" * 64, [], BenchmarkConfig(), 0)
+    assert row["success"] is False
+    assert row["error"] == "invalid_response_shape"
+    assert row["latency_seconds"] >= 0
+
+
+@pytest.mark.parametrize("payload", [[], {"choices": []}, {"choices": [42]},
+                                     {"choices": [{"message": {"content": 42}}]}])
+async def test_malformed_sync_response_is_recorded_as_failure(payload):
+    async with httpx.AsyncClient(base_url="http://test", transport=httpx.MockTransport(
+            lambda request: httpx.Response(200, json=payload))) as client:
+        row = await _request(client, "a" * 64, [], BenchmarkConfig(stream=False), 0)
+    assert row["success"] is False
+    assert row["error"] == "invalid_response_shape"
+
+
 def test_comparison_rejects_changed_weights():
     report = {"metadata": {"weights_id": "base", "tokenizer_id": "token", "prompt_set_sha256": "p"},
               "config": {k: 1 for k in ("max_tokens", "temperature", "seed", "stream", "requests", "warmup")}}
