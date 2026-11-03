@@ -1,0 +1,19 @@
+{
+  "source_revision": "4b3c07bb0e0470724f0c5e018af5f0392f8d12a1",
+  "started_at_utc": "2026-11-03T05:20:38.949111+00:00",
+  "finished_at_utc": "2026-11-03T05:22:38.710534+00:00",
+  "terminal_environment": {
+    "FORCE_COLOR": "1",
+    "GITHUB_ACTIONS": "true"
+  },
+  "python_executable": "/home/ridle/llm-platform-env/bin/python",
+  "cuda_visible_devices": "",
+  "scope": "Final full CPU suite, not GPU performance evidence",
+  "command": [
+    "/home/ridle/llm-platform-env/bin/python",
+    "-c",
+    "import os; assert os.environ.get('CUDA_VISIBLE_DEVICES') == ''; import pytest; r=pytest.main(['-q']); import sys; t=sys.modules.get('torch'); assert t is None or not t.cuda.is_initialized(); print('CUDA_CONTEXT_INITIALIZED=False'); raise SystemExit(r)"
+  ],
+  "exit_code": 0,
+  "log_sha256": "0b98e4ac9eab49b7976d18e9e0e73ca982bbe7542c5bf00dc6a4dbbf8d387423"
+}

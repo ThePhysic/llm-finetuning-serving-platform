@@ -1,0 +1,25 @@
+{
+  "run_id": "41583032684",
+  "head_sha": "0dcfb31d2f77c7b09565d12ce63d862c7d4a4aae",
+  "url": "https://github.com/ThePhysic/llm-finetuning-serving-platform/actions/runs/41583032684",
+  "conclusion": "failure",
+  "result": "1 failed, 423 passed, 4 skipped",
+  "cause": "Rich ANSI styling splits the required --provenance error option in a raw-text test assertion. CLI correctly returns BadParameter exit 2.",
+  "reproduction_environment": {
+    "CUDA_VISIBLE_DEVICES": "",
+    "FORCE_COLOR": "1",
+    "GITHUB_ACTIONS": "true"
+  },
+  "correction": "Normalize presentation with click.unstyle; check both color settings, require exit 2 and no output file. No runtime or provenance guard is changed.",
+  "command": [
+    "gh",
+    "run",
+    "view",
+    "41583032684",
+    "--repo",
+    "ThePhysic/llm-finetuning-serving-platform",
+    "--log-failed"
+  ],
+  "log_path": "evidence/polish/validation/github-actions-41583032684-failure.txt",
+  "log_sha256": "99983757436e93294b614d8b3c2391a6b1f4c47c994544f393c7dc3a4f52cf40"
+}

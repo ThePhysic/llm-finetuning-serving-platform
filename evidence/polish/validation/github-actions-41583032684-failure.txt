@@ -1,0 +1,37 @@
+test	Run pytest -q	﻿2026-11-03T05:17:44.6646137Z ##[group]Run pytest -q
+test	Run pytest -q	2026-11-03T05:17:44.6646509Z ^[[36;1mpytest -q^[[0m
+test	Run pytest -q	2026-11-03T05:17:44.6670536Z shell: /usr/bin/bash -e {0}
+test	Run pytest -q	2026-11-03T05:17:44.6670679Z env:
+test	Run pytest -q	2026-11-03T05:17:44.6670798Z   CUDA_VISIBLE_DEVICES: 
+test	Run pytest -q	2026-11-03T05:17:44.6670974Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.15/x64
+test	Run pytest -q	2026-11-03T05:17:44.6671214Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib/pkgconfig
+test	Run pytest -q	2026-11-03T05:17:44.6671447Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+test	Run pytest -q	2026-11-03T05:17:44.6671662Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+test	Run pytest -q	2026-11-03T05:17:44.6671871Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.15/x64
+test	Run pytest -q	2026-11-03T05:17:44.6672104Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.15/x64/lib
+test	Run pytest -q	2026-11-03T05:17:44.6672297Z ##[endgroup]
+test	Run pytest -q	2026-11-03T05:17:47.1952351Z ........................................................................ [ 16%]
+test	Run pytest -q	2026-11-03T05:17:49.8049543Z ....F................................................................... [ 33%]
+test	Run pytest -q	2026-11-03T05:17:50.4634277Z ........................................................................ [ 50%]
+test	Run pytest -q	2026-11-03T05:17:51.0268957Z ........................................................................ [ 67%]
+test	Run pytest -q	2026-11-03T05:17:52.6612951Z ........................................................................ [ 84%]
+test	Run pytest -q	2026-11-03T05:17:52.9824294Z .........................s.......................................sss     [100%]
+test	Run pytest -q	2026-11-03T05:17:52.9824814Z =================================== FAILURES ===================================
+test	Run pytest -q	2026-11-03T05:17:52.9825219Z ____ test_review_import_requires_structured_provenance_not_a_reviewer_label ____
+test	Run pytest -q	2026-11-03T05:17:52.9825535Z 
+test	Run pytest -q	2026-11-03T05:17:52.9825752Z tmp_path = PosixPath('/tmp/pytest-of-runner/pytest-0/test_review_import_requires_st0')
+test	Run pytest -q	2026-11-03T05:17:52.9826052Z 
+test	Run pytest -q	2026-11-03T05:17:52.9826404Z     def test_review_import_requires_structured_provenance_not_a_reviewer_label(tmp_path):
+test	Run pytest -q	2026-11-03T05:17:52.9826968Z         result = runner.invoke(app, ["review", "import", str(tmp_path / "packet.jsonl"), str(tmp_path / "key.json"),
+test	Run pytest -q	2026-11-03T05:17:52.9827444Z                                      str(tmp_path / "result.json")])
+test	Run pytest -q	2026-11-03T05:17:52.9827735Z         assert result.exit_code != 0
+test	Run pytest -q	2026-11-03T05:17:52.9828021Z >       assert "--provenance" in result.output
+test	Run pytest -q	2026-11-03T05:17:52.9829659Z E       assert '--provenance' in "\x1b[1;33mUsage: \x1b[0m\x1b[1mroot review import [OPTIONS] {packet} {key} {output}\x1b[0m\n\x1b[2mTry \x1b[0m\x1b[2;...   \x1b[31m│\x1b[0m\n\x1b[31m╰──────────────────────────────────────────────────────────────────────────────╯\x1b[0m\n"
+test	Run pytest -q	2026-11-03T05:17:52.9831239Z E        +  where "\x1b[1;33mUsage: \x1b[0m\x1b[1mroot review import [OPTIONS] {packet} {key} {output}\x1b[0m\n\x1b[2mTry \x1b[0m\x1b[2;...   \x1b[31m│\x1b[0m\n\x1b[31m╰──────────────────────────────────────────────────────────────────────────────╯\x1b[0m\n" = <Result SystemExit(2)>.output
+test	Run pytest -q	2026-11-03T05:17:52.9831978Z 
+test	Run pytest -q	2026-11-03T05:17:52.9832087Z tests/test_cli.py:153: AssertionError
+test	Run pytest -q	2026-11-03T05:17:52.9832390Z =========================== short test summary info ============================
+test	Run pytest -q	2026-11-03T05:17:52.9833840Z FAILED tests/test_cli.py::test_review_import_requires_structured_provenance_not_a_reviewer_label - assert '--provenance' in "\x1b[1;33mUsage: \x1b[0m\x1b[1mroot review import [OPTIONS] {packet} {key} {output}\x1b[0m\n\x1b[2mTry \x1b[0m\x1b[2;...   \x1b[31m│\x1b[0m\n\x1b[31m╰──────────────────────────────────────────────────────────────────────────────╯\x1b[0m\n"
+test	Run pytest -q	2026-11-03T05:17:52.9835628Z  +  where "\x1b[1;33mUsage: \x1b[0m\x1b[1mroot review import [OPTIONS] {packet} {key} {output}\x1b[0m\n\x1b[2mTry \x1b[0m\x1b[2;...   \x1b[31m│\x1b[0m\n\x1b[31m╰──────────────────────────────────────────────────────────────────────────────╯\x1b[0m\n" = <Result SystemExit(2)>.output
+test	Run pytest -q	2026-11-03T05:17:52.9837061Z 1 failed, 423 passed, 4 skipped in 7.62s
+test	Run pytest -q	2026-11-03T05:17:53.1184756Z ##[error]Process completed with exit code 1.

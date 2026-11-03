@@ -70,9 +70,9 @@ completion. Dependency and chart assets preserve hash-bound bytes across checkou
 
 | Check | Recorded result and scope |
 |---|---|
-| Final Linux suite, preserved training environment | **428 passed**, three expected PEFT tiny-model warnings; CUDA hidden and no initialized context. |
-| Final Linux suite, modern candidate | **428 passed**, same scoped warnings; CUDA hidden and no initialized context. |
-| Final Windows core suite | **422 passed, 6 skipped** for platform/privilege or optional training dependencies; CUDA hidden inside Python. |
+| Final Linux suite, preserved training environment | **429 passed**, three expected PEFT tiny-model warnings; CUDA hidden and no initialized context. |
+| Final Linux suite, modern candidate | **429 passed**, same scoped warnings; CUDA hidden and no initialized context. |
+| Final Windows core suite | **423 passed, 6 skipped** for platform/privilege or optional training dependencies; CUDA hidden inside Python. |
 | Static checks, frozen dataset and strict evidence audit | Ruff passed; dataset verified; all 11 evidence criteria passed using the separate fresh owner-attested review. |
 | Modern candidate runtime | All 70 audited third-party versions match the installed inventory; dependency consistency check passed. |
 | Modern candidate GPU | Real BF16 matmul/SDPA, two optimizer steps, validation, adapter export and new/old adapter reload; real TCP sync/SSE, usage/identity, authorization, in-progress cancellation, promotion/rollback and graceful shutdown passed. |
@@ -84,6 +84,19 @@ uses source `fd2d3c0`; its failed first run is preserved. That failure exposed t
 Transformers 5 default `BatchEncoding` return shape. The shared strict token-ID
 normalizer fixes masking and token counts while retaining exact prompt-prefix
 and sequence-budget checks. No old model outputs were regenerated or improved.
+
+The first publication CI at `0dcfb31` found a terminal-formatting test failure:
+Rich inserted ANSI escapes within the `--provenance` error text. The CLI correctly
+refused missing provenance with exit 2, but the raw substring assertion failed.
+The [failed run and log](../evidence/polish/validation/github-actions-41583032684-failure.json)
+remain preserved. Test-only commit `4b3c07bb0e0470724f0c5e018af5f0392f8d12a1`
+normalizes ANSI, checks both color settings, requires exact exit 2 and retains the
+no-output assertion. The latest `*-ci-fix-final-tests` records above use this
+commit with `FORCE_COLOR=1`, `GITHUB_ACTIONS=true` and CUDA hidden; both Linux
+suites passed 429 tests, and Windows passed 423 with six skips. Earlier 428/422
+records remain scoped to `ae04ce0`. Astra independently passed all 16 CLI tests
+under the forced-color settings and reviewed the correction without complaints.
+No production code, model results, GPU experiment or container identity changed.
 
 ## GPU-container identity and commands
 
