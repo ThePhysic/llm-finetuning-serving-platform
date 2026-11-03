@@ -229,13 +229,13 @@ types, not the humanity of a claimed reviewer. Preserve the annotated packet has
 and review provenance. Overall unsupported-claim and action-correctness metrics
 remain pending until this step is complete.
 
-The published primary pending packet is `evidence/human-review/review_packet.jsonl`:
-two independent incident families and six blinded responses. Its display labels
-A–F conceal the variant mapping. Keep `review_key.json` and `display-map.json`
-separate from the person reviewing the packet. Save actual completed annotations
-as `evidence/human-review/annotated.jsonl` before importing; no labels or semantic
-scores are currently supplied by the pending request itself. A larger archived
-packet does not imply additional human review occurred.
+The completed primary packet is `evidence/human-review/review_packet.jsonl`:
+two independent incident families and six responses displayed as A–F. The human
+project owner supplied the ratings directly while model identities were hidden.
+Original replies, `annotated.jsonl`, the validated aggregate, and reviewer
+provenance are preserved. Keys are published after completion for auditability.
+For a new blinded review, generate a fresh packet and keep its key separate until
+annotations are complete. The larger archived packet was not additionally reviewed.
 
 ## Evidence checklist
 

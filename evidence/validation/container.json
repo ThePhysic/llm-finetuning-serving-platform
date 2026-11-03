@@ -1,0 +1,9 @@
+{
+    "image_id":  "sha256:5ef96a7e1f9f5eb04b46e526770e966587b28cb72240a0e91d11a36078b3ff90",
+    "cpu_build_verified":  true,
+    "cpu_doctor_verified":  true,
+    "control_plane_verified":  true,
+    "graceful_exit_code":  0,
+    "gpu_container_build_verified":  false,
+    "scope":  "GPU inference was measured natively on WSL2; the GPU Dockerfile is provided but was not built/tested in this validation."
+}

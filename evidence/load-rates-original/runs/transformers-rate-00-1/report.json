@@ -1,0 +1,240 @@
+{
+  "config": {
+    "compute_price_per_hour": null,
+    "concurrency": 4,
+    "gpu_sample_interval": 0.5,
+    "max_tokens": 32,
+    "repetition": 0,
+    "request_rate": 1.0,
+    "requests": 12,
+    "seed": 42,
+    "stream": true,
+    "temperature": 0.0,
+    "timeout_seconds": 120.0,
+    "warmup": 2
+  },
+  "created_at": "2026-11-03T02:58:20.823788+00:00",
+  "definitions": {
+    "GPU": "nvidia-smi samples the load-generator host's device-wide used memory and utilization, including other processes and runtime reservations; not tensor allocated memory",
+    "TPOT": "(last content event time - first content event time)/(reported completion tokens-1); streaming event batching can bias this estimate",
+    "TTFT": "HTTP dispatch to first nonempty content event received by the client",
+    "arrival": "Bounded closed-loop workers, optionally paced; late arrivals wait at client and schedule delay is recorded",
+    "inter_content_event": "Time between nonempty SSE content events; events may contain multiple tokens",
+    "latency": "HTTP dispatch to complete response, including transport and queue",
+    "runtime_GPU": "Gateway metrics sample runtime allocated/reserved tensor bytes when available; unsupported values stay null. Peak is the backend process/session high-water mark including warmup and earlier workloads, not an isolated per-request or per-run peak. Sample median is observed during this workload, not a guaranteed equilibrium.",
+    "throughput": "Successful measured requests or reported output tokens divided by full measured workload wall time"
+  },
+  "environment": {
+    "client_software": {
+      "fastapi": "0.162.0",
+      "httpx": "0.28.1",
+      "peft": "0.15.2",
+      "torch": "2.6.0+cu124",
+      "transformers": "4.51.3",
+      "vllm": null
+    },
+    "gpu_inventory_csv": [
+      "NVIDIA GeForce RTX 4060 Laptop GPU, 566.36, 8188"
+    ],
+    "platform": "Linux-6.18.54.1-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+    "python": "3.12.16"
+  },
+  "limitations": [
+    "Small samples give unstable tail estimates; retain repetitions and raw observations.",
+    "GPU and gateway-metrics sampling is best effort and may miss short peaks; it adds monitoring overhead through a separate HTTP connection.",
+    "Client software inventory does not establish a remote engine's software; supply engine versions in metadata."
+  ],
+  "metadata": {
+    "actual_startup": {
+      "engine": "transformers",
+      "engine_software": {
+        "python": "3.12.16",
+        "versions": {
+          "fastapi": "0.162.0",
+          "httpx": "0.28.1",
+          "peft": "0.15.2",
+          "torch": "2.6.0+cu124",
+          "transformers": "4.51.3",
+          "vllm": null
+        }
+      },
+      "gateway_ready_seconds": 21.527323988999342,
+      "model": "b4d8a201e94315bff4f5b030336d6644691da18fc6d050f04a8e095ae9d484ad",
+      "prefix_caching": false,
+      "ready_engine_state": {
+        "active_requests": 0,
+        "adapter_compute_dtype": null,
+        "adapter_storage_dtype": null,
+        "backend": "transformers",
+        "base_compute_dtype": "bfloat16",
+        "cleanup_pending": false,
+        "cuda_allocated_bytes": 996321792,
+        "cuda_peak_allocated_bytes": 996321792,
+        "cuda_reserved_bytes": 1040187392,
+        "decoding_policy": {
+          "bad_words_ids": null,
+          "bos_token_id": 151643,
+          "constraints": null,
+          "eos_policy": "packaged-tokenizer-single-eos",
+          "eos_token_ids": [
+            151645
+          ],
+          "forced_token_ids": null,
+          "frequency_penalty": 0.0,
+          "ignore_eos": false,
+          "length_penalty": 1.0,
+          "min_new_tokens": 0,
+          "min_p": "disabled",
+          "no_repeat_ngram_size": 0,
+          "num_beams": 1,
+          "num_return_sequences": 1,
+          "pad_token_id": 151643,
+          "presence_penalty": 0.0,
+          "publisher_generation_config": "ignored",
+          "repetition_penalty": 1.0,
+          "sha256": "aaa5a1cdd345cdb0c00a74169e019c4823a6e8555400fdc67ae2e69096c484eb",
+          "top_k": "disabled",
+          "top_p": 1.0,
+          "version": "platform-serving-v1"
+        },
+        "device": "cuda",
+        "dtype": "bfloat16",
+        "last_error": null,
+        "max_model_len": 32768,
+        "precision_source": "actual-runtime-parameters-and-safetensors-header",
+        "ready": true
+      },
+      "state": "fresh processes; weights in local HF cache; OS cache uncontrolled"
+    },
+    "adapter_compute_dtype": null,
+    "adapter_storage_dtype": null,
+    "base_compute_dtype": "bfloat16",
+    "cache_state": {
+      "OS_cache": "uncontrolled",
+      "prefix_caching": "not implemented",
+      "warmup_requests": 2,
+      "weights": "local HF cache"
+    },
+    "configured_request_rate": 1.0,
+    "contention": "No other platform GPU job is scheduled by this script; desktop/display allocations may remain.",
+    "decoding_policy": {
+      "bad_words_ids": null,
+      "bos_token_id": 151643,
+      "constraints": null,
+      "eos_policy": "packaged-tokenizer-single-eos",
+      "eos_token_ids": [
+        151645
+      ],
+      "forced_token_ids": null,
+      "frequency_penalty": 0.0,
+      "ignore_eos": false,
+      "length_penalty": 1.0,
+      "min_new_tokens": 0,
+      "min_p": "disabled",
+      "no_repeat_ngram_size": 0,
+      "num_beams": 1,
+      "num_return_sequences": 1,
+      "pad_token_id": 151643,
+      "presence_penalty": 0.0,
+      "publisher_generation_config": "ignored",
+      "repetition_penalty": 1.0,
+      "sha256": "aaa5a1cdd345cdb0c00a74169e019c4823a6e8555400fdc67ae2e69096c484eb",
+      "top_k": "disabled",
+      "top_p": 1.0,
+      "version": "platform-serving-v1"
+    },
+    "decoding_policy_sha256": "aaa5a1cdd345cdb0c00a74169e019c4823a6e8555400fdc67ae2e69096c484eb",
+    "engine": "transformers",
+    "engine_settings": {
+      "adapter": false,
+      "base_model": {
+        "id": "Qwen/Qwen2.5-0.5B-Instruct",
+        "revision": "7ae557604adf67be50417f59c2c2f167def9a775"
+      },
+      "dtype": "bfloat16",
+      "engine_software": {
+        "python": "3.12.16",
+        "versions": {
+          "fastapi": "0.162.0",
+          "httpx": "0.28.1",
+          "peft": "0.15.2",
+          "torch": "2.6.0+cu124",
+          "transformers": "4.51.3",
+          "vllm": null
+        }
+      },
+      "gateway_concurrency": 1,
+      "gateway_queue": 4,
+      "max_model_len": 32768,
+      "quantization": "none",
+      "reference_execution_serialized": true,
+      "vllm_enforce_eager": null,
+      "vllm_gpu_memory_utilization": null,
+      "vllm_max_num_seqs": null
+    },
+    "precision_source": "actual-runtime-parameters-and-safetensors-header",
+    "prompt_set_sha256": "4209006b1baa23cbee0a3b3c8feaaef41fd97c710b82281d2b9916a1555aa9d3",
+    "quality": "Weights and tokenization controlled; numerical engine differences may change generated tokens. This is not a quality-equivalence claim.",
+    "tokenizer_id": "2f7b87220b0652034ee0e661d8522fa23ab2ad9d4f9ef23dafae6c090a30dbf4",
+    "weight_label": "base",
+    "weights_id": "6e0fe88609de5e1d89db60f009820d18556dd40815db8a40bea69dc764a88864",
+    "workload": "short-stream-c4-rate-sweep"
+  },
+  "model": "b4d8a201e94315bff4f5b030336d6644691da18fc6d050f04a8e095ae9d484ad",
+  "pacing_observations": {
+    "arrival_model": "Paced bounded closed-loop workers. Client scheduling delay is outside HTTP request latency/TTFT; gateway queue delay is inside them. No independent open-loop offered-load claim.",
+    "client_schedule_delay_seconds": {
+      "maximum": 10.559942662001049,
+      "median": 0.9987742100001924,
+      "total": 36.58216891300253
+    },
+    "configured_request_rate": 1.0,
+    "dispatch_span_requests_per_second": 0.5107322539005972,
+    "gateway_queue_mean_seconds_including_warmup": 5.250488882499797,
+    "gateway_queue_samples_including_warmup": 14.0,
+    "gateway_queue_seconds_sum_including_warmup": 73.50684435499716,
+    "queue_observation": "Cumulative gateway queue histogram deltas span this arm including its two warmup requests; not per-example queue timings."
+  },
+  "schema_version": 1,
+  "summary": {
+    "error_rate": 0.0,
+    "errors": {},
+    "gpu_device_used_median_mib": 1577.0,
+    "gpu_device_used_peak_mib": 1577.0,
+    "input_tokens": {
+      "p50": 142.5,
+      "p95": 147.0,
+      "p99": 147.0
+    },
+    "latency_seconds": {
+      "p50": 10.731711014999746,
+      "p95": 11.356815485949664,
+      "p99": 11.357705469990506
+    },
+    "output_tokens": {
+      "p50": 32.0,
+      "p95": 32.0,
+      "p99": 32.0
+    },
+    "output_tokens_per_second": 11.878924319640127,
+    "rejection_rate": 0.0,
+    "request_per_second": 0.371216384988754,
+    "requests": 12,
+    "runtime_allocated_sample_median_bytes": 1033058816.0,
+    "runtime_session_peak_allocated_bytes": 1037766144.0,
+    "successful_requests": 12,
+    "timeout_rate": 0.0,
+    "total_output_tokens": 384,
+    "tpot_seconds": {
+      "p50": 0.08310970885483379,
+      "p95": 0.09315171770804814,
+      "p99": 0.0964037519029203
+    },
+    "ttft_seconds": {
+      "p50": 7.950106713999958,
+      "p95": 8.680982709000455,
+      "p99": 8.722908091400386
+    },
+    "wall_seconds": 32.32615931100008
+  }
+}

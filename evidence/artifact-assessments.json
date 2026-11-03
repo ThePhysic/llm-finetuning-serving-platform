@@ -1,0 +1,288 @@
+{
+  "schema_version": 1,
+  "type": "detached-artifact-quality-assessments",
+  "created_at": "2026-11-03T03:21:28.728548+00:00",
+  "design": "Packages are immutable and were exported before evaluation. Export manifest evaluation fields preserve that creation-time status. These detached hash-bound assessments link completed reports without creating a circular package/report identity or changing adapter bytes.",
+  "assessments": [
+    {
+      "artifact_id": "b4d8a201e94315bff4f5b030336d6644691da18fc6d050f04a8e095ae9d484ad",
+      "kind": "base",
+      "base_model": {
+        "id": "Qwen/Qwen2.5-0.5B-Instruct",
+        "revision": "7ae557604adf67be50417f59c2c2f167def9a775"
+      },
+      "reports": [
+        {
+          "variant": "zero_shot",
+          "path": "evaluation/zero_shot/report.json",
+          "sha256": "7120c03b2595cfe8545a2dd7f9a356df8e3844de523892fe29f7360ff0812a13",
+          "outputs_sha256": "135f88aaa8590b52e907c7e653c995d272a970c392bd37fee6a4ea4988e9e33a",
+          "scores_sha256": "a2be828ad1efdec310f33eae17da58a6fbecb6372d86ac9b9f5351bc1baa1487",
+          "dataset_id": "cac5d6b49c5e9e20233538b7bec6d45d5eceb22726660b217d11fb3f06776cb5",
+          "frozen_test_sha256": "3619389fe0165d757ed7d15f04f5f5f6ddaa70c3488cfaf4c68566d924cebaff",
+          "classification": {
+            "accuracy": 0.05,
+            "macro_f1": 0.02,
+            "per_category": {
+              "api_failure": {
+                "support": 5,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0
+              },
+              "fulfillment_failure": {
+                "support": 5,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0
+              },
+              "inventory_discrepancy": {
+                "support": 5,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0
+              },
+              "inventory_sync_failure": {
+                "support": 5,
+                "precision": 0.1,
+                "recall": 0.4,
+                "f1": 0.16
+              },
+              "payment_processing_error": {
+                "support": 5,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0
+              },
+              "shipment_delay": {
+                "support": 5,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0
+              },
+              "transaction_missing": {
+                "support": 5,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0
+              },
+              "unknown": {
+                "support": 5,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0
+              }
+            }
+          },
+          "quality": {
+            "json_validity": 0.5,
+            "required_field_compliance": 0.425,
+            "severity_accuracy": 0.075,
+            "confidence_label_accuracy": 0.2,
+            "evidence_quote_precision": 0.43333333333333335,
+            "evidence_exact_reference_recall": 0.2916666666666667,
+            "unsupported_evidence_claim_rate": 0.09090909090909091,
+            "unsupported_claim_rate": null,
+            "human_action_correctness": null,
+            "action_keyword_coverage": 0.1125,
+            "escalation_accuracy": 0.3,
+            "required_abstention_accuracy": 0.0,
+            "general_instruction_accuracy": 0.5
+          }
+        },
+        {
+          "variant": "prompted",
+          "path": "evaluation/prompted/report.json",
+          "sha256": "25d2897e7b5ab7fc95facfa6b97e8d817cdc0aef4877b41c1bc5b585b9346979",
+          "outputs_sha256": "6aceb8120d9d5e8156d8ead63d8aa74184c6657efb2fcccb5c79a3112f98dd54",
+          "scores_sha256": "66b01a40f653238c50eec95daeb2cb6d02230ca148501a5e5dddbcffd325bfeb",
+          "dataset_id": "cac5d6b49c5e9e20233538b7bec6d45d5eceb22726660b217d11fb3f06776cb5",
+          "frozen_test_sha256": "3619389fe0165d757ed7d15f04f5f5f6ddaa70c3488cfaf4c68566d924cebaff",
+          "classification": {
+            "accuracy": 0.175,
+            "macro_f1": 0.08933933933933934,
+            "per_category": {
+              "api_failure": {
+                "support": 5,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0
+              },
+              "fulfillment_failure": {
+                "support": 5,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0
+              },
+              "inventory_discrepancy": {
+                "support": 5,
+                "precision": 0.25,
+                "recall": 0.2,
+                "f1": 0.2222222222222222
+              },
+              "inventory_sync_failure": {
+                "support": 5,
+                "precision": 0.15625,
+                "recall": 1.0,
+                "f1": 0.2702702702702703
+              },
+              "payment_processing_error": {
+                "support": 5,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0
+              },
+              "shipment_delay": {
+                "support": 5,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0
+              },
+              "transaction_missing": {
+                "support": 5,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0
+              },
+              "unknown": {
+                "support": 5,
+                "precision": 0.25,
+                "recall": 0.2,
+                "f1": 0.2222222222222222
+              }
+            }
+          },
+          "quality": {
+            "json_validity": 1.0,
+            "required_field_compliance": 1.0,
+            "severity_accuracy": 0.175,
+            "confidence_label_accuracy": 0.375,
+            "evidence_quote_precision": 0.8875,
+            "evidence_exact_reference_recall": 0.5583333333333333,
+            "unsupported_evidence_claim_rate": 0.0945945945945946,
+            "unsupported_claim_rate": null,
+            "human_action_correctness": null,
+            "action_keyword_coverage": 0.1875,
+            "escalation_accuracy": 0.5,
+            "required_abstention_accuracy": 0.0,
+            "general_instruction_accuracy": 0.5
+          }
+        }
+      ],
+      "human_review": {
+        "path": "human-review/report.json",
+        "sha256": "b48118221b373d14d2736c9b70970c42f77b45af85aabdd662e19144eb765abd",
+        "cohort": "Two incidents and six actual human annotations across three variants"
+      },
+      "known_limitations": [
+        "Synthetic authored fixtures; only eight independent held-out incident families.",
+        "The base model classified 2/40 incidents correctly zero-shot and 7/40 with the stronger prompt; both failed all five required-abstention cases.",
+        "Historical quality decoding and adapter computation differ from the explicit BF16 serving configuration; semantic equivalence is not claimed.",
+        "The human subset is exploratory and does not establish population-level safety or quality.",
+        "No generated recommendation may automatically execute an operational action."
+      ],
+      "deployment_decision": "Reviewer demonstration only; these results do not justify unattended operational triage."
+    },
+    {
+      "artifact_id": "1183832f233f3a2f720a98efad446cffb2ada613cc59860fedd58e186af6838c",
+      "kind": "adapter",
+      "base_model": {
+        "id": "Qwen/Qwen2.5-0.5B-Instruct",
+        "revision": "7ae557604adf67be50417f59c2c2f167def9a775"
+      },
+      "reports": [
+        {
+          "variant": "lora",
+          "path": "evaluation/lora/report.json",
+          "sha256": "600b2ca2ca1e633f377d48e9c249e436ec1dca807d150240a87a863fdcabfdac",
+          "outputs_sha256": "422db82db19789152421264c763f1aca16ac96c59e6c4a9787ece58cb7ce456d",
+          "scores_sha256": "4e6e91061c65438b22e9ea4a095249aef9f9e3a762cb4c11f275b1da8da7450d",
+          "dataset_id": "cac5d6b49c5e9e20233538b7bec6d45d5eceb22726660b217d11fb3f06776cb5",
+          "frozen_test_sha256": "3619389fe0165d757ed7d15f04f5f5f6ddaa70c3488cfaf4c68566d924cebaff",
+          "classification": {
+            "accuracy": 0.375,
+            "macro_f1": 0.28694331983805665,
+            "per_category": {
+              "api_failure": {
+                "support": 5,
+                "precision": 0.625,
+                "recall": 1.0,
+                "f1": 0.7692307692307693
+              },
+              "fulfillment_failure": {
+                "support": 5,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0
+              },
+              "inventory_discrepancy": {
+                "support": 5,
+                "precision": 0.35714285714285715,
+                "recall": 1.0,
+                "f1": 0.5263157894736842
+              },
+              "inventory_sync_failure": {
+                "support": 5,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0
+              },
+              "payment_processing_error": {
+                "support": 5,
+                "precision": 1.0,
+                "recall": 0.2,
+                "f1": 0.3333333333333333
+              },
+              "shipment_delay": {
+                "support": 5,
+                "precision": 0.5714285714285714,
+                "recall": 0.8,
+                "f1": 0.6666666666666666
+              },
+              "transaction_missing": {
+                "support": 5,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0
+              },
+              "unknown": {
+                "support": 5,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0
+              }
+            }
+          },
+          "quality": {
+            "json_validity": 1.0,
+            "required_field_compliance": 1.0,
+            "severity_accuracy": 0.625,
+            "confidence_label_accuracy": 0.5,
+            "evidence_quote_precision": 0.9791666666666666,
+            "evidence_exact_reference_recall": 0.8708333333333333,
+            "unsupported_evidence_claim_rate": 0.024691358024691357,
+            "unsupported_claim_rate": null,
+            "human_action_correctness": null,
+            "action_keyword_coverage": 0.5,
+            "escalation_accuracy": 0.5,
+            "required_abstention_accuracy": 0.0,
+            "general_instruction_accuracy": 0.5
+          }
+        }
+      ],
+      "human_review": {
+        "path": "human-review/report.json",
+        "sha256": "b48118221b373d14d2736c9b70970c42f77b45af85aabdd662e19144eb765abd",
+        "cohort": "Two incidents and six actual human annotations across three variants"
+      },
+      "known_limitations": [
+        "Synthetic authored fixtures; only eight independent held-out incident families.",
+        "The adapted model misclassified 25 of 40 incidents and failed all five required-abstention cases.",
+        "Historical quality decoding and adapter computation differ from the explicit BF16 serving configuration; semantic equivalence is not claimed.",
+        "The human subset is exploratory and does not establish population-level safety or quality.",
+        "No generated recommendation may automatically execute an operational action."
+      ],
+      "deployment_decision": "Reviewer demonstration only; these results do not justify unattended operational triage."
+    }
+  ]
+}

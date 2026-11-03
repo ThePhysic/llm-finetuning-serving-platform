@@ -1,0 +1,11 @@
+{
+  "source": "Direct annotation supplied by the human project owner in this conversation",
+  "models_disclosed_before_rating": false,
+  "answer": "A: 0, true, 0/3\nB: 0, true, 0/2\nC: 0.5, true, 0/2",
+  "annotations": {
+    "A": {"action_correctness": 0, "summary_faithful": true, "unsupported_claims": 0, "total_claims": 3},
+    "B": {"action_correctness": 0, "summary_faithful": true, "unsupported_claims": 0, "total_claims": 2},
+    "C": {"action_correctness": 0.5, "summary_faithful": true, "unsupported_claims": 0, "total_claims": 2}
+  },
+  "scope": "Human ratings for three blinded responses to the first incident. Remaining responses stay pending."
+}

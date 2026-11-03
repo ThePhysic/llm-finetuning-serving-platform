@@ -1,0 +1,9 @@
+{"devices": [{"device_used_memory_mib": 4399.0, "index": 0, "utilization_percent": 24.0}], "runtime": {"allocated_bytes": null, "reserved_bytes": null, "session_peak_allocated_bytes": null}, "time": 1793674040.0006588}
+{"devices": [{"device_used_memory_mib": 4399.0, "index": 0, "utilization_percent": 47.0}], "runtime": {"allocated_bytes": null, "reserved_bytes": null, "session_peak_allocated_bytes": null}, "time": 1793674040.5427938}
+{"devices": [{"device_used_memory_mib": 4399.0, "index": 0, "utilization_percent": 24.0}], "runtime": {"allocated_bytes": null, "reserved_bytes": null, "session_peak_allocated_bytes": null}, "time": 1793674041.0811071}
+{"devices": [{"device_used_memory_mib": 4399.0, "index": 0, "utilization_percent": 37.0}], "runtime": {"allocated_bytes": null, "reserved_bytes": null, "session_peak_allocated_bytes": null}, "time": 1793674041.6209347}
+{"devices": [{"device_used_memory_mib": 4399.0, "index": 0, "utilization_percent": 25.0}], "runtime": {"allocated_bytes": null, "reserved_bytes": null, "session_peak_allocated_bytes": null}, "time": 1793674042.1747763}
+{"devices": [{"device_used_memory_mib": 4399.0, "index": 0, "utilization_percent": 32.0}], "runtime": {"allocated_bytes": null, "reserved_bytes": null, "session_peak_allocated_bytes": null}, "time": 1793674042.7202985}
+{"devices": [{"device_used_memory_mib": 4399.0, "index": 0, "utilization_percent": 23.0}], "runtime": {"allocated_bytes": null, "reserved_bytes": null, "session_peak_allocated_bytes": null}, "time": 1793674043.2663295}
+{"devices": [{"device_used_memory_mib": 4399.0, "index": 0, "utilization_percent": 21.0}], "runtime": {"allocated_bytes": null, "reserved_bytes": null, "session_peak_allocated_bytes": null}, "time": 1793674043.8162093}
+{"devices": [{"device_used_memory_mib": 4399.0, "index": 0, "utilization_percent": 21.0}], "runtime": {"allocated_bytes": null, "reserved_bytes": null, "session_peak_allocated_bytes": null}, "time": 1793674043.9289877}

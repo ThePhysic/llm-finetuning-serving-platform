@@ -1,0 +1,36 @@
+{
+  "scope": "CPU dependency-contract validation only; not training, quality, or GPU benchmark evidence",
+  "validation_source": "runtime/validate_peft_precision_cpu.py",
+  "corrected_source_sha256": "89228106de167816e7bccbc8427eb03e670ed64765b108e1afea205c779b453e",
+  "initial_validation_mistake": {
+    "description": "A tiny Qwen model was placed on CPU, but PEFT inferred CUDA while loading its adapter. All final tensors were CPU, while torch.cuda.is_initialized() became true. The assertion caught this; the process exited with code 1 and released its context.",
+    "conservative_possible_context_window_start_utc": "2026-11-03T02:56:35Z",
+    "conservative_possible_context_window_end_utc": "2026-11-03T02:57:00Z",
+    "window_basis": "Source CreationTimeUtc was 02:56:35; explicit clock reading after the failed process and initial report was 02:57:00. These are conservative bounds, not exact CUDA allocation timestamps.",
+    "failed_process_wall_seconds": 8.5472413,
+    "measurement_handling": "Parent informed immediately; any overlapping GPU measurements require contamination annotation and rerun. No historical model, quality output, or adapter file was modified."
+  },
+  "corrected_validation": {
+    "change": "Set CUDA_VISIBLE_DEVICES to an empty string before importing Torch or PEFT.",
+    "corrected_source_last_write_utc": "2026-11-03T02:57:05Z",
+    "exit_code": 0,
+    "process_wall_seconds": 7.6994501,
+    "peft_version": "0.15.2",
+    "torch_version": "2.6.0+cu124",
+    "all_model_tensors_on_cpu": true,
+    "CUDA_context_initialized": false,
+    "adapter_storage_dtype": "float32",
+    "default_PEFT_adapter_runtime_dtypes": ["torch.float32"],
+    "autocast_adapter_dtype_false_runtime_dtype": "bfloat16"
+  },
+  "actual_export_header_check": {
+    "artifact_path": "evidence/adapter-package/adapter/adapter_model.safetensors",
+    "observed_storage_dtype": "float32",
+    "method": "Read safetensors header in Windows core environment without Torch installed; no model or CUDA context was loaded."
+  },
+  "final_precision_tests": {
+    "backend_tests_passed": 29,
+    "ruff": "All checks passed",
+    "method": "Core Windows environment; Torch/PEFT loader tests use explicit test doubles and do not create CUDA contexts."
+  }
+}

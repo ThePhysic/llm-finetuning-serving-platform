@@ -1,0 +1,151 @@
+# HELP llm_requests_total Completed inference requests
+# TYPE llm_requests_total counter
+llm_requests_total{status="ok"} 12.0
+llm_requests_total{status="cancelled"} 1.0
+llm_requests_total{status="queue_full"} 3.0
+# HELP llm_requests_created Completed inference requests
+# TYPE llm_requests_created gauge
+llm_requests_created{status="ok"} 1.7936730568485641e+09
+llm_requests_created{status="cancelled"} 1.7936730883071113e+09
+llm_requests_created{status="queue_full"} 1.7936730890354035e+09
+# HELP llm_http_requests_total HTTP responses including validation and authorization errors
+# TYPE llm_http_requests_total counter
+llm_http_requests_total{route="/health/ready",status="200"} 1.0
+llm_http_requests_total{route="/admin/status",status="200"} 9.0
+llm_http_requests_total{route="/v1/models",status="200"} 1.0
+llm_http_requests_total{route="/v1/chat/completions",status="401"} 1.0
+llm_http_requests_total{route="/admin/status",status="401"} 2.0
+llm_http_requests_total{route="/v1/chat/completions",status="200"} 13.0
+llm_http_requests_total{route="/v1/chat/completions",status="422"} 1.0
+llm_http_requests_total{route="/admin/promote",status="200"} 1.0
+llm_http_requests_total{route="/admin/rollback",status="200"} 1.0
+llm_http_requests_total{route="/admin/promote",status="409"} 1.0
+llm_http_requests_total{route="/v1/chat/completions",status="429"} 3.0
+# HELP llm_http_requests_created HTTP responses including validation and authorization errors
+# TYPE llm_http_requests_created gauge
+llm_http_requests_created{route="/health/ready",status="200"} 1.7936730538245244e+09
+llm_http_requests_created{route="/admin/status",status="200"} 1.7936730538625216e+09
+llm_http_requests_created{route="/v1/models",status="200"} 1.7936730545474198e+09
+llm_http_requests_created{route="/v1/chat/completions",status="401"} 1.79367305457332e+09
+llm_http_requests_created{route="/admin/status",status="401"} 1.7936730545846298e+09
+llm_http_requests_created{route="/v1/chat/completions",status="200"} 1.793673056848751e+09
+llm_http_requests_created{route="/v1/chat/completions",status="422"} 1.7936730582306936e+09
+llm_http_requests_created{route="/admin/promote",status="200"} 1.7936730696041892e+09
+llm_http_requests_created{route="/admin/rollback",status="200"} 1.793673082499611e+09
+llm_http_requests_created{route="/admin/promote",status="409"} 1.7936730869300528e+09
+llm_http_requests_created{route="/v1/chat/completions",status="429"} 1.7936730890356429e+09
+# HELP llm_request_seconds Gateway end to end request duration
+# TYPE llm_request_seconds histogram
+llm_request_seconds_bucket{le="0.005"} 0.0
+llm_request_seconds_bucket{le="0.01"} 0.0
+llm_request_seconds_bucket{le="0.025"} 0.0
+llm_request_seconds_bucket{le="0.05"} 0.0
+llm_request_seconds_bucket{le="0.075"} 0.0
+llm_request_seconds_bucket{le="0.1"} 0.0
+llm_request_seconds_bucket{le="0.25"} 0.0
+llm_request_seconds_bucket{le="0.5"} 1.0
+llm_request_seconds_bucket{le="0.75"} 3.0
+llm_request_seconds_bucket{le="1.0"} 4.0
+llm_request_seconds_bucket{le="2.5"} 9.0
+llm_request_seconds_bucket{le="5.0"} 10.0
+llm_request_seconds_bucket{le="7.5"} 12.0
+llm_request_seconds_bucket{le="10.0"} 13.0
+llm_request_seconds_bucket{le="+Inf"} 13.0
+llm_request_seconds_count 13.0
+llm_request_seconds_sum 37.265623844999936
+# HELP llm_request_seconds_created Gateway end to end request duration
+# TYPE llm_request_seconds_created gauge
+llm_request_seconds_created 1.7936730324394908e+09
+# HELP llm_queue_seconds Time spent waiting for execution capacity
+# TYPE llm_queue_seconds histogram
+llm_queue_seconds_bucket{le="0.005"} 9.0
+llm_queue_seconds_bucket{le="0.01"} 9.0
+llm_queue_seconds_bucket{le="0.025"} 9.0
+llm_queue_seconds_bucket{le="0.05"} 9.0
+llm_queue_seconds_bucket{le="0.075"} 9.0
+llm_queue_seconds_bucket{le="0.1"} 9.0
+llm_queue_seconds_bucket{le="0.25"} 9.0
+llm_queue_seconds_bucket{le="0.5"} 9.0
+llm_queue_seconds_bucket{le="0.75"} 9.0
+llm_queue_seconds_bucket{le="1.0"} 9.0
+llm_queue_seconds_bucket{le="2.5"} 10.0
+llm_queue_seconds_bucket{le="5.0"} 11.0
+llm_queue_seconds_bucket{le="7.5"} 13.0
+llm_queue_seconds_bucket{le="10.0"} 13.0
+llm_queue_seconds_bucket{le="+Inf"} 13.0
+llm_queue_seconds_count 13.0
+llm_queue_seconds_sum 18.135621758001435
+# HELP llm_queue_seconds_created Time spent waiting for execution capacity
+# TYPE llm_queue_seconds_created gauge
+llm_queue_seconds_created 1.7936730324395714e+09
+# HELP llm_execution_seconds Backend stream lifetime including downstream transport
+# TYPE llm_execution_seconds histogram
+llm_execution_seconds_bucket{le="0.005"} 0.0
+llm_execution_seconds_bucket{le="0.01"} 0.0
+llm_execution_seconds_bucket{le="0.025"} 0.0
+llm_execution_seconds_bucket{le="0.05"} 0.0
+llm_execution_seconds_bucket{le="0.075"} 0.0
+llm_execution_seconds_bucket{le="0.1"} 0.0
+llm_execution_seconds_bucket{le="0.25"} 0.0
+llm_execution_seconds_bucket{le="0.5"} 1.0
+llm_execution_seconds_bucket{le="0.75"} 3.0
+llm_execution_seconds_bucket{le="1.0"} 4.0
+llm_execution_seconds_bucket{le="2.5"} 13.0
+llm_execution_seconds_bucket{le="5.0"} 13.0
+llm_execution_seconds_bucket{le="7.5"} 13.0
+llm_execution_seconds_bucket{le="10.0"} 13.0
+llm_execution_seconds_bucket{le="+Inf"} 13.0
+llm_execution_seconds_count 13.0
+llm_execution_seconds_sum 19.129308519000915
+# HELP llm_execution_seconds_created Backend stream lifetime including downstream transport
+# TYPE llm_execution_seconds_created gauge
+llm_execution_seconds_created 1.793673032439605e+09
+# HELP llm_ttft_seconds Request to first nonempty generated text
+# TYPE llm_ttft_seconds histogram
+llm_ttft_seconds_bucket{le="0.005"} 0.0
+llm_ttft_seconds_bucket{le="0.01"} 0.0
+llm_ttft_seconds_bucket{le="0.025"} 0.0
+llm_ttft_seconds_bucket{le="0.05"} 0.0
+llm_ttft_seconds_bucket{le="0.075"} 3.0
+llm_ttft_seconds_bucket{le="0.1"} 4.0
+llm_ttft_seconds_bucket{le="0.25"} 6.0
+llm_ttft_seconds_bucket{le="0.5"} 7.0
+llm_ttft_seconds_bucket{le="0.75"} 7.0
+llm_ttft_seconds_bucket{le="1.0"} 8.0
+llm_ttft_seconds_bucket{le="2.5"} 10.0
+llm_ttft_seconds_bucket{le="5.0"} 11.0
+llm_ttft_seconds_bucket{le="7.5"} 13.0
+llm_ttft_seconds_bucket{le="10.0"} 13.0
+llm_ttft_seconds_bucket{le="+Inf"} 13.0
+llm_ttft_seconds_count 13.0
+llm_ttft_seconds_sum 22.527891603996977
+# HELP llm_ttft_seconds_created Request to first nonempty generated text
+# TYPE llm_ttft_seconds_created gauge
+llm_ttft_seconds_created 1.7936730324396455e+09
+# HELP llm_output_tokens_total Generated output tokens
+# TYPE llm_output_tokens_total counter
+llm_output_tokens_total 273.0
+# HELP llm_output_tokens_created Generated output tokens
+# TYPE llm_output_tokens_created gauge
+llm_output_tokens_created 1.793673032439678e+09
+# HELP llm_active_requests Active backend requests
+# TYPE llm_active_requests gauge
+llm_active_requests 0.0
+# HELP llm_queued_requests Requests waiting for an execution slot
+# TYPE llm_queued_requests gauge
+llm_queued_requests 0.0
+# HELP llm_model_ready Model runtime health
+# TYPE llm_model_ready gauge
+llm_model_ready 1.0
+# HELP llm_gpu_memory_bytes Runtime-reported GPU allocated bytes; NaN when unavailable
+# TYPE llm_gpu_memory_bytes gauge
+llm_gpu_memory_bytes 1.029876224e+09
+# HELP llm_gpu_peak_allocated_bytes Runtime session peak allocated bytes; NaN when unavailable
+# TYPE llm_gpu_peak_allocated_bytes gauge
+llm_gpu_peak_allocated_bytes 2.030523392e+09
+# HELP llm_gpu_reserved_bytes Runtime allocator reserved bytes; NaN when unavailable
+# TYPE llm_gpu_reserved_bytes gauge
+llm_gpu_reserved_bytes 1.26877696e+09
+# HELP llm_deployment_info Current immutable model deployment identity
+# TYPE llm_deployment_info gauge
+llm_deployment_info{artifact_id="b4d8a201e94315bff4f5b030336d6644691da18fc6d050f04a8e095ae9d484ad",backend="transformers",base_revision="7ae557604adf67be50417f59c2c2f167def9a775"} 1.0

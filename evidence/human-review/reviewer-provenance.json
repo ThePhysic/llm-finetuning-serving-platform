@@ -1,0 +1,10 @@
+{
+  "reviewer": "human-project-owner",
+  "source": "The human user supplied both annotation replies directly in this conversation after agreeing to review a blinded sample.",
+  "responses": ["user-response-1.json", "user-response-2.json"],
+  "display_map": "display-map.json",
+  "blinding": "Responses were labeled A–F. Model/run identities were omitted from both review questions and were revealed only after all six ratings arrived.",
+  "selection": "Two fixed category/tag-selected incidents: one API prompt-injection case and one ambiguous delivery case. Three model alternatives per incident.",
+  "annotation_handling": "The user-supplied action scores, summary judgments and claim counts were transferred unchanged. The standard importer verified full packet coverage and content integrity.",
+  "limitations": "One human, two independent incidents. The importer cannot attest human identity or establish population-level quality. Full outputs remain in the packet; questions showed exact summary/evidence/action fields relevant to this rubric."
+}

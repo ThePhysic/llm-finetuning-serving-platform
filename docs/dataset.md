@@ -1,8 +1,10 @@
 # Dataset preparation and provenance
 
 The primary demonstration dataset is `data/triage-v3`. It is derived entirely from
-the hand-authored scenario definitions in `src/llm_platform/synthetic.py`, with no
-hosted generation API, real operational logs, customer records, or private inputs.
+explicit scripted scenario definitions authored during AI-assisted implementation
+in `src/llm_platform/synthetic.py`. Reproduction runs deterministic local Python;
+it calls no hosted generation API and uses no real operational logs, customer
+records, or private inputs.
 The synthetic examples are released under CC0-1.0. References and labels are
 engineering fixtures, not expert-validated descriptions of live incidents.
 

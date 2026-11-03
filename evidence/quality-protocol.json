@@ -1,0 +1,225 @@
+{
+  "schema_version": 1,
+  "frozen_at_unix": 1793671869.3379946,
+  "dataset": {
+    "schema_version": 1,
+    "dataset_id": "cac5d6b49c5e9e20233538b7bec6d45d5eceb22726660b217d11fb3f06776cb5",
+    "source_sha256": "a8c2911849bdb674398696ab43d04d26b11e0a74081c92579d82f7a2ba3d427e",
+    "settings": {
+      "seed": 42,
+      "max_chars": 16000,
+      "max_tokens": 2048,
+      "near_threshold": 0.9,
+      "split_unit": "connected family/scenario/near-duplicate group",
+      "stratified_by": "category signature of connected group",
+      "tokenization_validated": false,
+      "tokenizer_identity": null
+    },
+    "files": {
+      "test.jsonl": {
+        "sha256": "3619389fe0165d757ed7d15f04f5f5f6ddaa70c3488cfaf4c68566d924cebaff",
+        "count": 40,
+        "families": [
+          "api_failure-scenario-03",
+          "fulfillment_failure-scenario-03",
+          "inventory_discrepancy-scenario-03",
+          "inventory_sync_failure-scenario-02",
+          "payment_processing_error-scenario-05",
+          "shipment_delay-scenario-05",
+          "transaction_missing-scenario-03",
+          "unknown-scenario-05"
+        ],
+        "categories": {
+          "api_failure": 5,
+          "fulfillment_failure": 5,
+          "inventory_discrepancy": 5,
+          "inventory_sync_failure": 5,
+          "payment_processing_error": 5,
+          "shipment_delay": 5,
+          "transaction_missing": 5,
+          "unknown": 5
+        }
+      },
+      "validation.jsonl": {
+        "sha256": "b1716e8453c10f538ef07c324146c30c0c9ac472a0b4765f56800db57d08a474",
+        "count": 40,
+        "families": [
+          "api_failure-scenario-04",
+          "fulfillment_failure-scenario-07",
+          "inventory_discrepancy-scenario-05",
+          "inventory_sync_failure-scenario-01",
+          "payment_processing_error-scenario-02",
+          "shipment_delay-scenario-03",
+          "transaction_missing-scenario-01",
+          "unknown-scenario-07"
+        ],
+        "categories": {
+          "api_failure": 5,
+          "fulfillment_failure": 5,
+          "inventory_discrepancy": 5,
+          "inventory_sync_failure": 5,
+          "payment_processing_error": 5,
+          "shipment_delay": 5,
+          "transaction_missing": 5,
+          "unknown": 5
+        }
+      },
+      "train.jsonl": {
+        "sha256": "16041669feb5554a11362cb5657c0cae8d0173d3b8eb6851e0fd499e4e1fdf28",
+        "count": 240,
+        "families": [
+          "api_failure-scenario-00",
+          "api_failure-scenario-01",
+          "api_failure-scenario-02",
+          "api_failure-scenario-05",
+          "api_failure-scenario-06",
+          "api_failure-scenario-07",
+          "fulfillment_failure-scenario-00",
+          "fulfillment_failure-scenario-01",
+          "fulfillment_failure-scenario-02",
+          "fulfillment_failure-scenario-04",
+          "fulfillment_failure-scenario-05",
+          "fulfillment_failure-scenario-06",
+          "inventory_discrepancy-scenario-00",
+          "inventory_discrepancy-scenario-01",
+          "inventory_discrepancy-scenario-02",
+          "inventory_discrepancy-scenario-04",
+          "inventory_discrepancy-scenario-06",
+          "inventory_discrepancy-scenario-07",
+          "inventory_sync_failure-scenario-00",
+          "inventory_sync_failure-scenario-03",
+          "inventory_sync_failure-scenario-04",
+          "inventory_sync_failure-scenario-05",
+          "inventory_sync_failure-scenario-06",
+          "inventory_sync_failure-scenario-07",
+          "payment_processing_error-scenario-00",
+          "payment_processing_error-scenario-01",
+          "payment_processing_error-scenario-03",
+          "payment_processing_error-scenario-04",
+          "payment_processing_error-scenario-06",
+          "payment_processing_error-scenario-07",
+          "shipment_delay-scenario-00",
+          "shipment_delay-scenario-01",
+          "shipment_delay-scenario-02",
+          "shipment_delay-scenario-04",
+          "shipment_delay-scenario-06",
+          "shipment_delay-scenario-07",
+          "transaction_missing-scenario-00",
+          "transaction_missing-scenario-02",
+          "transaction_missing-scenario-04",
+          "transaction_missing-scenario-05",
+          "transaction_missing-scenario-06",
+          "transaction_missing-scenario-07",
+          "unknown-scenario-00",
+          "unknown-scenario-01",
+          "unknown-scenario-02",
+          "unknown-scenario-03",
+          "unknown-scenario-04",
+          "unknown-scenario-06"
+        ],
+        "categories": {
+          "api_failure": 30,
+          "fulfillment_failure": 30,
+          "inventory_discrepancy": 30,
+          "inventory_sync_failure": 30,
+          "payment_processing_error": 30,
+          "shipment_delay": 30,
+          "transaction_missing": 30,
+          "unknown": 30
+        }
+      },
+      "regressions.jsonl": {
+        "sha256": "775bf8f6d8f9d1a0e7131726ba87561d773f400065f56b5af18fa2584c5bde68",
+        "count": 8,
+        "families": [
+          "general-regression-0",
+          "general-regression-1",
+          "general-regression-2",
+          "general-regression-3",
+          "general-regression-4",
+          "general-regression-5",
+          "general-regression-6",
+          "general-regression-7"
+        ],
+        "categories": {}
+      }
+    },
+    "audit": {
+      "duplicate_ids": [],
+      "duplicate_inputs": [],
+      "near_duplicates": [],
+      "near_threshold": 0.9
+    },
+    "statistics": {
+      "records": 328,
+      "triage_groups": 64,
+      "input_chars_min": 34,
+      "input_chars_max": 299
+    },
+    "frozen_test_sha256": "3619389fe0165d757ed7d15f04f5f5f6ddaa70c3488cfaf4c68566d924cebaff",
+    "policy": "Never use test/regressions to train, tune hyperparameters, or select prompts.",
+    "manifest_sha256": "855a9c6006d8fc440a09a7b4a122f6b40d6cb520b3acd8c7baed19f7a4bf7527"
+  },
+  "training_configuration": {
+    "model_id": "Qwen/Qwen2.5-0.5B-Instruct",
+    "revision": "main",
+    "seed": 42,
+    "max_steps": 80,
+    "batch_size": 1,
+    "gradient_accumulation_steps": 4,
+    "max_seq_length": 768,
+    "learning_rate": 0.0002,
+    "weight_decay": 0.01,
+    "warmup_steps": 5,
+    "max_grad_norm": 1.0,
+    "rank": 8,
+    "alpha": 16,
+    "dropout": 0.05,
+    "target_modules": [
+      "q_proj",
+      "v_proj"
+    ],
+    "dtype": "bfloat16",
+    "device": "cuda",
+    "qlora": false,
+    "gradient_checkpointing": true,
+    "validation_every": 20,
+    "checkpoint_every": 40,
+    "dataset_id": "cac5d6b49c5e9e20233538b7bec6d45d5eceb22726660b217d11fb3f06776cb5",
+    "experiment_id": "qwen05b-lora-sft-4060",
+    "resume_from": null
+  },
+  "decoding": {
+    "max_tokens": 320,
+    "temperature": 0,
+    "seed": 42,
+    "stop": []
+  },
+  "prompt_identities": {
+    "zero_shot": {
+      "version": "triage-v1",
+      "variant": "zero_shot",
+      "sha256": "8d0ac935618c598af655bd12f6169ee3bfe7749ba8d3c7153282332990dfbf66"
+    },
+    "prompted": {
+      "version": "triage-v1",
+      "variant": "prompted",
+      "sha256": "680b047ddc40e3353a141f18774663cff3ed3087c0b84a4d1f3112f58972453f"
+    },
+    "lora": {
+      "version": "triage-v1",
+      "variant": "lora",
+      "sha256": "8d0ac935618c598af655bd12f6169ee3bfe7749ba8d3c7153282332990dfbf66"
+    }
+  },
+  "source_commit": "84a870010c85fbc66b893c0e884c59ada4ab20c2",
+  "order": [
+    "base zero-shot",
+    "base prompted",
+    "train LoRA fixed configuration",
+    "reload LoRA",
+    "LoRA evaluation"
+  ],
+  "selection": "Fixed configuration and prompts before baseline generation. Final test is not used to change them.",
+  "human_review": "Pending actual human annotation; no agent-generated human labels permitted."
+}

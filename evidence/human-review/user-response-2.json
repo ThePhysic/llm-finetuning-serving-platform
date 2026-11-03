@@ -1,0 +1,11 @@
+{
+  "source": "Direct annotation supplied by the human project owner in this conversation",
+  "models_disclosed_before_rating": false,
+  "answer": "D: 1, false, 4/6\nE: 0.5, true, 0/3\nF: 0, false, 3/6",
+  "annotations": {
+    "D": {"action_correctness": 1, "summary_faithful": false, "unsupported_claims": 4, "total_claims": 6},
+    "E": {"action_correctness": 0.5, "summary_faithful": true, "unsupported_claims": 0, "total_claims": 3},
+    "F": {"action_correctness": 0, "summary_faithful": false, "unsupported_claims": 3, "total_claims": 6}
+  },
+  "scope": "Human ratings for the remaining three blinded responses; all six ratings are now supplied."
+}

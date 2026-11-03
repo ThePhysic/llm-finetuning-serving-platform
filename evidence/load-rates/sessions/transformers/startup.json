@@ -1,0 +1,61 @@
+{
+  "engine": "transformers",
+  "engine_software": {
+    "python": "3.12.16",
+    "versions": {
+      "fastapi": "0.162.0",
+      "httpx": "0.28.1",
+      "peft": "0.15.2",
+      "torch": "2.6.0+cu124",
+      "transformers": "4.51.3",
+      "vllm": null
+    }
+  },
+  "gateway_ready_seconds": 25.308954435999112,
+  "model": "b4d8a201e94315bff4f5b030336d6644691da18fc6d050f04a8e095ae9d484ad",
+  "prefix_caching": false,
+  "ready_engine_state": {
+    "active_requests": 0,
+    "adapter_compute_dtype": null,
+    "adapter_storage_dtype": null,
+    "backend": "transformers",
+    "base_compute_dtype": "bfloat16",
+    "cleanup_pending": false,
+    "cuda_allocated_bytes": 996321792,
+    "cuda_peak_allocated_bytes": 996321792,
+    "cuda_reserved_bytes": 1040187392,
+    "decoding_policy": {
+      "bad_words_ids": null,
+      "bos_token_id": 151643,
+      "constraints": null,
+      "eos_policy": "packaged-tokenizer-single-eos",
+      "eos_token_ids": [
+        151645
+      ],
+      "forced_token_ids": null,
+      "frequency_penalty": 0.0,
+      "ignore_eos": false,
+      "length_penalty": 1.0,
+      "min_new_tokens": 0,
+      "min_p": "disabled",
+      "no_repeat_ngram_size": 0,
+      "num_beams": 1,
+      "num_return_sequences": 1,
+      "pad_token_id": 151643,
+      "presence_penalty": 0.0,
+      "publisher_generation_config": "ignored",
+      "repetition_penalty": 1.0,
+      "sha256": "aaa5a1cdd345cdb0c00a74169e019c4823a6e8555400fdc67ae2e69096c484eb",
+      "top_k": "disabled",
+      "top_p": 1.0,
+      "version": "platform-serving-v1"
+    },
+    "device": "cuda",
+    "dtype": "bfloat16",
+    "last_error": null,
+    "max_model_len": 32768,
+    "precision_source": "actual-runtime-parameters-and-safetensors-header",
+    "ready": true
+  },
+  "state": "fresh processes; weights in local HF cache; OS cache uncontrolled"
+}

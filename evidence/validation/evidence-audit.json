@@ -1,0 +1,329 @@
+{
+  "schema_version": 1,
+  "status": "pass",
+  "criteria": {
+    "frozen_dataset": {
+      "status": "pass",
+      "details": {
+        "manifest_sha256": "855a9c6006d8fc440a09a7b4a122f6b40d6cb520b3acd8c7baed19f7a4bf7527",
+        "dataset_id": "cac5d6b49c5e9e20233538b7bec6d45d5eceb22726660b217d11fb3f06776cb5",
+        "frozen_test_sha256": "3619389fe0165d757ed7d15f04f5f5f6ddaa70c3488cfaf4c68566d924cebaff",
+        "counts": {
+          "test.jsonl": 40,
+          "validation.jsonl": 40,
+          "train.jsonl": 240,
+          "regressions.jsonl": 8
+        }
+      }
+    },
+    "execution_snapshot": {
+      "status": "pass",
+      "details": {
+        "snapshot_sha256": "e41da1552775f673c845e9a3648879cd1b2a3d9f6b280d957972451bacf634c9",
+        "source_revision": "84a870010c85fbc66b893c0e884c59ada4ab20c2",
+        "files": 18,
+        "mode": "retrospective exact Git tree reconstruction",
+        "contemporaneous_capture": false,
+        "trust_boundary": "Snapshot proves preserved bytes and links; retrospective reconstruction is not evidence of a contemporaneous capture or execution attestation."
+      }
+    },
+    "gpu_training": {
+      "status": "pass",
+      "details": {
+        "artifact_id": "1183832f233f3a2f720a98efad446cffb2ada613cc59860fedd58e186af6838c",
+        "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+        "completed_optimizer_steps": 80,
+        "recorded_gpu_peak_bytes": 1594780672,
+        "trust_boundary": "Metadata and cross-file consistency are checked; this is not GPU attestation."
+      }
+    },
+    "adapter_reload": {
+      "status": "pass",
+      "details": {
+        "artifact_id": "1183832f233f3a2f720a98efad446cffb2ada613cc59860fedd58e186af6838c",
+        "integrity": "verified exported package",
+        "generation": "Completed generation recorded under this adapter identity; see quality criterion for full rescore."
+      }
+    },
+    "controlled_quality": {
+      "status": "pass",
+      "details": {
+        "variants": [
+          "zero_shot",
+          "prompted",
+          "lora"
+        ],
+        "examples_per_variant": 48,
+        "rescore": "All raw outputs independently rescored with current matching scorer sources.",
+        "classification": {
+          "zero_shot": {
+            "accuracy": 0.05,
+            "macro_f1": 0.02,
+            "per_category": {
+              "api_failure": {
+                "support": 5,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0
+              },
+              "fulfillment_failure": {
+                "support": 5,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0
+              },
+              "inventory_discrepancy": {
+                "support": 5,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0
+              },
+              "inventory_sync_failure": {
+                "support": 5,
+                "precision": 0.1,
+                "recall": 0.4,
+                "f1": 0.16
+              },
+              "payment_processing_error": {
+                "support": 5,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0
+              },
+              "shipment_delay": {
+                "support": 5,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0
+              },
+              "transaction_missing": {
+                "support": 5,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0
+              },
+              "unknown": {
+                "support": 5,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0
+              }
+            }
+          },
+          "prompted": {
+            "accuracy": 0.175,
+            "macro_f1": 0.08933933933933934,
+            "per_category": {
+              "api_failure": {
+                "support": 5,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0
+              },
+              "fulfillment_failure": {
+                "support": 5,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0
+              },
+              "inventory_discrepancy": {
+                "support": 5,
+                "precision": 0.25,
+                "recall": 0.2,
+                "f1": 0.2222222222222222
+              },
+              "inventory_sync_failure": {
+                "support": 5,
+                "precision": 0.15625,
+                "recall": 1.0,
+                "f1": 0.2702702702702703
+              },
+              "payment_processing_error": {
+                "support": 5,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0
+              },
+              "shipment_delay": {
+                "support": 5,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0
+              },
+              "transaction_missing": {
+                "support": 5,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0
+              },
+              "unknown": {
+                "support": 5,
+                "precision": 0.25,
+                "recall": 0.2,
+                "f1": 0.2222222222222222
+              }
+            }
+          },
+          "lora": {
+            "accuracy": 0.375,
+            "macro_f1": 0.28694331983805665,
+            "per_category": {
+              "api_failure": {
+                "support": 5,
+                "precision": 0.625,
+                "recall": 1.0,
+                "f1": 0.7692307692307693
+              },
+              "fulfillment_failure": {
+                "support": 5,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0
+              },
+              "inventory_discrepancy": {
+                "support": 5,
+                "precision": 0.35714285714285715,
+                "recall": 1.0,
+                "f1": 0.5263157894736842
+              },
+              "inventory_sync_failure": {
+                "support": 5,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0
+              },
+              "payment_processing_error": {
+                "support": 5,
+                "precision": 1.0,
+                "recall": 0.2,
+                "f1": 0.3333333333333333
+              },
+              "shipment_delay": {
+                "support": 5,
+                "precision": 0.5714285714285714,
+                "recall": 0.8,
+                "f1": 0.6666666666666666
+              },
+              "transaction_missing": {
+                "support": 5,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0
+              },
+              "unknown": {
+                "support": 5,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0
+              }
+            }
+          }
+        },
+        "trust_boundary": "Known backend/source provenance is checked; recorded JSON alone cannot prove execution."
+      }
+    },
+    "gpu_benchmarks_and_optimization": {
+      "status": "pass",
+      "details": {
+        "runs": 28,
+        "repetitions": 2,
+        "requests": 336,
+        "trust_boundary": "Raw timings/accounting are internally checked; device telemetry is sampled and not external attestation."
+      }
+    },
+    "adapter_precision_correction": {
+      "status": "pass",
+      "details": {
+        "replacement_runs": 12,
+        "retained_runs": 16,
+        "original_tree_sha256": "7412e5e67c8c795e4cf7553e3bda04ad4c5c576d2a6370f1be403956b9467e17",
+        "compute": "BF16 base and adapter; FP32 serialized adapter",
+        "protocol": "Original retained; post-discovery amendment explicitly recorded"
+      }
+    },
+    "paired_cuda_startup": {
+      "status": "pass",
+      "details": {
+        "paired_repetitions": 3,
+        "real_loads": 6,
+        "first_load_median_seconds": 18.257071620000715,
+        "warm_reload_median_seconds": 12.271301090999259,
+        "scope": "Fresh-process imports/CUDA context versus same-process reload; cached weights and uncontrolled OS cache, not disk-cold startup."
+      }
+    },
+    "bounded_request_rate_comparison": {
+      "status": "pass",
+      "details": {
+        "arms": 4,
+        "rates": [
+          1.0,
+          32.0
+        ],
+        "requests": 48,
+        "scope": "Bounded paced workers with observed scheduling delay; no independent open-loop offered-load claim."
+      }
+    },
+    "http_lifecycle_and_recovery": {
+      "status": "pass",
+      "details": {
+        "models": [
+          "b4d8a201e94315bff4f5b030336d6644691da18fc6d050f04a8e095ae9d484ad",
+          "1183832f233f3a2f720a98efad446cffb2ada613cc59860fedd58e186af6838c"
+        ],
+        "shutdown_sessions": 10,
+        "checks": "Recorded sync/SSE identity, authorization, limits, promotion, rollback, corruption refusal, disconnect cleanup and overload recovery."
+      }
+    },
+    "blinded_human_review": {
+      "status": "pass",
+      "details": {
+        "status": "complete",
+        "result": {
+          "status": "complete",
+          "annotated_packet_sha256": "22766a707bd13be43e3fa21a0515c4f2e1e684be7301d9a53adbdc92d75e9fea",
+          "runs": {
+            "prompted": {
+              "reviewed_examples": 2,
+              "action_correctness": 0.5,
+              "summary_faithfulness": 0.5,
+              "unsupported_claim_rate": 0.4444444444444444,
+              "reviewers": [
+                "human-project-owner"
+              ]
+            },
+            "lora": {
+              "reviewed_examples": 2,
+              "action_correctness": 0.5,
+              "summary_faithfulness": 1,
+              "unsupported_claim_rate": 0.0,
+              "reviewers": [
+                "human-project-owner"
+              ]
+            },
+            "zero_shot": {
+              "reviewed_examples": 2,
+              "action_correctness": 0,
+              "summary_faithfulness": 0.5,
+              "unsupported_claim_rate": 0.375,
+              "reviewers": [
+                "human-project-owner"
+              ]
+            }
+          }
+        },
+        "trust_boundary": "Importer checks contents and annotations, not humanity; operator must retain genuine human provenance."
+      }
+    }
+  },
+  "scope": "Local recorded evidence integrity and reproducibility; not project-completion certification.",
+  "external_requirements": [
+    "Independent Astra medium adversarial review must explicitly have no remaining complaints.",
+    "Verify GitHub privacy and remote commit equality using authenticated live tools.",
+    "Confirm human annotations actually came from a person; JSON labels cannot prove reviewer identity."
+  ],
+  "limitations": [
+    "Internally consistent metadata cannot independently prove GPU execution or exclude fabricated raw observations.",
+    "Sources must match this checkout or the exact recorded immutable git revision; uncommitted historical bytes cannot be inferred from a dirty flag.",
+    "A negative quality result is valid evidence; this audit does not require fine-tuning to win."
+  ]
+}

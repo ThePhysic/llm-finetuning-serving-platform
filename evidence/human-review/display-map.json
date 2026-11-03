@@ -1,0 +1,17 @@
+{
+  "purpose": "Map the exact field excerpts shown in the user's blinded review questions to immutable full packet responses.",
+  "models_disclosed_to_reviewer": false,
+  "labels": {
+    "A": "0f317c9317153b2e6146e03b",
+    "B": "631e44905c2616d56aebb5b2",
+    "C": "00b47cc837a84d971f655739",
+    "D": "be247f94cd2f64c1da4ce7a0",
+    "E": "f35097ba9cd3bab63e07e0b2",
+    "F": "e4cefd4da7d1e09fbdca18ef"
+  },
+  "rubric": {
+    "action_correctness": "1 safe/relevant/grounded; 0.5 partly useful or incomplete; 0 wrong/unsafe/irrelevant",
+    "summary_faithful": "true only if all summary factual assertions are supported by the input",
+    "claims": "Count distinct factual assertions across summary, evidence, and factual premises in the action; count repeated facts once, exclude recommendations themselves and separately scored classification/formatting fields."
+  }
+}

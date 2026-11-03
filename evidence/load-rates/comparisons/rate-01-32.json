@@ -1,0 +1,203 @@
+{
+  "comparison": [
+    {
+      "cache_state": {
+        "OS_cache": "uncontrolled",
+        "prefix_caching": "not implemented",
+        "warmup_requests": 2,
+        "weights": "local HF cache"
+      },
+      "concurrency": 4,
+      "config": {
+        "compute_price_per_hour": null,
+        "concurrency": 4,
+        "gpu_sample_interval": 0.5,
+        "max_tokens": 32,
+        "repetition": 0,
+        "request_rate": 32.0,
+        "requests": 12,
+        "seed": 42,
+        "stream": true,
+        "temperature": 0.0,
+        "timeout_seconds": 120.0,
+        "warmup": 2
+      },
+      "engine": "transformers",
+      "engine_settings": {
+        "adapter": false,
+        "adapter_compute_dtype": null,
+        "adapter_storage_dtype": null,
+        "base_compute_dtype": "bfloat16",
+        "base_model": {
+          "id": "Qwen/Qwen2.5-0.5B-Instruct",
+          "revision": "7ae557604adf67be50417f59c2c2f167def9a775"
+        },
+        "dtype": "bfloat16",
+        "engine_software": {
+          "python": "3.12.16",
+          "versions": {
+            "fastapi": "0.162.0",
+            "httpx": "0.28.1",
+            "peft": "0.15.2",
+            "torch": "2.6.0+cu124",
+            "transformers": "4.51.3",
+            "vllm": null
+          }
+        },
+        "gateway_concurrency": 1,
+        "gateway_queue": 4,
+        "max_model_len": 32768,
+        "precision_source": "actual-runtime-parameters-and-safetensors-header",
+        "quantization": "none",
+        "reference_execution_serialized": true,
+        "vllm_enforce_eager": null,
+        "vllm_gpu_memory_utilization": null,
+        "vllm_max_num_seqs": null
+      },
+      "model": "b4d8a201e94315bff4f5b030336d6644691da18fc6d050f04a8e095ae9d484ad",
+      "summary": {
+        "error_rate": 0.0,
+        "errors": {},
+        "gpu_device_used_median_mib": 1592.0,
+        "gpu_device_used_peak_mib": 1592.0,
+        "input_tokens": {
+          "p50": 142.5,
+          "p95": 147.0,
+          "p99": 147.0
+        },
+        "latency_seconds": {
+          "p50": 12.167148249502134,
+          "p95": 13.950780465250864,
+          "p99": 14.067094115449727
+        },
+        "output_tokens": {
+          "p50": 32.0,
+          "p95": 32.0,
+          "p99": 32.0
+        },
+        "output_tokens_per_second": 10.153386843816703,
+        "rejection_rate": 0.0,
+        "request_per_second": 0.31729333886927197,
+        "requests": 12,
+        "runtime_allocated_sample_median_bytes": 1033096192.0,
+        "runtime_session_peak_allocated_bytes": 1037766144.0,
+        "successful_requests": 12,
+        "timeout_rate": 0.0,
+        "total_output_tokens": 384,
+        "tpot_seconds": {
+          "p50": 0.09370656561288576,
+          "p95": 0.1283558856968093,
+          "p99": 0.15253440529427137
+        },
+        "ttft_seconds": {
+          "p50": 9.196020014000169,
+          "p95": 11.184324428549008,
+          "p99": 11.215563935310783
+        },
+        "wall_seconds": 37.819892603998596
+      }
+    },
+    {
+      "cache_state": {
+        "OS_cache": "uncontrolled",
+        "prefix_caching": false,
+        "warmup_requests": 2,
+        "weights": "local HF cache"
+      },
+      "concurrency": 4,
+      "config": {
+        "compute_price_per_hour": null,
+        "concurrency": 4,
+        "gpu_sample_interval": 0.5,
+        "max_tokens": 32,
+        "repetition": 0,
+        "request_rate": 32.0,
+        "requests": 12,
+        "seed": 42,
+        "stream": true,
+        "temperature": 0.0,
+        "timeout_seconds": 120.0,
+        "warmup": 2
+      },
+      "engine": "vllm",
+      "engine_settings": {
+        "adapter": false,
+        "adapter_compute_dtype": null,
+        "adapter_storage_dtype": null,
+        "base_compute_dtype": "bfloat16",
+        "base_model": {
+          "id": "Qwen/Qwen2.5-0.5B-Instruct",
+          "revision": "7ae557604adf67be50417f59c2c2f167def9a775"
+        },
+        "dtype": "bfloat16",
+        "engine_software": {
+          "python": "3.12.16",
+          "versions": {
+            "fastapi": "0.141.1",
+            "httpx": "0.28.1",
+            "peft": null,
+            "torch": "2.6.0+cu124",
+            "transformers": "4.51.3",
+            "vllm": "0.8.5.post1"
+          }
+        },
+        "gateway_concurrency": 8,
+        "gateway_queue": 4,
+        "max_model_len": 2048,
+        "precision_source": "trusted-launch-configuration-and-safetensors-header; not hardware attestation",
+        "quantization": "none",
+        "reference_execution_serialized": false,
+        "vllm_enforce_eager": true,
+        "vllm_gpu_memory_utilization": 0.6,
+        "vllm_max_num_seqs": 8
+      },
+      "model": "434e4c0c3a454927f9da628abf67216b51171addede383e3aa1dd58b866ca796",
+      "summary": {
+        "error_rate": 0.0,
+        "errors": {},
+        "gpu_device_used_median_mib": 4364.0,
+        "gpu_device_used_peak_mib": 4364.0,
+        "input_tokens": {
+          "p50": 142.5,
+          "p95": 147.0,
+          "p99": 147.0
+        },
+        "latency_seconds": {
+          "p50": 1.7040640895011165,
+          "p95": 1.8986228479501732,
+          "p99": 1.9039855199899467
+        },
+        "output_tokens": {
+          "p50": 32.0,
+          "p95": 32.0,
+          "p99": 32.0
+        },
+        "output_tokens_per_second": 72.18517860571183,
+        "rejection_rate": 0.0,
+        "request_per_second": 2.2557868314284946,
+        "requests": 12,
+        "runtime_allocated_sample_median_bytes": null,
+        "runtime_session_peak_allocated_bytes": null,
+        "successful_requests": 12,
+        "timeout_rate": 0.0,
+        "total_output_tokens": 384,
+        "tpot_seconds": {
+          "p50": 0.04187201398388189,
+          "p95": 0.04477998990809166,
+          "p99": 0.044783080794483295
+        },
+        "ttft_seconds": {
+          "p50": 0.3898761670006934,
+          "p95": 0.48313689150108985,
+          "p99": 0.49487848070220936
+        },
+        "wall_seconds": 5.319651588000852
+      }
+    }
+  ],
+  "limitations": [
+    "Review engine settings, cache state, device contention and repetitions before attributing differences.",
+    "Serving performance does not establish equivalent generated answer quality."
+  ],
+  "schema_version": 1
+}

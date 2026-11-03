@@ -1,0 +1,644 @@
+{
+  "completed_at_unix_seconds": 1793676282.3288262,
+  "completed_replacement_runs": [
+    "transformers-adapter-r0-short-stream-c1",
+    "transformers-adapter-r0-short-sync-c4",
+    "transformers-adapter-r0-long-stream-c4",
+    "transformers-adapter-r1-short-stream-c1",
+    "transformers-adapter-r1-short-sync-c4",
+    "transformers-adapter-r1-long-stream-c4",
+    "vllm-adapter-r0-short-stream-c1",
+    "vllm-adapter-r0-short-sync-c4",
+    "vllm-adapter-r0-long-stream-c4",
+    "vllm-adapter-r1-short-stream-c1",
+    "vllm-adapter-r1-short-sync-c4",
+    "vllm-adapter-r1-long-stream-c4"
+  ],
+  "corrected_report_sha256": {
+    "transformers-adapter-r0-long-stream-c4": "b98c65e50290565a8b88a0a0886cb547de57ac1021c4c98c82cbc9768533add2",
+    "transformers-adapter-r0-short-stream-c1": "2135883ab8e0096ee9118cd5a46df0033517abab008820ec6e3f26abe6ece47b",
+    "transformers-adapter-r0-short-sync-c4": "7d367744ca150f395b75728fea573da48fd2b6e6ffa5292309b5a4bc28152467",
+    "transformers-adapter-r1-long-stream-c4": "935fbc1f4dbfd03bb5de1eacf3ab1d31ad3fe6f92269b270ef98edc2d17b15ad",
+    "transformers-adapter-r1-short-stream-c1": "15c204244e9d8982ecaf5513351532a3d509bbe43a61a3d0aa5dbdd25bea0be7",
+    "transformers-adapter-r1-short-sync-c4": "5d77403e895dba62a8e0c535f56f6df42bfdd92425478b4c5de41bc74e696e05",
+    "vllm-adapter-r0-long-stream-c4": "4097cb54cd9a13ea3bc1c071521cd513ba4e83738aee3f290e18af588700c228",
+    "vllm-adapter-r0-short-stream-c1": "7e5ec271fc1061eb5ac02a6ca7e9633d2d6b386ed30a17fb545ccd19ee39a927",
+    "vllm-adapter-r0-short-sync-c4": "0c90d7d134e06f28a76b179d924e2645d2e8d676c6a6fc268970e69a63cdcd3e",
+    "vllm-adapter-r1-long-stream-c4": "4a0ddd30c94d12cb07ab345d47d9e80c5d75b71a5299a7c6502200d4608dc518",
+    "vllm-adapter-r1-short-stream-c1": "a3705157163af9d8f7da7cd5a1a32b20fa55f875a4ddaed6d3449cefa9492c92",
+    "vllm-adapter-r1-short-sync-c4": "6ccd77473a7cd77593947b490499a7beb481bdbc3fa49fe30efa86bd09394439"
+  },
+  "derived_files_sha256": {
+    "comparison.md": "64e50f8896245cba20418298a8265942813cd7390c16f4c0c1481b947a6bad06",
+    "comparisons/adapter-long-stream-c4.json": "7694b3c2b6588d68ce8ae160127d118fc3337f1307a51bf2a8ee3ace8f749329",
+    "comparisons/adapter-short-stream-c1.json": "b98c6be51345f53c9813b1409206b1a6f0a8b7f9f4a0835e831ab979305f49ad",
+    "comparisons/adapter-short-sync-c4.json": "3aa4ba68e0316292803df80c5fac1c2e6382b75784bed9b01a3bf8fb6003f085",
+    "comparisons/base-long-stream-c4.json": "25627e0dc8d30d94804f5fd2e25c704f60185e0c31627908b0bb6f64b54c8c58",
+    "comparisons/base-short-stream-c1.json": "e9bb1aba564e7a095fdee3db260a91575dbf015ddd31809afe3eacdd8b244ed7",
+    "comparisons/base-short-sync-c4.json": "1a7d820149a4def36dfa6d37803ac76d9dbd9f10926a927349294baaa54920c0",
+    "comparisons/prefix-cache-toggle.json": "4ff0a37b555747cfec4622f1462a13162d952e0829a9825d7a329109f96253bf"
+  },
+  "engine_environments": {
+    "transformers": {
+      "python": "3.12.16",
+      "versions": {
+        "fastapi": "0.162.0",
+        "httpx": "0.28.1",
+        "peft": "0.15.2",
+        "torch": "2.6.0+cu124",
+        "transformers": "4.51.3",
+        "vllm": null
+      }
+    },
+    "vllm": {
+      "python": "3.12.16",
+      "versions": {
+        "fastapi": "0.141.1",
+        "httpx": "0.28.1",
+        "peft": null,
+        "torch": "2.6.0+cu124",
+        "transformers": "4.51.3",
+        "vllm": "0.8.5.post1"
+      }
+    }
+  },
+  "environment": {
+    "client_software": {
+      "fastapi": "0.162.0",
+      "httpx": "0.28.1",
+      "peft": "0.15.2",
+      "torch": "2.6.0+cu124",
+      "transformers": "4.51.3",
+      "vllm": null
+    },
+    "gpu_inventory_csv": [
+      "NVIDIA GeForce RTX 4060 Laptop GPU, 566.36, 8188"
+    ],
+    "platform": "Linux-6.18.54.1-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+    "python": "3.12.16"
+  },
+  "expected_precision": {
+    "adapter_compute_dtype": "bfloat16",
+    "adapter_storage_dtype": "float32",
+    "base_compute_dtype": "bfloat16"
+  },
+  "limitations": [
+    "Only adapter-serving arms were rerun after discovering a precision confound; execution date/order and source differ from the original base/cache measurements.",
+    "Two repetitions of twelve requests per arm do not establish stable tails or broad engine superiority.",
+    "vLLM precision identity is trusted-launch configuration plus tensor-header verification, not hardware attestation."
+  ],
+  "method": "Post-discovery protocol amendment, not a newly claimed original pre-frozen design. Same immutable adapter/base/tokenizer, prompts, decoding policy, request counts and workloads; four fresh adapter sessions with aligned compute precision. Base/prefix and earlier training/quality evidence are retained unchanged.",
+  "original_archive": {
+    "files_sha256": {
+      "comparison.md": "84c9fec406560bb56ae2042f5f9c124acb745a4e76d97e1df266081cec2295f9",
+      "comparisons/adapter-long-stream-c4.json": "392553c1b9d34a36c5f52de4217b7ff86561a971fb4d55bf518e56608fa5c7d5",
+      "comparisons/adapter-short-stream-c1.json": "f6920d7c19a610222c2c99da60fc2ace64637407f8cdbfe054a5cbe616c4f183",
+      "comparisons/adapter-short-sync-c4.json": "cb2ecd886503293a9670a8dc676ad6dbb15c52c5d7bd4fef121a4b2ab4a41a63",
+      "comparisons/base-long-stream-c4.json": "25627e0dc8d30d94804f5fd2e25c704f60185e0c31627908b0bb6f64b54c8c58",
+      "comparisons/base-short-stream-c1.json": "e9bb1aba564e7a095fdee3db260a91575dbf015ddd31809afe3eacdd8b244ed7",
+      "comparisons/base-short-sync-c4.json": "1a7d820149a4def36dfa6d37803ac76d9dbd9f10926a927349294baaa54920c0",
+      "comparisons/prefix-cache-toggle.json": "4ff0a37b555747cfec4622f1462a13162d952e0829a9825d7a329109f96253bf",
+      "execution-provenance.json": "7d19be59d81d3c42dd8e05dae154eab3eeadbdd39b86f4e918e5e1d9522ac8c5",
+      "execution-source/manifest.json": "b84b4c153985c9bf4bf80cef3ef35fed2bba70545199814e84f17c0747206b59",
+      "execution-source/scripts/demo.py": "935802d2fd56303979c0cf935b217759217421da290974ce9f23097b3ffba569",
+      "execution-source/scripts/prepare_human_sample.py": "727e2dadc210a07bc3c878e19c72b0b7110fb2196c49700591ff2d1e1dc3ef18",
+      "execution-source/scripts/run_quality_experiment.py": "d292aef4f3cab6ce6b2e7edd995e88a90fd53d8775c507d2f302849e344aa72f",
+      "execution-source/scripts/run_serving_experiments.py": "449a3e400864434113b8025a74cfa7767604118e6f3291c73ee45698a4b72161",
+      "execution-source/src/llm_platform/__init__.py": "345fc34c2323ca08d5799bc4a7c7b17c2b3b2a59d77f903d3ad8db18970c36d1",
+      "execution-source/src/llm_platform/backends/__init__.py": "6ac08ec30729dfc90e99dcb1605ded4aa9aaabfa4d9ba55b576db189c39a27a5",
+      "execution-source/src/llm_platform/backends/launch_vllm.py": "dd37495cc3b6c75fd9ff12eeebf6177c3b27ebf54edc8ca4cc0b2a04a9594ab2",
+      "execution-source/src/llm_platform/backends/transformers_backend.py": "0081f0f658ddd0d6e814cd466051b5e36a9a53d112d2c87897c9688402120789",
+      "execution-source/src/llm_platform/backends/vllm_backend.py": "01db391cb0c2e6be309fad991b88e987dc1e7671fed68eb2208b9d88e4753467",
+      "execution-source/src/llm_platform/benchmark.py": "91a13bf933acc9104dd9ca0efbe1ad377a5014cf0411a37949bb4d7a72956b52",
+      "execution-source/src/llm_platform/cli.py": "5c32369eb893322e9fba62b51f978ed4c4877efbd365d060be335ba518c8b34c",
+      "execution-source/src/llm_platform/contracts.py": "6927bc6accbe6040c52d2ba32c32bab25b4eec9a471f2b19e8e2d779e3a1d91e",
+      "execution-source/src/llm_platform/data.py": "09527e84a485ddd89df695831e51a1e8a044035d0edee2fe2143e5791770b047",
+      "execution-source/src/llm_platform/evaluation.py": "20aa4b54b8c18bf5566346f3ce9cc5dc1fac2aa39e3e3f171d627997ec7284bc",
+      "execution-source/src/llm_platform/evidence.py": "7b11b09a289a166891ebcdda2698319c45e5fc6d4301f23a05fe2cc3c5ab714c",
+      "execution-source/src/llm_platform/prompts.py": "b9d57c5183197f15476bdd5149ebfccdbc1eaa984c5e46ccdae4f599198487c2",
+      "execution-source/src/llm_platform/provenance.py": "c627ff10df363c6b8be2ba4420ee610bd7c95877e9af0c041f14f75250df1014",
+      "execution-source/src/llm_platform/registry.py": "71a7b1c84b61aed7edb2a07d72f344b6f1ed1ed014bed72fb1400d485bbb3354",
+      "execution-source/src/llm_platform/serving.py": "a7eebf4d0f48b44631a5faac7a3cff9dba40552bd7ecadf21455e1fc276f8978",
+      "execution-source/src/llm_platform/synthetic.py": "5949bcf822ec93b14db8fbfb2d0b54540b03e2642f6f4ef4aee86766aab32add",
+      "execution-source/src/llm_platform/training.py": "2623208cc55cef850aa2ffc1763408b7d9f118dedbc71911758775d5ac1ee3f0",
+      "index.json": "c229ed55a341ec42ac5cc62f3756ff9098b98694facea30bde63565d3b93e1c6",
+      "lifecycle/lifecycle.json": "a90f4dd5d66b7aacd9a0baa8766d576613516d9aa7ecdcf1d6240be4e2a7ff45",
+      "lifecycle/metrics.txt": "6a3c1ef2dd196fde63e327b32202b624985216251e0360714166ea388f3f411f",
+      "protocol.json": "d9de3d07102279a3aafb1d4b92a1926e5974804c09b89f15fffe0cca2b81a799",
+      "runs/prefix-off-r0/gpu.jsonl": "2de85469a1068ddc8d8177753f8cf2edd3f7bc38be81a5a463c6deacfb1f1e68",
+      "runs/prefix-off-r0/report.json": "3957fbfde5d19db568876ae9adb20eaad827592791e62fff36a286aa427fdd73",
+      "runs/prefix-off-r0/report.md": "ef6871b5fd3a9cfceff4f337b525375d3ed444b70cb8be42ce23706dddb46e9d",
+      "runs/prefix-off-r0/requests.jsonl": "ae21205365dd8dc56004427dd6ae29b00adeee022eb862eeca38e93918f26b2b",
+      "runs/prefix-off-r1/gpu.jsonl": "c364d9e0b62e4db51da93fde27efd943480a915262691d627d34c178c6495823",
+      "runs/prefix-off-r1/report.json": "d77385d4421cde8cbab1f5348e11bf56f97712f451abadf0e13e253700eae5ea",
+      "runs/prefix-off-r1/report.md": "6d446cbbed99768fead2562adb3671090fa648b322c17168fd7b31d37a22b8e0",
+      "runs/prefix-off-r1/requests.jsonl": "36d263bb3d16aa0ca0239e7b8e11152552ffdf0eecdf54613bb3eceeb2d58834",
+      "runs/prefix-on-r0/gpu.jsonl": "ca9e409796fbf1339c64b207ed217771c3d9af076bcd34f4ac25311f09f0661e",
+      "runs/prefix-on-r0/report.json": "d11dda538f22ecec9ed3c4ae7f50f0e317239aacca04ceabc9aa1acccca533f4",
+      "runs/prefix-on-r0/report.md": "a98261d25bfb341c4c4b9a15a40bd595860187b03dc781e7235852f61677b7e8",
+      "runs/prefix-on-r0/requests.jsonl": "16b2deb594e2202ba53a342d2294c7860f5f470687bfa7dbde0bb05de250453c",
+      "runs/prefix-on-r1/gpu.jsonl": "e6a2e261a3aec15e4413d7d26fdba61581c450bbc10ff372105e13e5fe4b71a4",
+      "runs/prefix-on-r1/report.json": "87578e58670163532791ce3de17faa80ad24f7273b46da2bda47f0568da7d97d",
+      "runs/prefix-on-r1/report.md": "1c63ecc36c333a66f3b1ffe96c47e56e52d9f1860174621c129b94578b37b7c8",
+      "runs/prefix-on-r1/requests.jsonl": "e4715cbbe26fdf7a692fb594969143432fb8f4a1cddcf93167abce53a398687c",
+      "runs/transformers-adapter-r0-long-stream-c4/gpu.jsonl": "cf08d1e7a7bd87f2a538915e27bacf210cb00133413b130b7b8365f6bad405d3",
+      "runs/transformers-adapter-r0-long-stream-c4/report.json": "50c6395a655620a7f4c52bb50fbe469f53e233fb95fd4867cf414816720ad4ba",
+      "runs/transformers-adapter-r0-long-stream-c4/report.md": "77027b52e3a68af8653c8f3fda036d493a3796617ed7463481b90263c1b77fd3",
+      "runs/transformers-adapter-r0-long-stream-c4/requests.jsonl": "ea65dd98c1e269ef7e04cd991bb7d205b5e88a4a2734b747e69b2a5d1fa8a2d0",
+      "runs/transformers-adapter-r0-short-stream-c1/gpu.jsonl": "c4d71af3e923dd83b1afba7ecd2de68e135bb40652be8f38579380c7bf2599da",
+      "runs/transformers-adapter-r0-short-stream-c1/report.json": "970ec3e956d4a2b3e4888d427a4db2505d87d48e6c163629191ce53118c0a86a",
+      "runs/transformers-adapter-r0-short-stream-c1/report.md": "a678dab25d5c3ae82b8d018c70b9ceed3b18f34fe8e89a392fc0fbaa20c90825",
+      "runs/transformers-adapter-r0-short-stream-c1/requests.jsonl": "b348b927ff96489a67b058852db9be3577c557209e29edb1871d53a797112b3e",
+      "runs/transformers-adapter-r0-short-sync-c4/gpu.jsonl": "3c342e0b240412db9a2dcfa52b3f874e05bf40fa65a29f4654ab60ca349799ee",
+      "runs/transformers-adapter-r0-short-sync-c4/report.json": "fd581ff8db35616056d0146fba1a219ea1c152c51273764da31ad6b023f8befb",
+      "runs/transformers-adapter-r0-short-sync-c4/report.md": "dfdf8067a7d58a8e09486e91862c14573a2041ad4bff9d6fbc24afca877860e3",
+      "runs/transformers-adapter-r0-short-sync-c4/requests.jsonl": "fd8df0968604929b52cccfa0a9613650c2808acc65015e6d2fb6ad419591d2dc",
+      "runs/transformers-adapter-r1-long-stream-c4/gpu.jsonl": "bad1fa07a3472d1cf53c657a334820bc9933331c1b7666c94b813ec9d01f6b57",
+      "runs/transformers-adapter-r1-long-stream-c4/report.json": "e484a02bae75efc6580236b554de2c13e39e7c3aaa4f0cbe90f98f12953b1c43",
+      "runs/transformers-adapter-r1-long-stream-c4/report.md": "c000e019bf9e3e221a38e6e873d2e7c1ba7f9799c2d9bd4d0855646ab9e28f96",
+      "runs/transformers-adapter-r1-long-stream-c4/requests.jsonl": "280297847f957751b2e248924aa60591ece8cb9b31e8595d4b9e59da00a7c6df",
+      "runs/transformers-adapter-r1-short-stream-c1/gpu.jsonl": "96e2c69f6608aa1ce8fdf93a6518ada165fd31010dd56fda55219713d1223096",
+      "runs/transformers-adapter-r1-short-stream-c1/report.json": "0b04cd7d1f2bed1600dc9a2f773bd1c843cb6d6c890b41ef22b94d5954f6401a",
+      "runs/transformers-adapter-r1-short-stream-c1/report.md": "353418cf8c4b2aa40578a93250a5ddbb6a9f5f60826dae7b356aed1ec898e0c8",
+      "runs/transformers-adapter-r1-short-stream-c1/requests.jsonl": "8aa266afab20c5a70dd34d85ae5848baebb88f087d0376b32ea74fb4c88da025",
+      "runs/transformers-adapter-r1-short-sync-c4/gpu.jsonl": "0ccce85190a01dd64cc72a66a5c94d9760846c85cba9812ce75440a62a6f2ea3",
+      "runs/transformers-adapter-r1-short-sync-c4/report.json": "f51316223e4ecc936169dedf8dbc9df520131e859bf45fc513b2557637884a28",
+      "runs/transformers-adapter-r1-short-sync-c4/report.md": "90882312819f2fab885d41db8b36500a768d338710de42dec48a830b7c0db136",
+      "runs/transformers-adapter-r1-short-sync-c4/requests.jsonl": "35a8e14520cfd68d9b71026f6f27d2556aaca071f083c8423060937cbf9063a0",
+      "runs/transformers-base-r0-long-stream-c4/gpu.jsonl": "13891ed7bb6ceed79fbc3537843504738e089d6f27c8f9535cc9ba44758b9e79",
+      "runs/transformers-base-r0-long-stream-c4/report.json": "e01f6a4226576922da1a8ef7ba0051ae0d0b85682caf3e7ce373bf9a40a87b9e",
+      "runs/transformers-base-r0-long-stream-c4/report.md": "96f3c6791623a6083e0e483cfea03d9d5f32b180537bf8b78822c177001e2825",
+      "runs/transformers-base-r0-long-stream-c4/requests.jsonl": "dc1763a361baa51fbf748774aa4bd8d5090b7aedee1951a4202603cb922c1b5d",
+      "runs/transformers-base-r0-short-stream-c1/gpu.jsonl": "88203780e98f1d244ed42fe7f9fe65efecd88c264c144aac0e0707c04448ba68",
+      "runs/transformers-base-r0-short-stream-c1/report.json": "3ff2739408dd84c5435e5c49de38621e126c93753f10438d011ac5373bfae81f",
+      "runs/transformers-base-r0-short-stream-c1/report.md": "284ca428de9f8c394d2f5d5426aecacf7a34dcac768df5bfea04fd69cc10cde6",
+      "runs/transformers-base-r0-short-stream-c1/requests.jsonl": "35c591b90df7048ba99e9c8d3ca527df3c2fcaae639b5fda8f3ee742643f1946",
+      "runs/transformers-base-r0-short-sync-c4/gpu.jsonl": "7b9b76aedf84c4acc1be4371d0353450891807673e1d1b82bab8e613a2d9c7c9",
+      "runs/transformers-base-r0-short-sync-c4/report.json": "71be55b1c6debc2ade1799eff97c970b625c516278b4c395776d41ddeec73a8c",
+      "runs/transformers-base-r0-short-sync-c4/report.md": "329ef000d1c587719b4ad667d385ed2c923b8f60cc54e0ec73d430f23d727fe8",
+      "runs/transformers-base-r0-short-sync-c4/requests.jsonl": "6e28487073258ca515c0894565b23859c2fbfd4ddefdb8e15849d0b49c90df9c",
+      "runs/transformers-base-r1-long-stream-c4/gpu.jsonl": "fb5cbefdc7f54b3ecc4cbfec06e71d5f2e74f804b7e2a6f11a279e4d3f2325f8",
+      "runs/transformers-base-r1-long-stream-c4/report.json": "01270edac2ec815865a1648bf1ea6d9f2884e09b59c8ef52be1f97d84c66003f",
+      "runs/transformers-base-r1-long-stream-c4/report.md": "d13f06d1b6e891012324cafb53026300fc840696627d45a687729f2cafd96f5b",
+      "runs/transformers-base-r1-long-stream-c4/requests.jsonl": "801d35883638279e86dfdafd76bf063bc47c4773352b2077cc77e640db0ab5d1",
+      "runs/transformers-base-r1-short-stream-c1/gpu.jsonl": "3e9471420870691d8d572fec8bb435c419dfbbe9f77a1ab9b70784530f92a4db",
+      "runs/transformers-base-r1-short-stream-c1/report.json": "3ce6c43807e5466e9823de44d33dcd05d67d3bd979ff69eac6c96a12c3c2d46f",
+      "runs/transformers-base-r1-short-stream-c1/report.md": "6279a3043e7402a3024b3402bc24e1721adf14489b21b9bb929fb2f76fe40abe",
+      "runs/transformers-base-r1-short-stream-c1/requests.jsonl": "fa5c46b342f7d0bee2206fafdf0430fec4664c20b6a5b2a63aba5531d25134ba",
+      "runs/transformers-base-r1-short-sync-c4/gpu.jsonl": "ff86dedcf77833889c9c8efad1d5427a6a2bbe07c684eeecab44a336d6fe6af2",
+      "runs/transformers-base-r1-short-sync-c4/report.json": "55907c5be3f4ae61829f038d7be216aab013ea9b8a4816cc21a78a20f10ca0c2",
+      "runs/transformers-base-r1-short-sync-c4/report.md": "7ef04bae5aa0cf8e362405b23ef6e7e8d71398f9a82153ccb4e63e8f10929fd3",
+      "runs/transformers-base-r1-short-sync-c4/requests.jsonl": "5e4c3f9efc1eafde194b3ec2e758e3fd1f519aa8e7c9afe6ca2fe153788f0f23",
+      "runs/vllm-adapter-r0-long-stream-c4/gpu.jsonl": "279c9e1f9551a5c2df8e09bab9c270610826deedd3fd3619c0fdc7a7f217a24e",
+      "runs/vllm-adapter-r0-long-stream-c4/report.json": "fa18480dc5c8cfed667292db3b0a2a69ea41d8f9990b92eefbca1420cd4e97ec",
+      "runs/vllm-adapter-r0-long-stream-c4/report.md": "9fa0886f9abbfd813c2e27d4ff5d81efb1a1f954773e5ae1b9a90bffbfa648ae",
+      "runs/vllm-adapter-r0-long-stream-c4/requests.jsonl": "50633bd676ec8ec07b44cf879bf0f1c21e3cc9b654698ed55d86ab4bba0c7f19",
+      "runs/vllm-adapter-r0-short-stream-c1/gpu.jsonl": "a56222c2f65f4a1266b06b41800d7dfeedf2e33c86f792411924789bc84f21eb",
+      "runs/vllm-adapter-r0-short-stream-c1/report.json": "51c971cd021337d97f608d0e54e37377004a506baae14ff35b43383a8a21bf89",
+      "runs/vllm-adapter-r0-short-stream-c1/report.md": "db2072b555734ec836e0f08a4fc2b738646e15e01c471da60989f0dae259701c",
+      "runs/vllm-adapter-r0-short-stream-c1/requests.jsonl": "6993404cdc4225451d1a70fde694b0cc3706cd87fecc8081bde4aa818805f163",
+      "runs/vllm-adapter-r0-short-sync-c4/gpu.jsonl": "9b3f57d0e0ba8bab19fe106f02c0d8d6ef712e0bb86d94f48f9723622c45c764",
+      "runs/vllm-adapter-r0-short-sync-c4/report.json": "49a45b8e95328494540a0a1302ed925a4ef51f43a36d2be8976d8dcf73584fa8",
+      "runs/vllm-adapter-r0-short-sync-c4/report.md": "74058151e70cb95a570aec57237c21a9365a036184334dfd04e18edc71e54627",
+      "runs/vllm-adapter-r0-short-sync-c4/requests.jsonl": "ea83c37cc16ac4634b35ceb20d22936bd65551de9354eea601d3e88b5c8a2939",
+      "runs/vllm-adapter-r1-long-stream-c4/gpu.jsonl": "351d07d5a6ed6d707706d2654ce14f4d10c27246c89043dcc7da02665d472349",
+      "runs/vllm-adapter-r1-long-stream-c4/report.json": "3208c75b400a40497539f33d74ae48db3881150c8d999aef44cdc68981a48f96",
+      "runs/vllm-adapter-r1-long-stream-c4/report.md": "320f0504bf807d00581ea4b31e835972012f214caee3309c66a261458b366581",
+      "runs/vllm-adapter-r1-long-stream-c4/requests.jsonl": "e9c27b6fb652154deda26c349cf681ae285679173a06f18beb59a9faa98cc73c",
+      "runs/vllm-adapter-r1-short-stream-c1/gpu.jsonl": "d55e3dcd42038bbc3dd26f290f1c84f74d226b8378aecc4195a09b4deb85862b",
+      "runs/vllm-adapter-r1-short-stream-c1/report.json": "4e9c2775f8daf80a0892773b2748832d98ca52a7bc5a1c4487d45ee0f77d9e2d",
+      "runs/vllm-adapter-r1-short-stream-c1/report.md": "b0de6bb21fd71b4c8ca18120ce730be21d1d66be6c7093c35d4e1429deddb0c3",
+      "runs/vllm-adapter-r1-short-stream-c1/requests.jsonl": "822331d930abc87f1cc27c48fb3230f89e295367f8afd638f456097b11060c10",
+      "runs/vllm-adapter-r1-short-sync-c4/gpu.jsonl": "ef7c7e961e06d9a99473b465f8c865aaa61830f1f41180db76a0672182024984",
+      "runs/vllm-adapter-r1-short-sync-c4/report.json": "ae8017b2f90eed90ec56bb5ba5becbbe1c51cec0b8f016e7cdec558f5ddd2c28",
+      "runs/vllm-adapter-r1-short-sync-c4/report.md": "c4d1a844aa24cb193cbe6307d855d18cfaaf8898206c14a0df088d5354f56b65",
+      "runs/vllm-adapter-r1-short-sync-c4/requests.jsonl": "4ac6d18b58cd18f34d9c680d8cd12d05f8ee11b47aacf9f39aaa776f7be885ff",
+      "runs/vllm-base-r0-long-stream-c4/gpu.jsonl": "8b07a1088a5cb3ed7038d9db8f03067f86394fc47e7b91255fd19b6b7c29bc22",
+      "runs/vllm-base-r0-long-stream-c4/report.json": "67e6df96f9900b361f69dad90502fb46b8eaa87177676f9e3ec4b84b0ff2b16f",
+      "runs/vllm-base-r0-long-stream-c4/report.md": "6ce811423538c22e67466be72848b40c9907658ef97db84c696147deecca0e00",
+      "runs/vllm-base-r0-long-stream-c4/requests.jsonl": "3ea50326fed4fc42bb0f27192cba56f237d76e7b049beb9fac2ff368ffa788ee",
+      "runs/vllm-base-r0-short-stream-c1/gpu.jsonl": "76f7e2c5eda7a1332db48c83b38a7d667cc23435dfcfaa691efd12d72e0dfabb",
+      "runs/vllm-base-r0-short-stream-c1/report.json": "9f362881590d3bd5426031e649ec505ab16481380d91b1c02400b9aa7c025039",
+      "runs/vllm-base-r0-short-stream-c1/report.md": "4f1f7c2a080b65d04104253ff9deaf7bdde5dbdd21ae8ccbb3f8ce8bb36c13c7",
+      "runs/vllm-base-r0-short-stream-c1/requests.jsonl": "a01842a685a2c95fa03826d0eebdbf5f9ad7341728daa8b1cb4b09bb118d854a",
+      "runs/vllm-base-r0-short-sync-c4/gpu.jsonl": "adaec3fa36fbe9fe110256b55a14281a9e639458c47bbe4f8e62d03397daec8f",
+      "runs/vllm-base-r0-short-sync-c4/report.json": "0e1839b9ff9d04518ebb846d56c603e1cd17fce6e299a7a9a9f1951b1d06b9a9",
+      "runs/vllm-base-r0-short-sync-c4/report.md": "f9dfc571b164c611bf06dc441460f0b94a29ff01bffdcddff01d7e20f38a2940",
+      "runs/vllm-base-r0-short-sync-c4/requests.jsonl": "aa95f3605453e1e16a4be0e2a29f49133e46a6eabe1be6659b4281fb6fdef5fd",
+      "runs/vllm-base-r1-long-stream-c4/gpu.jsonl": "54ed5b19b99101d87b3719dca3d2e5485e7c6f27ed44fa139b41dc784a2a724a",
+      "runs/vllm-base-r1-long-stream-c4/report.json": "72f3b54cec0d40b677c35a7e9b1df32ec4fbcf261042b689f4e959450232ca78",
+      "runs/vllm-base-r1-long-stream-c4/report.md": "45ad15aa8ce5933ab18578fdf5b361334a2b0a89a1963e323da847d3965a5ba0",
+      "runs/vllm-base-r1-long-stream-c4/requests.jsonl": "e18b5850c25ce0fda2d10757d0fc9e1c214c6402f14aed68417b85f8e5c5412a",
+      "runs/vllm-base-r1-short-stream-c1/gpu.jsonl": "458af08ffcb84d8b939298d9c318b9adaf7513289f0189b5a72b6170df09a75b",
+      "runs/vllm-base-r1-short-stream-c1/report.json": "a458cce93b0ec7208eb9d99cf1e8f76a4559bba1baa4478b9f8d8545088c9018",
+      "runs/vllm-base-r1-short-stream-c1/report.md": "e844a5066c81b8f7bc85aca6ffb1e655d5c341b330cc26c14c78a7bceebe005d",
+      "runs/vllm-base-r1-short-stream-c1/requests.jsonl": "fda8a11cb810c4f33046eff43ce46d9c01dd54584a4235b862b1ed8c4fc3af29",
+      "runs/vllm-base-r1-short-sync-c4/gpu.jsonl": "ef51394ad51bb6bb40b7d24de46fc16f1231b6cc095c5306a5518cec72d202a2",
+      "runs/vllm-base-r1-short-sync-c4/report.json": "5c48df126e0475b3e40e71e44948c48d526c5b0ff832a0a93b96fbb19faffc1f",
+      "runs/vllm-base-r1-short-sync-c4/report.md": "fb5c0e790152023acd5b6d2e2cf11905981f1a755408da072ffb3bde2dafaef7",
+      "runs/vllm-base-r1-short-sync-c4/requests.jsonl": "87b8bf81a3bd95eed9a5fbe1416f6dfde6f35fe7b35a1dbc4cc2d83f4170bea8",
+      "sessions/transformers-adapter-r0/shutdown.json": "9c0f105f510e56ba0ffca74a4733f9d8ae3c1602cbf04fe4ecc3614766a97ab7",
+      "sessions/transformers-adapter-r0/startup.json": "2c8ab6b955f7fe01aa8784af22085d9524ab3ac690a20374b5caa2fca2ee0d8b",
+      "sessions/transformers-adapter-r1/shutdown.json": "664f2440c8a370da212f667bdf8c255f0951580d4198a505860707628a1c64ee",
+      "sessions/transformers-adapter-r1/startup.json": "2ec07175430d805506687be920196b5320eb968dc1fd60c991cd270c95a9ce97",
+      "sessions/transformers-base-r0/shutdown.json": "b8a8201f707291900991c345fb05f56d773ff42020e486c271b858f50fc3042c",
+      "sessions/transformers-base-r0/startup.json": "99b9216926638bd3870cd6318d5d8680dce13540c3f8a82f0337a37135d49c03",
+      "sessions/transformers-base-r1/shutdown.json": "726136a71a081d4b1dc6103aeac07bb292f7346651041019e30dd9b937c35aa9",
+      "sessions/transformers-base-r1/startup.json": "e919b5e3562566a14518533efe77eea42e41b23bc5d911d045f22290f7bc9313",
+      "sessions/vllm-adapter-r0/shutdown.json": "a7d6f6ff747cf4d0a136a95d254aeb4baaa9e60a68c839964af6a309bcd56165",
+      "sessions/vllm-adapter-r0/startup.json": "54f6d11a50f602d6158718645cd5b71b7beb04a559005007e0c0f51da9a29d7f",
+      "sessions/vllm-adapter-r1/shutdown.json": "dfcaa6f00f5afbb85fc23869d02be5bc4265a93de9fe820b075e5f8605b24efc",
+      "sessions/vllm-adapter-r1/startup.json": "63e9a70779fd4b5d54caf671c54aaa19cfb49b6dba75f40fc14c0fa1975ab27d",
+      "sessions/vllm-base-prefix-on-r0/shutdown.json": "ee86c6e434871796cfe39b34f9d5abad66a08fe992720f2710e1177c6e202ab6",
+      "sessions/vllm-base-prefix-on-r0/startup.json": "61ead43993e9de0d8cbc1bae99c4eca2431ee17415e1153c9b68c2678e69fd70",
+      "sessions/vllm-base-prefix-on-r1/shutdown.json": "85a1c89c7c603cc3f3ec6f8b9cc907e5cafb09da8d38a552ca0b3b287af4eae4",
+      "sessions/vllm-base-prefix-on-r1/startup.json": "208fdb699cd7fb22017b4ccc7ea514c52e66e9180b20a579c96f491387cf6243",
+      "sessions/vllm-base-r0/shutdown.json": "ac1a3f8e53b6bc4a1f5e2e9b9a46f927073c101d8c48df3af99185ce0849236b",
+      "sessions/vllm-base-r0/startup.json": "4345196724b29d78ab936b22cdaf5b8c4914fe257df367549e5f5c6032f3931b",
+      "sessions/vllm-base-r1/shutdown.json": "f18efd7c85763a89784b8420bdc260a689a3f1c57c7d29ed2c26450abcf96c6a",
+      "sessions/vllm-base-r1/startup.json": "1dbc6a6b805b4053ebb8bedfe663992d2591e37867d831a0b8d1859d15e95337"
+    },
+    "path": "../serving-original",
+    "tree_sha256": "7412e5e67c8c795e4cf7553e3bda04ad4c5c576d2a6370f1be403956b9467e17"
+  },
+  "original_protocol_sha256": "d9de3d07102279a3aafb1d4b92a1926e5974804c09b89f15fffe0cca2b81a799",
+  "reason": "Adversarial review found PEFT's original Transformers LoRA default computed FP32 while vLLM auto selected BF16. Only affected adapter serving arms are rerun with explicit verified BF16 compute; archived numbers remain historical confounded observations.",
+  "replacement_runs": [
+    "transformers-adapter-r0-long-stream-c4",
+    "transformers-adapter-r0-short-stream-c1",
+    "transformers-adapter-r0-short-sync-c4",
+    "transformers-adapter-r1-long-stream-c4",
+    "transformers-adapter-r1-short-stream-c1",
+    "transformers-adapter-r1-short-sync-c4",
+    "vllm-adapter-r0-long-stream-c4",
+    "vllm-adapter-r0-short-stream-c1",
+    "vllm-adapter-r0-short-sync-c4",
+    "vllm-adapter-r1-long-stream-c4",
+    "vllm-adapter-r1-short-stream-c1",
+    "vllm-adapter-r1-short-sync-c4"
+  ],
+  "replacements": {
+    "runs/transformers-adapter-r0-long-stream-c4": {
+      "corrected_files_sha256": {
+        "gpu.jsonl": "b8d320e387f08126a528ead77c21bdabc88ab7e2f052a06a60cdbfab18b53468",
+        "report.json": "b98c65e50290565a8b88a0a0886cb547de57ac1021c4c98c82cbc9768533add2",
+        "report.md": "2a918845cdfc12aa6a89fca3f461da8fe2479b57a19b24a7267e671f40be6c75",
+        "requests.jsonl": "d116bb175ed9f47f7bf017fbb2475da9377d04952b77f95155e027368ca48b7e"
+      },
+      "original_files_sha256": {
+        "gpu.jsonl": "cf08d1e7a7bd87f2a538915e27bacf210cb00133413b130b7b8365f6bad405d3",
+        "report.json": "50c6395a655620a7f4c52bb50fbe469f53e233fb95fd4867cf414816720ad4ba",
+        "report.md": "77027b52e3a68af8653c8f3fda036d493a3796617ed7463481b90263c1b77fd3",
+        "requests.jsonl": "ea65dd98c1e269ef7e04cd991bb7d205b5e88a4a2734b747e69b2a5d1fa8a2d0"
+      }
+    },
+    "runs/transformers-adapter-r0-short-stream-c1": {
+      "corrected_files_sha256": {
+        "gpu.jsonl": "48c2b02c014ae275acbfc8881a28e6c254edece46ba48e6e5799b8b3e56106fc",
+        "report.json": "2135883ab8e0096ee9118cd5a46df0033517abab008820ec6e3f26abe6ece47b",
+        "report.md": "81cf5cf232dd74b5dab76b977599470f13fd1133858fe1d6606e2c693061f400",
+        "requests.jsonl": "60afd62b06d6cb46e76396c2d27dbc9a0203c627b73e1b6cf609d1bb58d59456"
+      },
+      "original_files_sha256": {
+        "gpu.jsonl": "c4d71af3e923dd83b1afba7ecd2de68e135bb40652be8f38579380c7bf2599da",
+        "report.json": "970ec3e956d4a2b3e4888d427a4db2505d87d48e6c163629191ce53118c0a86a",
+        "report.md": "a678dab25d5c3ae82b8d018c70b9ceed3b18f34fe8e89a392fc0fbaa20c90825",
+        "requests.jsonl": "b348b927ff96489a67b058852db9be3577c557209e29edb1871d53a797112b3e"
+      }
+    },
+    "runs/transformers-adapter-r0-short-sync-c4": {
+      "corrected_files_sha256": {
+        "gpu.jsonl": "fd752e673a98657c851b5f2295af4e3a31c9745073f6a479b143da0d01bd1cab",
+        "report.json": "7d367744ca150f395b75728fea573da48fd2b6e6ffa5292309b5a4bc28152467",
+        "report.md": "90fd08c172573ad4e0f6e5758112885ec94214485aaf47aae53c1b2420e1bc88",
+        "requests.jsonl": "70346ce8d7580b4e6f76ca5952fa15d8f0f4411db58ce55e0fe56e2948331a1e"
+      },
+      "original_files_sha256": {
+        "gpu.jsonl": "3c342e0b240412db9a2dcfa52b3f874e05bf40fa65a29f4654ab60ca349799ee",
+        "report.json": "fd581ff8db35616056d0146fba1a219ea1c152c51273764da31ad6b023f8befb",
+        "report.md": "dfdf8067a7d58a8e09486e91862c14573a2041ad4bff9d6fbc24afca877860e3",
+        "requests.jsonl": "fd8df0968604929b52cccfa0a9613650c2808acc65015e6d2fb6ad419591d2dc"
+      }
+    },
+    "runs/transformers-adapter-r1-long-stream-c4": {
+      "corrected_files_sha256": {
+        "gpu.jsonl": "4b6b47c01af4e160d711a599aabb7f3cf3ea6f0aa68f94747c41b45cd60cb222",
+        "report.json": "935fbc1f4dbfd03bb5de1eacf3ab1d31ad3fe6f92269b270ef98edc2d17b15ad",
+        "report.md": "d5925206db6ba76c07bff904723aa639c23acd1198f74b40cf37599eefa105d3",
+        "requests.jsonl": "b4ad557290b6a563ad1896ac3bc4a35ba7e9212c4e72d34b2f83cee00a0a9bcd"
+      },
+      "original_files_sha256": {
+        "gpu.jsonl": "bad1fa07a3472d1cf53c657a334820bc9933331c1b7666c94b813ec9d01f6b57",
+        "report.json": "e484a02bae75efc6580236b554de2c13e39e7c3aaa4f0cbe90f98f12953b1c43",
+        "report.md": "c000e019bf9e3e221a38e6e873d2e7c1ba7f9799c2d9bd4d0855646ab9e28f96",
+        "requests.jsonl": "280297847f957751b2e248924aa60591ece8cb9b31e8595d4b9e59da00a7c6df"
+      }
+    },
+    "runs/transformers-adapter-r1-short-stream-c1": {
+      "corrected_files_sha256": {
+        "gpu.jsonl": "81ad22b36c6dedec50f1d653eea654ba083ef219c06b4d28a092eef60368b1ea",
+        "report.json": "15c204244e9d8982ecaf5513351532a3d509bbe43a61a3d0aa5dbdd25bea0be7",
+        "report.md": "8d52696b152bc5bd40c100f6f531ef2a55e7be2d9fa0f5fc36a61cacae5443b9",
+        "requests.jsonl": "67eecfa6fbe659ec55aea5287f8c7994c3b488872552385b4646057f1bc615e3"
+      },
+      "original_files_sha256": {
+        "gpu.jsonl": "96e2c69f6608aa1ce8fdf93a6518ada165fd31010dd56fda55219713d1223096",
+        "report.json": "0b04cd7d1f2bed1600dc9a2f773bd1c843cb6d6c890b41ef22b94d5954f6401a",
+        "report.md": "353418cf8c4b2aa40578a93250a5ddbb6a9f5f60826dae7b356aed1ec898e0c8",
+        "requests.jsonl": "8aa266afab20c5a70dd34d85ae5848baebb88f087d0376b32ea74fb4c88da025"
+      }
+    },
+    "runs/transformers-adapter-r1-short-sync-c4": {
+      "corrected_files_sha256": {
+        "gpu.jsonl": "66a14551ff416782968da72e5ac0792c365e84f9095521225bede32a96ec2999",
+        "report.json": "5d77403e895dba62a8e0c535f56f6df42bfdd92425478b4c5de41bc74e696e05",
+        "report.md": "efb72a3fe76c98d0fd02abbfa1a30a8501438d20165762175f42f66840696838",
+        "requests.jsonl": "4c7dd36174faf9ab9bd6d05b0f40ffff57195fb4159eb6d2605835776645be76"
+      },
+      "original_files_sha256": {
+        "gpu.jsonl": "0ccce85190a01dd64cc72a66a5c94d9760846c85cba9812ce75440a62a6f2ea3",
+        "report.json": "f51316223e4ecc936169dedf8dbc9df520131e859bf45fc513b2557637884a28",
+        "report.md": "90882312819f2fab885d41db8b36500a768d338710de42dec48a830b7c0db136",
+        "requests.jsonl": "35a8e14520cfd68d9b71026f6f27d2556aaca071f083c8423060937cbf9063a0"
+      }
+    },
+    "runs/vllm-adapter-r0-long-stream-c4": {
+      "corrected_files_sha256": {
+        "gpu.jsonl": "b4298697f3de6025efeb7d44c81662c2756add0cea2594860cf84aec0cfe9ec0",
+        "report.json": "4097cb54cd9a13ea3bc1c071521cd513ba4e83738aee3f290e18af588700c228",
+        "report.md": "94a0bc637dd4b12e4ab8eb40fc9f68ed53262227b4d81a28f6155ae9827364a1",
+        "requests.jsonl": "e7f130be4487ba93f18c224740a8c940ef5a5378320d72b83a5621afb7d1e173"
+      },
+      "original_files_sha256": {
+        "gpu.jsonl": "279c9e1f9551a5c2df8e09bab9c270610826deedd3fd3619c0fdc7a7f217a24e",
+        "report.json": "fa18480dc5c8cfed667292db3b0a2a69ea41d8f9990b92eefbca1420cd4e97ec",
+        "report.md": "9fa0886f9abbfd813c2e27d4ff5d81efb1a1f954773e5ae1b9a90bffbfa648ae",
+        "requests.jsonl": "50633bd676ec8ec07b44cf879bf0f1c21e3cc9b654698ed55d86ab4bba0c7f19"
+      }
+    },
+    "runs/vllm-adapter-r0-short-stream-c1": {
+      "corrected_files_sha256": {
+        "gpu.jsonl": "d04b5af8e1425e321def609942977e49f899042cca343dc85bd3fb8786b0275b",
+        "report.json": "7e5ec271fc1061eb5ac02a6ca7e9633d2d6b386ed30a17fb545ccd19ee39a927",
+        "report.md": "66d80c933f62c31b536dac52aff2b2c97570717ab375f7a5b0665e8c6c9a121c",
+        "requests.jsonl": "ca87e2e57f3ab30fdfaf506586b9dbb4a298f0470996281de3d8717fdfef7d49"
+      },
+      "original_files_sha256": {
+        "gpu.jsonl": "a56222c2f65f4a1266b06b41800d7dfeedf2e33c86f792411924789bc84f21eb",
+        "report.json": "51c971cd021337d97f608d0e54e37377004a506baae14ff35b43383a8a21bf89",
+        "report.md": "db2072b555734ec836e0f08a4fc2b738646e15e01c471da60989f0dae259701c",
+        "requests.jsonl": "6993404cdc4225451d1a70fde694b0cc3706cd87fecc8081bde4aa818805f163"
+      }
+    },
+    "runs/vllm-adapter-r0-short-sync-c4": {
+      "corrected_files_sha256": {
+        "gpu.jsonl": "fb242f8065c9b58a761a76174f05eda5e6ec31243f3bc72b2347f56bf0894bd7",
+        "report.json": "0c90d7d134e06f28a76b179d924e2645d2e8d676c6a6fc268970e69a63cdcd3e",
+        "report.md": "a8404950afa2e61bb93374a8a67ade6b0074d7f71797934bf31da07982d5c9bd",
+        "requests.jsonl": "0f3f2d0b9b4e57df4a388f584067c926d8a2f06e79d6da3e5ba4af6875f5d9dc"
+      },
+      "original_files_sha256": {
+        "gpu.jsonl": "9b3f57d0e0ba8bab19fe106f02c0d8d6ef712e0bb86d94f48f9723622c45c764",
+        "report.json": "49a45b8e95328494540a0a1302ed925a4ef51f43a36d2be8976d8dcf73584fa8",
+        "report.md": "74058151e70cb95a570aec57237c21a9365a036184334dfd04e18edc71e54627",
+        "requests.jsonl": "ea83c37cc16ac4634b35ceb20d22936bd65551de9354eea601d3e88b5c8a2939"
+      }
+    },
+    "runs/vllm-adapter-r1-long-stream-c4": {
+      "corrected_files_sha256": {
+        "gpu.jsonl": "8c1e89106482dfbbcd4d0053a2c3077fcc4cda89b1f27b7a05cc466109f807dd",
+        "report.json": "4a0ddd30c94d12cb07ab345d47d9e80c5d75b71a5299a7c6502200d4608dc518",
+        "report.md": "935248974ce34588d5965798af6e07f21300f902ff8041408129d1c97276f6fd",
+        "requests.jsonl": "7ea1a81d7191e369d8f7b4830a0bacafc7d078f9196b9bf99c25fe9524fdf384"
+      },
+      "original_files_sha256": {
+        "gpu.jsonl": "351d07d5a6ed6d707706d2654ce14f4d10c27246c89043dcc7da02665d472349",
+        "report.json": "3208c75b400a40497539f33d74ae48db3881150c8d999aef44cdc68981a48f96",
+        "report.md": "320f0504bf807d00581ea4b31e835972012f214caee3309c66a261458b366581",
+        "requests.jsonl": "e9c27b6fb652154deda26c349cf681ae285679173a06f18beb59a9faa98cc73c"
+      }
+    },
+    "runs/vllm-adapter-r1-short-stream-c1": {
+      "corrected_files_sha256": {
+        "gpu.jsonl": "588bf377bdedabab0fea5a54efff2f0a062e11416d4eb2cb5832bec712f86cb6",
+        "report.json": "a3705157163af9d8f7da7cd5a1a32b20fa55f875a4ddaed6d3449cefa9492c92",
+        "report.md": "f5fe527b7e50bbb48faf51ee99e82a64473507c6ee0486a8fb35aadca4172a99",
+        "requests.jsonl": "266e9da2ff152a4fa968507a141adaa4f09b31c507c92853f86122aa8afb4715"
+      },
+      "original_files_sha256": {
+        "gpu.jsonl": "d55e3dcd42038bbc3dd26f290f1c84f74d226b8378aecc4195a09b4deb85862b",
+        "report.json": "4e9c2775f8daf80a0892773b2748832d98ca52a7bc5a1c4487d45ee0f77d9e2d",
+        "report.md": "b0de6bb21fd71b4c8ca18120ce730be21d1d66be6c7093c35d4e1429deddb0c3",
+        "requests.jsonl": "822331d930abc87f1cc27c48fb3230f89e295367f8afd638f456097b11060c10"
+      }
+    },
+    "runs/vllm-adapter-r1-short-sync-c4": {
+      "corrected_files_sha256": {
+        "gpu.jsonl": "fcba39cbece2930636251aafda217e72422aae0989d49f2ba53bfc5017739dd0",
+        "report.json": "6ccd77473a7cd77593947b490499a7beb481bdbc3fa49fe30efa86bd09394439",
+        "report.md": "85b90839a47a66356a4a4a2ff4439262ef281f4d2b8e63ee0bf2e36d1dd6a74a",
+        "requests.jsonl": "ace9d3463b487d0d68f31ad77a454f58e883008989674bf781a171a05c2d3b61"
+      },
+      "original_files_sha256": {
+        "gpu.jsonl": "ef7c7e961e06d9a99473b465f8c865aaa61830f1f41180db76a0672182024984",
+        "report.json": "ae8017b2f90eed90ec56bb5ba5becbbe1c51cec0b8f016e7cdec558f5ddd2c28",
+        "report.md": "c4d1a844aa24cb193cbe6307d855d18cfaaf8898206c14a0df088d5354f56b65",
+        "requests.jsonl": "4ac6d18b58cd18f34d9c680d8cd12d05f8ee11b47aacf9f39aaa776f7be885ff"
+      }
+    }
+  },
+  "retained_runs": [
+    "prefix-off-r0",
+    "prefix-off-r1",
+    "prefix-on-r0",
+    "prefix-on-r1",
+    "transformers-base-r0-long-stream-c4",
+    "transformers-base-r0-short-stream-c1",
+    "transformers-base-r0-short-sync-c4",
+    "transformers-base-r1-long-stream-c4",
+    "transformers-base-r1-short-stream-c1",
+    "transformers-base-r1-short-sync-c4",
+    "vllm-base-r0-long-stream-c4",
+    "vllm-base-r0-short-stream-c1",
+    "vllm-base-r0-short-sync-c4",
+    "vllm-base-r1-long-stream-c4",
+    "vllm-base-r1-short-stream-c1",
+    "vllm-base-r1-short-sync-c4"
+  ],
+  "schema_version": 1,
+  "session_replacements": {
+    "sessions/transformers-adapter-r0": {
+      "corrected_files_sha256": {
+        "shutdown.json": "6a0bd7a6839d8045f4cab718e6e3964baed208288f506ba87d8c2a2036efec11",
+        "startup.json": "aa9d44b1657d242cc63567be79c36d341f76d1c9ff38e70dd6ce7247c39859d2"
+      },
+      "original_files_sha256": {
+        "shutdown.json": "9c0f105f510e56ba0ffca74a4733f9d8ae3c1602cbf04fe4ecc3614766a97ab7",
+        "startup.json": "2c8ab6b955f7fe01aa8784af22085d9524ab3ac690a20374b5caa2fca2ee0d8b"
+      }
+    },
+    "sessions/transformers-adapter-r1": {
+      "corrected_files_sha256": {
+        "shutdown.json": "5bfe73f7de82414e5d5ea307b93ce12481519945e6a475feb32955839f884b5f",
+        "startup.json": "293042cedc9c9031eb3ab850fa92e6f869662e47c08e0560fe672362184ec12b"
+      },
+      "original_files_sha256": {
+        "shutdown.json": "664f2440c8a370da212f667bdf8c255f0951580d4198a505860707628a1c64ee",
+        "startup.json": "2ec07175430d805506687be920196b5320eb968dc1fd60c991cd270c95a9ce97"
+      }
+    },
+    "sessions/vllm-adapter-r0": {
+      "corrected_files_sha256": {
+        "shutdown.json": "dae4677d55f8158cadde67d72fc6e593ef3cda4584463e41964025be88754ca0",
+        "startup.json": "c83e9c68fee3754570a3bc36be5cfc90092baa585bf65fb257d574583f8d8fe7"
+      },
+      "original_files_sha256": {
+        "shutdown.json": "a7d6f6ff747cf4d0a136a95d254aeb4baaa9e60a68c839964af6a309bcd56165",
+        "startup.json": "54f6d11a50f602d6158718645cd5b71b7beb04a559005007e0c0f51da9a29d7f"
+      }
+    },
+    "sessions/vllm-adapter-r1": {
+      "corrected_files_sha256": {
+        "shutdown.json": "e8f41215d008f86bd13cd3c7dfb916bb1cfa2b68d8b207448bf1bf98c36b513b",
+        "startup.json": "a2561c688f5e2e15baabec5484bd7636b39d3aa466f92fc6dc71b666385b00ab"
+      },
+      "original_files_sha256": {
+        "shutdown.json": "dfcaa6f00f5afbb85fc23869d02be5bc4265a93de9fe820b075e5f8605b24efc",
+        "startup.json": "63e9a70779fd4b5d54caf671c54aaa19cfb49b6dba75f40fc14c0fa1975ab27d"
+      }
+    }
+  },
+  "source": {
+    "code_dirty": true,
+    "code_revision": "253ec5607e78a7812ba77fae114652657d0ee7a4",
+    "source_files_sha256": {
+      "pyproject.toml": "fa6e0dcde6b633ebb7296f3b60ae3f9d86f9ef89c7bf0feb5ae4e1ab5a498a43",
+      "scripts/realign_adapter_benchmarks.py": "09095ac070898369eb9a3115915b4ec6dc8507d19adbd326b6a7346f8a800d76",
+      "scripts/run_serving_experiments.py": "d068f57b74c8361f8575643d2d363d55a9fd9e61213de9a12f06a72b86580da8",
+      "src/llm_platform/__init__.py": "345fc34c2323ca08d5799bc4a7c7b17c2b3b2a59d77f903d3ad8db18970c36d1",
+      "src/llm_platform/backends/__init__.py": "6ac08ec30729dfc90e99dcb1605ded4aa9aaabfa4d9ba55b576db189c39a27a5",
+      "src/llm_platform/backends/launch_vllm.py": "f51d4038b4513aeb1a0e6754d3fcfdbeebc39a8c916385a39fd2a778ff3b82fa",
+      "src/llm_platform/backends/precision.py": "bee8fb279e72cf3ad4095b7c97d7b6abcfd838be93c5a9bb22c0eaab37561706",
+      "src/llm_platform/backends/transformers_backend.py": "c8d0683ecd771572601cdd75d1f7f43ccaa79e2eba696cd2bdc619a647453ba2",
+      "src/llm_platform/backends/vllm_backend.py": "af187e3d1a4e415ea94f5855956b03faf32c0cffbe6037c12056dbc96bd13a81",
+      "src/llm_platform/benchmark.py": "42c7ac5421c0c9e4c7692ec8230f004bb66c5f81392b4be799d555cdc45d6b10",
+      "src/llm_platform/cli.py": "5c32369eb893322e9fba62b51f978ed4c4877efbd365d060be335ba518c8b34c",
+      "src/llm_platform/contracts.py": "6927bc6accbe6040c52d2ba32c32bab25b4eec9a471f2b19e8e2d779e3a1d91e",
+      "src/llm_platform/data.py": "a73f4769d8216d13678deafbb27873bdb03233601cb22f54134b51c031ef3407",
+      "src/llm_platform/evaluation.py": "20aa4b54b8c18bf5566346f3ce9cc5dc1fac2aa39e3e3f171d627997ec7284bc",
+      "src/llm_platform/evidence.py": "e6cde60dea47e61ec32dc273b1d9cd213506296c3faeca851aa017d39537ba3a",
+      "src/llm_platform/prompts.py": "b9d57c5183197f15476bdd5149ebfccdbc1eaa984c5e46ccdae4f599198487c2",
+      "src/llm_platform/provenance.py": "c627ff10df363c6b8be2ba4420ee610bd7c95877e9af0c041f14f75250df1014",
+      "src/llm_platform/registry.py": "71a7b1c84b61aed7edb2a07d72f344b6f1ed1ed014bed72fb1400d485bbb3354",
+      "src/llm_platform/serving.py": "a7eebf4d0f48b44631a5faac7a3cff9dba40552bd7ecadf21455e1fc276f8978",
+      "src/llm_platform/synthetic.py": "5949bcf822ec93b14db8fbfb2d0b54540b03e2642f6f4ef4aee86766aab32add",
+      "src/llm_platform/training.py": "2623208cc55cef850aa2ffc1763408b7d9f118dedbc71911758775d5ac1ee3f0"
+    }
+  },
+  "started_at_unix_seconds": 1793675279.9126656,
+  "status": "complete",
+  "unchanged_original_files_sha256": {
+    "execution-provenance.json": "7d19be59d81d3c42dd8e05dae154eab3eeadbdd39b86f4e918e5e1d9522ac8c5",
+    "execution-source/manifest.json": "b84b4c153985c9bf4bf80cef3ef35fed2bba70545199814e84f17c0747206b59",
+    "execution-source/scripts/demo.py": "935802d2fd56303979c0cf935b217759217421da290974ce9f23097b3ffba569",
+    "execution-source/scripts/prepare_human_sample.py": "727e2dadc210a07bc3c878e19c72b0b7110fb2196c49700591ff2d1e1dc3ef18",
+    "execution-source/scripts/run_quality_experiment.py": "d292aef4f3cab6ce6b2e7edd995e88a90fd53d8775c507d2f302849e344aa72f",
+    "execution-source/scripts/run_serving_experiments.py": "449a3e400864434113b8025a74cfa7767604118e6f3291c73ee45698a4b72161",
+    "execution-source/src/llm_platform/__init__.py": "345fc34c2323ca08d5799bc4a7c7b17c2b3b2a59d77f903d3ad8db18970c36d1",
+    "execution-source/src/llm_platform/backends/__init__.py": "6ac08ec30729dfc90e99dcb1605ded4aa9aaabfa4d9ba55b576db189c39a27a5",
+    "execution-source/src/llm_platform/backends/launch_vllm.py": "dd37495cc3b6c75fd9ff12eeebf6177c3b27ebf54edc8ca4cc0b2a04a9594ab2",
+    "execution-source/src/llm_platform/backends/transformers_backend.py": "0081f0f658ddd0d6e814cd466051b5e36a9a53d112d2c87897c9688402120789",
+    "execution-source/src/llm_platform/backends/vllm_backend.py": "01db391cb0c2e6be309fad991b88e987dc1e7671fed68eb2208b9d88e4753467",
+    "execution-source/src/llm_platform/benchmark.py": "91a13bf933acc9104dd9ca0efbe1ad377a5014cf0411a37949bb4d7a72956b52",
+    "execution-source/src/llm_platform/cli.py": "5c32369eb893322e9fba62b51f978ed4c4877efbd365d060be335ba518c8b34c",
+    "execution-source/src/llm_platform/contracts.py": "6927bc6accbe6040c52d2ba32c32bab25b4eec9a471f2b19e8e2d779e3a1d91e",
+    "execution-source/src/llm_platform/data.py": "09527e84a485ddd89df695831e51a1e8a044035d0edee2fe2143e5791770b047",
+    "execution-source/src/llm_platform/evaluation.py": "20aa4b54b8c18bf5566346f3ce9cc5dc1fac2aa39e3e3f171d627997ec7284bc",
+    "execution-source/src/llm_platform/evidence.py": "7b11b09a289a166891ebcdda2698319c45e5fc6d4301f23a05fe2cc3c5ab714c",
+    "execution-source/src/llm_platform/prompts.py": "b9d57c5183197f15476bdd5149ebfccdbc1eaa984c5e46ccdae4f599198487c2",
+    "execution-source/src/llm_platform/provenance.py": "c627ff10df363c6b8be2ba4420ee610bd7c95877e9af0c041f14f75250df1014",
+    "execution-source/src/llm_platform/registry.py": "71a7b1c84b61aed7edb2a07d72f344b6f1ed1ed014bed72fb1400d485bbb3354",
+    "execution-source/src/llm_platform/serving.py": "a7eebf4d0f48b44631a5faac7a3cff9dba40552bd7ecadf21455e1fc276f8978",
+    "execution-source/src/llm_platform/synthetic.py": "5949bcf822ec93b14db8fbfb2d0b54540b03e2642f6f4ef4aee86766aab32add",
+    "execution-source/src/llm_platform/training.py": "2623208cc55cef850aa2ffc1763408b7d9f118dedbc71911758775d5ac1ee3f0",
+    "lifecycle/lifecycle.json": "a90f4dd5d66b7aacd9a0baa8766d576613516d9aa7ecdcf1d6240be4e2a7ff45",
+    "lifecycle/metrics.txt": "6a3c1ef2dd196fde63e327b32202b624985216251e0360714166ea388f3f411f",
+    "protocol.json": "d9de3d07102279a3aafb1d4b92a1926e5974804c09b89f15fffe0cca2b81a799",
+    "runs/prefix-off-r0/gpu.jsonl": "2de85469a1068ddc8d8177753f8cf2edd3f7bc38be81a5a463c6deacfb1f1e68",
+    "runs/prefix-off-r0/report.json": "3957fbfde5d19db568876ae9adb20eaad827592791e62fff36a286aa427fdd73",
+    "runs/prefix-off-r0/report.md": "ef6871b5fd3a9cfceff4f337b525375d3ed444b70cb8be42ce23706dddb46e9d",
+    "runs/prefix-off-r0/requests.jsonl": "ae21205365dd8dc56004427dd6ae29b00adeee022eb862eeca38e93918f26b2b",
+    "runs/prefix-off-r1/gpu.jsonl": "c364d9e0b62e4db51da93fde27efd943480a915262691d627d34c178c6495823",
+    "runs/prefix-off-r1/report.json": "d77385d4421cde8cbab1f5348e11bf56f97712f451abadf0e13e253700eae5ea",
+    "runs/prefix-off-r1/report.md": "6d446cbbed99768fead2562adb3671090fa648b322c17168fd7b31d37a22b8e0",
+    "runs/prefix-off-r1/requests.jsonl": "36d263bb3d16aa0ca0239e7b8e11152552ffdf0eecdf54613bb3eceeb2d58834",
+    "runs/prefix-on-r0/gpu.jsonl": "ca9e409796fbf1339c64b207ed217771c3d9af076bcd34f4ac25311f09f0661e",
+    "runs/prefix-on-r0/report.json": "d11dda538f22ecec9ed3c4ae7f50f0e317239aacca04ceabc9aa1acccca533f4",
+    "runs/prefix-on-r0/report.md": "a98261d25bfb341c4c4b9a15a40bd595860187b03dc781e7235852f61677b7e8",
+    "runs/prefix-on-r0/requests.jsonl": "16b2deb594e2202ba53a342d2294c7860f5f470687bfa7dbde0bb05de250453c",
+    "runs/prefix-on-r1/gpu.jsonl": "e6a2e261a3aec15e4413d7d26fdba61581c450bbc10ff372105e13e5fe4b71a4",
+    "runs/prefix-on-r1/report.json": "87578e58670163532791ce3de17faa80ad24f7273b46da2bda47f0568da7d97d",
+    "runs/prefix-on-r1/report.md": "1c63ecc36c333a66f3b1ffe96c47e56e52d9f1860174621c129b94578b37b7c8",
+    "runs/prefix-on-r1/requests.jsonl": "e4715cbbe26fdf7a692fb594969143432fb8f4a1cddcf93167abce53a398687c",
+    "runs/transformers-base-r0-long-stream-c4/gpu.jsonl": "13891ed7bb6ceed79fbc3537843504738e089d6f27c8f9535cc9ba44758b9e79",
+    "runs/transformers-base-r0-long-stream-c4/report.json": "e01f6a4226576922da1a8ef7ba0051ae0d0b85682caf3e7ce373bf9a40a87b9e",
+    "runs/transformers-base-r0-long-stream-c4/report.md": "96f3c6791623a6083e0e483cfea03d9d5f32b180537bf8b78822c177001e2825",
+    "runs/transformers-base-r0-long-stream-c4/requests.jsonl": "dc1763a361baa51fbf748774aa4bd8d5090b7aedee1951a4202603cb922c1b5d",
+    "runs/transformers-base-r0-short-stream-c1/gpu.jsonl": "88203780e98f1d244ed42fe7f9fe65efecd88c264c144aac0e0707c04448ba68",
+    "runs/transformers-base-r0-short-stream-c1/report.json": "3ff2739408dd84c5435e5c49de38621e126c93753f10438d011ac5373bfae81f",
+    "runs/transformers-base-r0-short-stream-c1/report.md": "284ca428de9f8c394d2f5d5426aecacf7a34dcac768df5bfea04fd69cc10cde6",
+    "runs/transformers-base-r0-short-stream-c1/requests.jsonl": "35c591b90df7048ba99e9c8d3ca527df3c2fcaae639b5fda8f3ee742643f1946",
+    "runs/transformers-base-r0-short-sync-c4/gpu.jsonl": "7b9b76aedf84c4acc1be4371d0353450891807673e1d1b82bab8e613a2d9c7c9",
+    "runs/transformers-base-r0-short-sync-c4/report.json": "71be55b1c6debc2ade1799eff97c970b625c516278b4c395776d41ddeec73a8c",
+    "runs/transformers-base-r0-short-sync-c4/report.md": "329ef000d1c587719b4ad667d385ed2c923b8f60cc54e0ec73d430f23d727fe8",
+    "runs/transformers-base-r0-short-sync-c4/requests.jsonl": "6e28487073258ca515c0894565b23859c2fbfd4ddefdb8e15849d0b49c90df9c",
+    "runs/transformers-base-r1-long-stream-c4/gpu.jsonl": "fb5cbefdc7f54b3ecc4cbfec06e71d5f2e74f804b7e2a6f11a279e4d3f2325f8",
+    "runs/transformers-base-r1-long-stream-c4/report.json": "01270edac2ec815865a1648bf1ea6d9f2884e09b59c8ef52be1f97d84c66003f",
+    "runs/transformers-base-r1-long-stream-c4/report.md": "d13f06d1b6e891012324cafb53026300fc840696627d45a687729f2cafd96f5b",
+    "runs/transformers-base-r1-long-stream-c4/requests.jsonl": "801d35883638279e86dfdafd76bf063bc47c4773352b2077cc77e640db0ab5d1",
+    "runs/transformers-base-r1-short-stream-c1/gpu.jsonl": "3e9471420870691d8d572fec8bb435c419dfbbe9f77a1ab9b70784530f92a4db",
+    "runs/transformers-base-r1-short-stream-c1/report.json": "3ce6c43807e5466e9823de44d33dcd05d67d3bd979ff69eac6c96a12c3c2d46f",
+    "runs/transformers-base-r1-short-stream-c1/report.md": "6279a3043e7402a3024b3402bc24e1721adf14489b21b9bb929fb2f76fe40abe",
+    "runs/transformers-base-r1-short-stream-c1/requests.jsonl": "fa5c46b342f7d0bee2206fafdf0430fec4664c20b6a5b2a63aba5531d25134ba",
+    "runs/transformers-base-r1-short-sync-c4/gpu.jsonl": "ff86dedcf77833889c9c8efad1d5427a6a2bbe07c684eeecab44a336d6fe6af2",
+    "runs/transformers-base-r1-short-sync-c4/report.json": "55907c5be3f4ae61829f038d7be216aab013ea9b8a4816cc21a78a20f10ca0c2",
+    "runs/transformers-base-r1-short-sync-c4/report.md": "7ef04bae5aa0cf8e362405b23ef6e7e8d71398f9a82153ccb4e63e8f10929fd3",
+    "runs/transformers-base-r1-short-sync-c4/requests.jsonl": "5e4c3f9efc1eafde194b3ec2e758e3fd1f519aa8e7c9afe6ca2fe153788f0f23",
+    "runs/vllm-base-r0-long-stream-c4/gpu.jsonl": "8b07a1088a5cb3ed7038d9db8f03067f86394fc47e7b91255fd19b6b7c29bc22",
+    "runs/vllm-base-r0-long-stream-c4/report.json": "67e6df96f9900b361f69dad90502fb46b8eaa87177676f9e3ec4b84b0ff2b16f",
+    "runs/vllm-base-r0-long-stream-c4/report.md": "6ce811423538c22e67466be72848b40c9907658ef97db84c696147deecca0e00",
+    "runs/vllm-base-r0-long-stream-c4/requests.jsonl": "3ea50326fed4fc42bb0f27192cba56f237d76e7b049beb9fac2ff368ffa788ee",
+    "runs/vllm-base-r0-short-stream-c1/gpu.jsonl": "76f7e2c5eda7a1332db48c83b38a7d667cc23435dfcfaa691efd12d72e0dfabb",
+    "runs/vllm-base-r0-short-stream-c1/report.json": "9f362881590d3bd5426031e649ec505ab16481380d91b1c02400b9aa7c025039",
+    "runs/vllm-base-r0-short-stream-c1/report.md": "4f1f7c2a080b65d04104253ff9deaf7bdde5dbdd21ae8ccbb3f8ce8bb36c13c7",
+    "runs/vllm-base-r0-short-stream-c1/requests.jsonl": "a01842a685a2c95fa03826d0eebdbf5f9ad7341728daa8b1cb4b09bb118d854a",
+    "runs/vllm-base-r0-short-sync-c4/gpu.jsonl": "adaec3fa36fbe9fe110256b55a14281a9e639458c47bbe4f8e62d03397daec8f",
+    "runs/vllm-base-r0-short-sync-c4/report.json": "0e1839b9ff9d04518ebb846d56c603e1cd17fce6e299a7a9a9f1951b1d06b9a9",
+    "runs/vllm-base-r0-short-sync-c4/report.md": "f9dfc571b164c611bf06dc441460f0b94a29ff01bffdcddff01d7e20f38a2940",
+    "runs/vllm-base-r0-short-sync-c4/requests.jsonl": "aa95f3605453e1e16a4be0e2a29f49133e46a6eabe1be6659b4281fb6fdef5fd",
+    "runs/vllm-base-r1-long-stream-c4/gpu.jsonl": "54ed5b19b99101d87b3719dca3d2e5485e7c6f27ed44fa139b41dc784a2a724a",
+    "runs/vllm-base-r1-long-stream-c4/report.json": "72f3b54cec0d40b677c35a7e9b1df32ec4fbcf261042b689f4e959450232ca78",
+    "runs/vllm-base-r1-long-stream-c4/report.md": "45ad15aa8ce5933ab18578fdf5b361334a2b0a89a1963e323da847d3965a5ba0",
+    "runs/vllm-base-r1-long-stream-c4/requests.jsonl": "e18b5850c25ce0fda2d10757d0fc9e1c214c6402f14aed68417b85f8e5c5412a",
+    "runs/vllm-base-r1-short-stream-c1/gpu.jsonl": "458af08ffcb84d8b939298d9c318b9adaf7513289f0189b5a72b6170df09a75b",
+    "runs/vllm-base-r1-short-stream-c1/report.json": "a458cce93b0ec7208eb9d99cf1e8f76a4559bba1baa4478b9f8d8545088c9018",
+    "runs/vllm-base-r1-short-stream-c1/report.md": "e844a5066c81b8f7bc85aca6ffb1e655d5c341b330cc26c14c78a7bceebe005d",
+    "runs/vllm-base-r1-short-stream-c1/requests.jsonl": "fda8a11cb810c4f33046eff43ce46d9c01dd54584a4235b862b1ed8c4fc3af29",
+    "runs/vllm-base-r1-short-sync-c4/gpu.jsonl": "ef51394ad51bb6bb40b7d24de46fc16f1231b6cc095c5306a5518cec72d202a2",
+    "runs/vllm-base-r1-short-sync-c4/report.json": "5c48df126e0475b3e40e71e44948c48d526c5b0ff832a0a93b96fbb19faffc1f",
+    "runs/vllm-base-r1-short-sync-c4/report.md": "fb5c0e790152023acd5b6d2e2cf11905981f1a755408da072ffb3bde2dafaef7",
+    "runs/vllm-base-r1-short-sync-c4/requests.jsonl": "87b8bf81a3bd95eed9a5fbe1416f6dfde6f35fe7b35a1dbc4cc2d83f4170bea8",
+    "sessions/transformers-base-r0/shutdown.json": "b8a8201f707291900991c345fb05f56d773ff42020e486c271b858f50fc3042c",
+    "sessions/transformers-base-r0/startup.json": "99b9216926638bd3870cd6318d5d8680dce13540c3f8a82f0337a37135d49c03",
+    "sessions/transformers-base-r1/shutdown.json": "726136a71a081d4b1dc6103aeac07bb292f7346651041019e30dd9b937c35aa9",
+    "sessions/transformers-base-r1/startup.json": "e919b5e3562566a14518533efe77eea42e41b23bc5d911d045f22290f7bc9313",
+    "sessions/vllm-base-prefix-on-r0/shutdown.json": "ee86c6e434871796cfe39b34f9d5abad66a08fe992720f2710e1177c6e202ab6",
+    "sessions/vllm-base-prefix-on-r0/startup.json": "61ead43993e9de0d8cbc1bae99c4eca2431ee17415e1153c9b68c2678e69fd70",
+    "sessions/vllm-base-prefix-on-r1/shutdown.json": "85a1c89c7c603cc3f3ec6f8b9cc907e5cafb09da8d38a552ca0b3b287af4eae4",
+    "sessions/vllm-base-prefix-on-r1/startup.json": "208fdb699cd7fb22017b4ccc7ea514c52e66e9180b20a579c96f491387cf6243",
+    "sessions/vllm-base-r0/shutdown.json": "ac1a3f8e53b6bc4a1f5e2e9b9a46f927073c101d8c48df3af99185ce0849236b",
+    "sessions/vllm-base-r0/startup.json": "4345196724b29d78ab936b22cdaf5b8c4914fe257df367549e5f5c6032f3931b",
+    "sessions/vllm-base-r1/shutdown.json": "f18efd7c85763a89784b8420bdc260a689a3f1c57c7d29ed2c26450abcf96c6a",
+    "sessions/vllm-base-r1/startup.json": "1dbc6a6b805b4053ebb8bedfe663992d2591e37867d831a0b8d1859d15e95337"
+  }
+}

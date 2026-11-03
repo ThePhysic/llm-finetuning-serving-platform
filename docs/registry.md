@@ -3,7 +3,8 @@
 `llm_platform.registry` implements a content-addressed local registry. It is an
 engineering component rather than a hosted model registry service. Base weights
 stay in the Hugging Face cache and are fetched by immutable commit revision; do
-not commit weights, private datasets, local keys, or runtime registries to Git.
+not commit base weights, private datasets, local keys, or runtime registries to Git.
+The small reference LoRA adapter is distributed with the publisher's license.
 
 ## Package contract
 
@@ -88,6 +89,17 @@ select the verified artifact, and restart. This incurs downtime and must be
 reported. The implementation does not claim zero-downtime swaps for every model.
 
 ## Trust boundary
+
+Completed quality assessments are detached in `evidence/artifact-assessments.json`.
+They bind exact artifact IDs to report/output hashes, the genuine human subset,
+and measured limitations. Export manifests preserve their creation-time evaluation
+status because they were produced before evaluation. Rewriting an immutable
+package after scoring would change its identity; embedding a report that itself
+names that package would also create a circular identity dependency.
+
+Promotion verifies artifact and runtime integrity. Domain-quality selection stays
+an explicit operator decision. The reference quality results do not justify
+unattended operational triage, and the platform never executes recommendations.
 
 SHA256 detects changed bytes; it does not authenticate the publisher. Registry
 storage, the local model cache, and the running process are trusted operator

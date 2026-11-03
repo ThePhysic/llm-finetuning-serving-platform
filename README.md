@@ -35,6 +35,14 @@ Raw generations, uncertainty, failures and training events are preserved under
 experiment from the current explicit serving policy. Use the historical source
 instructions in [reproducibility](docs/reproducibility.md) for reference replay.
 
+The completed [results report](docs/results.md) links the GPU serving matrix,
+startup measurements, bounded rate sweep, six actual blinded human ratings and
+validation records. On the measured short synchronous workload at concurrency
+four, base-model output throughput was 15.50 tokens/s with Transformers and
+98.66 tokens/s with vLLM; the corrected BF16 adapter comparison was 9.09 versus
+30.89 tokens/s. These are medians of two small runs under documented runtime
+configurations. Prefix caching reduced throughput in its measured workload.
+
 ## Repository map
 
 | Component | Implementation | Evidence or documentation |
@@ -142,6 +150,11 @@ docker build -f docker/Dockerfile.cpu -t llm-platform:cpu .
 docker run --rm llm-platform:cpu doctor
 docker build -f docker/Dockerfile.gpu -t llm-platform:gpu .
 ```
+
+The CPU image was built and its authenticated HTTP control plane exercised.
+GPU training and serving were measured natively on WSL2; the GPU image definition
+has not been built or tested. [Validation records](evidence/validation/) preserve
+these separate scopes.
 
 The GPU image requires NVIDIA container support, a writable `/runtime` mount,
 registered packages, and the access/admin keys when binding externally. Read

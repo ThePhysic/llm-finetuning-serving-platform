@@ -1,0 +1,746 @@
+{
+  "completed_optimizer_steps": 80,
+  "trainable_parameters": 540672,
+  "total_parameters": 494573440,
+  "trainable_fraction": 0.0010932087254827108,
+  "elapsed_seconds": 171.16526497499945,
+  "history": [
+    {
+      "step": 1,
+      "train_loss": 1.757204294204712,
+      "learning_rate": 3.9500000000000005e-05,
+      "elapsed_seconds": 2.3724411219991453,
+      "gradient_norm": 4.15478515625,
+      "cuda_peak_allocated_bytes": 1558154240,
+      "cuda_allocated_bytes": 1072945664
+    },
+    {
+      "step": 2,
+      "train_loss": 1.85370334982872,
+      "learning_rate": 7.800000000000001e-05,
+      "elapsed_seconds": 4.65335105899976,
+      "gradient_norm": 4.516948223114014,
+      "cuda_peak_allocated_bytes": 1558154240,
+      "cuda_allocated_bytes": 1072970240
+    },
+    {
+      "step": 3,
+      "train_loss": 1.6749243438243866,
+      "learning_rate": 0.0001155,
+      "elapsed_seconds": 6.585389350999321,
+      "gradient_norm": 3.870560884475708,
+      "cuda_peak_allocated_bytes": 1563932672,
+      "cuda_allocated_bytes": 1073011712
+    },
+    {
+      "step": 4,
+      "train_loss": 1.7518751621246338,
+      "learning_rate": 0.000152,
+      "elapsed_seconds": 8.419056808999812,
+      "gradient_norm": 4.249078273773193,
+      "cuda_peak_allocated_bytes": 1563932672,
+      "cuda_allocated_bytes": 1072916992
+    },
+    {
+      "step": 5,
+      "train_loss": 1.5032406151294708,
+      "learning_rate": 0.0001875,
+      "elapsed_seconds": 10.329741612998987,
+      "gradient_norm": 4.268469333648682,
+      "cuda_peak_allocated_bytes": 1563932672,
+      "cuda_allocated_bytes": 1072945664
+    },
+    {
+      "step": 6,
+      "train_loss": 1.4057977199554443,
+      "learning_rate": 0.00018500000000000002,
+      "elapsed_seconds": 12.139246378999815,
+      "gradient_norm": 3.7856462001800537,
+      "cuda_peak_allocated_bytes": 1563932672,
+      "cuda_allocated_bytes": 1072967168
+    },
+    {
+      "step": 7,
+      "train_loss": 1.2085144817829132,
+      "learning_rate": 0.0001825,
+      "elapsed_seconds": 14.092262337999273,
+      "gradient_norm": 2.779665231704712,
+      "cuda_peak_allocated_bytes": 1571412992,
+      "cuda_allocated_bytes": 1073033216
+    },
+    {
+      "step": 8,
+      "train_loss": 1.2565272748470306,
+      "learning_rate": 0.00018,
+      "elapsed_seconds": 15.912649584999599,
+      "gradient_norm": 2.139735460281372,
+      "cuda_peak_allocated_bytes": 1571412992,
+      "cuda_allocated_bytes": 1072970240
+    },
+    {
+      "step": 9,
+      "train_loss": 1.314102441072464,
+      "learning_rate": 0.0001775,
+      "elapsed_seconds": 17.937313164000443,
+      "gradient_norm": 1.8703395128250122,
+      "cuda_peak_allocated_bytes": 1590114304,
+      "cuda_allocated_bytes": 1073083392
+    },
+    {
+      "step": 10,
+      "train_loss": 1.1171255707740784,
+      "learning_rate": 0.000175,
+      "elapsed_seconds": 19.628386346999832,
+      "gradient_norm": 1.8105219602584839,
+      "cuda_peak_allocated_bytes": 1590114304,
+      "cuda_allocated_bytes": 1073026048
+    },
+    {
+      "step": 11,
+      "train_loss": 1.19107985496521,
+      "learning_rate": 0.00017250000000000002,
+      "elapsed_seconds": 21.255173068999284,
+      "gradient_norm": 1.666847825050354,
+      "cuda_peak_allocated_bytes": 1590114304,
+      "cuda_allocated_bytes": 1072970240
+    },
+    {
+      "step": 12,
+      "train_loss": 1.0128711760044098,
+      "learning_rate": 0.00017,
+      "elapsed_seconds": 22.971979734998968,
+      "gradient_norm": 1.530704140663147,
+      "cuda_peak_allocated_bytes": 1590114304,
+      "cuda_allocated_bytes": 1073003008
+    },
+    {
+      "step": 13,
+      "train_loss": 1.0039899349212646,
+      "learning_rate": 0.0001675,
+      "elapsed_seconds": 24.787840359000256,
+      "gradient_norm": 1.5405138731002808,
+      "cuda_peak_allocated_bytes": 1590114304,
+      "cuda_allocated_bytes": 1073006080
+    },
+    {
+      "step": 14,
+      "train_loss": 1.0026579201221466,
+      "learning_rate": 0.000165,
+      "elapsed_seconds": 26.532141929999852,
+      "gradient_norm": 1.4560068845748901,
+      "cuda_peak_allocated_bytes": 1590114304,
+      "cuda_allocated_bytes": 1073018880
+    },
+    {
+      "step": 15,
+      "train_loss": 1.0923203229904175,
+      "learning_rate": 0.00016250000000000002,
+      "elapsed_seconds": 28.268687947000217,
+      "gradient_norm": 1.609528660774231,
+      "cuda_peak_allocated_bytes": 1590114304,
+      "cuda_allocated_bytes": 1072974336
+    },
+    {
+      "step": 16,
+      "train_loss": 0.8857131153345108,
+      "learning_rate": 0.00016,
+      "elapsed_seconds": 30.063604887998736,
+      "gradient_norm": 1.7147771120071411,
+      "cuda_peak_allocated_bytes": 1590114304,
+      "cuda_allocated_bytes": 1073014784
+    },
+    {
+      "step": 17,
+      "train_loss": 0.8614774793386459,
+      "learning_rate": 0.0001575,
+      "elapsed_seconds": 31.875254775999565,
+      "gradient_norm": 1.5232362747192383,
+      "cuda_peak_allocated_bytes": 1590114304,
+      "cuda_allocated_bytes": 1073003008
+    },
+    {
+      "step": 18,
+      "train_loss": 0.8891649544239044,
+      "learning_rate": 0.000155,
+      "elapsed_seconds": 33.88044108599934,
+      "gradient_norm": 1.7020678520202637,
+      "cuda_peak_allocated_bytes": 1590114304,
+      "cuda_allocated_bytes": 1073003008
+    },
+    {
+      "step": 19,
+      "train_loss": 0.9461702257394791,
+      "learning_rate": 0.0001525,
+      "elapsed_seconds": 35.665411963000224,
+      "gradient_norm": 1.4551362991333008,
+      "cuda_peak_allocated_bytes": 1590114304,
+      "cuda_allocated_bytes": 1073033216
+    },
+    {
+      "step": 20,
+      "train_loss": 0.9625125229358673,
+      "learning_rate": 0.00015000000000000001,
+      "elapsed_seconds": 37.550750647000314,
+      "gradient_norm": 1.4208917617797852,
+      "validation_loss": 0.8616497328839241,
+      "cuda_peak_allocated_bytes": 1590114304,
+      "cuda_allocated_bytes": 1073012224
+    },
+    {
+      "step": 21,
+      "train_loss": 0.9269421696662903,
+      "learning_rate": 0.0001475,
+      "elapsed_seconds": 43.06697171399901,
+      "gradient_norm": 1.3265358209609985,
+      "cuda_peak_allocated_bytes": 1590114304,
+      "cuda_allocated_bytes": 1072956416
+    },
+    {
+      "step": 22,
+      "train_loss": 1.0556950867176056,
+      "learning_rate": 0.000145,
+      "elapsed_seconds": 45.024301571998876,
+      "gradient_norm": 1.4374901056289673,
+      "cuda_peak_allocated_bytes": 1590114304,
+      "cuda_allocated_bytes": 1072999424
+    },
+    {
+      "step": 23,
+      "train_loss": 0.8825997859239578,
+      "learning_rate": 0.00014250000000000002,
+      "elapsed_seconds": 46.76803417699921,
+      "gradient_norm": 1.1099380254745483,
+      "cuda_peak_allocated_bytes": 1590114304,
+      "cuda_allocated_bytes": 1072992256
+    },
+    {
+      "step": 24,
+      "train_loss": 0.8341734856367111,
+      "learning_rate": 0.00014,
+      "elapsed_seconds": 48.52845966200039,
+      "gradient_norm": 1.2346243858337402,
+      "cuda_peak_allocated_bytes": 1590114304,
+      "cuda_allocated_bytes": 1072999424
+    },
+    {
+      "step": 25,
+      "train_loss": 0.9244576543569565,
+      "learning_rate": 0.0001375,
+      "elapsed_seconds": 50.19235482099975,
+      "gradient_norm": 1.1710104942321777,
+      "cuda_peak_allocated_bytes": 1590114304,
+      "cuda_allocated_bytes": 1072999424
+    },
+    {
+      "step": 26,
+      "train_loss": 0.8432583063840866,
+      "learning_rate": 0.00013500000000000003,
+      "elapsed_seconds": 51.917583313999785,
+      "gradient_norm": 1.1444675922393799,
+      "cuda_peak_allocated_bytes": 1590114304,
+      "cuda_allocated_bytes": 1072970752
+    },
+    {
+      "step": 27,
+      "train_loss": 0.9010467231273651,
+      "learning_rate": 0.0001325,
+      "elapsed_seconds": 53.8242441959992,
+      "gradient_norm": 1.1428250074386597,
+      "cuda_peak_allocated_bytes": 1590114304,
+      "cuda_allocated_bytes": 1072999424
+    },
+    {
+      "step": 28,
+      "train_loss": 0.9564290642738342,
+      "learning_rate": 0.00013000000000000002,
+      "elapsed_seconds": 55.71275278199937,
+      "gradient_norm": 1.1931593418121338,
+      "cuda_peak_allocated_bytes": 1590114304,
+      "cuda_allocated_bytes": 1072970752
+    },
+    {
+      "step": 29,
+      "train_loss": 0.9298067092895508,
+      "learning_rate": 0.0001275,
+      "elapsed_seconds": 57.672415742999874,
+      "gradient_norm": 1.2290421724319458,
+      "cuda_peak_allocated_bytes": 1590114304,
+      "cuda_allocated_bytes": 1072949248
+    },
+    {
+      "step": 30,
+      "train_loss": 0.8484060168266296,
+      "learning_rate": 0.000125,
+      "elapsed_seconds": 59.86173373299971,
+      "gradient_norm": 1.216947317123413,
+      "cuda_peak_allocated_bytes": 1594780672,
+      "cuda_allocated_bytes": 1073091072
+    },
+    {
+      "step": 31,
+      "train_loss": 0.8042401820421219,
+      "learning_rate": 0.00012250000000000002,
+      "elapsed_seconds": 62.05902765399878,
+      "gradient_norm": 1.2908122539520264,
+      "cuda_peak_allocated_bytes": 1594780672,
+      "cuda_allocated_bytes": 1072960512
+    },
+    {
+      "step": 32,
+      "train_loss": 0.7617706209421158,
+      "learning_rate": 0.00012,
+      "elapsed_seconds": 63.95929859500029,
+      "gradient_norm": 1.0727510452270508,
+      "cuda_peak_allocated_bytes": 1594780672,
+      "cuda_allocated_bytes": 1072939008
+    },
+    {
+      "step": 33,
+      "train_loss": 0.9288085401058197,
+      "learning_rate": 0.00011750000000000001,
+      "elapsed_seconds": 65.76763224000024,
+      "gradient_norm": 1.1922032833099365,
+      "cuda_peak_allocated_bytes": 1594780672,
+      "cuda_allocated_bytes": 1072974848
+    },
+    {
+      "step": 34,
+      "train_loss": 0.8211085647344589,
+      "learning_rate": 0.00011499999999999999,
+      "elapsed_seconds": 67.47471811200012,
+      "gradient_norm": 1.4455950260162354,
+      "cuda_peak_allocated_bytes": 1594780672,
+      "cuda_allocated_bytes": 1073036800
+    },
+    {
+      "step": 35,
+      "train_loss": 0.8517240136861801,
+      "learning_rate": 0.00011250000000000001,
+      "elapsed_seconds": 69.2045833359989,
+      "gradient_norm": 1.2771152257919312,
+      "cuda_peak_allocated_bytes": 1594780672,
+      "cuda_allocated_bytes": 1072934912
+    },
+    {
+      "step": 36,
+      "train_loss": 0.6640413403511047,
+      "learning_rate": 0.00011000000000000002,
+      "elapsed_seconds": 71.01749920200018,
+      "gradient_norm": 1.3091392517089844,
+      "cuda_peak_allocated_bytes": 1594780672,
+      "cuda_allocated_bytes": 1072931840
+    },
+    {
+      "step": 37,
+      "train_loss": 0.748783215880394,
+      "learning_rate": 0.0001075,
+      "elapsed_seconds": 72.86580418399899,
+      "gradient_norm": 1.376152753829956,
+      "cuda_peak_allocated_bytes": 1594780672,
+      "cuda_allocated_bytes": 1072967680
+    },
+    {
+      "step": 38,
+      "train_loss": 0.7080855816602707,
+      "learning_rate": 0.000105,
+      "elapsed_seconds": 74.71534948999943,
+      "gradient_norm": 1.2969712018966675,
+      "cuda_peak_allocated_bytes": 1594780672,
+      "cuda_allocated_bytes": 1072977920
+    },
+    {
+      "step": 39,
+      "train_loss": 0.7785443365573883,
+      "learning_rate": 0.0001025,
+      "elapsed_seconds": 76.67333514599886,
+      "gradient_norm": 1.1030348539352417,
+      "cuda_peak_allocated_bytes": 1594780672,
+      "cuda_allocated_bytes": 1073026560
+    },
+    {
+      "step": 40,
+      "train_loss": 0.7783185094594955,
+      "learning_rate": 0.0001,
+      "elapsed_seconds": 78.58856303399989,
+      "gradient_norm": 1.6359949111938477,
+      "validation_loss": 0.6888875926725375,
+      "cuda_peak_allocated_bytes": 1594780672,
+      "cuda_allocated_bytes": 1073005056
+    },
+    {
+      "step": 41,
+      "train_loss": 0.7914500385522842,
+      "learning_rate": 9.750000000000001e-05,
+      "elapsed_seconds": 85.22241793399917,
+      "gradient_norm": 1.558052897453308,
+      "cuda_peak_allocated_bytes": 1594780672,
+      "cuda_allocated_bytes": 1073012224
+    },
+    {
+      "step": 42,
+      "train_loss": 0.7551470994949341,
+      "learning_rate": 9.5e-05,
+      "elapsed_seconds": 87.03188025899908,
+      "gradient_norm": 1.3213099241256714,
+      "cuda_peak_allocated_bytes": 1594780672,
+      "cuda_allocated_bytes": 1072953344
+    },
+    {
+      "step": 43,
+      "train_loss": 0.8405074328184128,
+      "learning_rate": 9.250000000000001e-05,
+      "elapsed_seconds": 88.77066808699965,
+      "gradient_norm": 1.0776506662368774,
+      "cuda_peak_allocated_bytes": 1594780672,
+      "cuda_allocated_bytes": 1072963584
+    },
+    {
+      "step": 44,
+      "train_loss": 0.6822954788804054,
+      "learning_rate": 8.999999999999999e-05,
+      "elapsed_seconds": 90.52968710200003,
+      "gradient_norm": 1.174865961074829,
+      "cuda_peak_allocated_bytes": 1594780672,
+      "cuda_allocated_bytes": 1072999424
+    },
+    {
+      "step": 45,
+      "train_loss": 0.781063973903656,
+      "learning_rate": 8.75e-05,
+      "elapsed_seconds": 92.4845882059999,
+      "gradient_norm": 1.3704888820648193,
+      "cuda_peak_allocated_bytes": 1594780672,
+      "cuda_allocated_bytes": 1072913408
+    },
+    {
+      "step": 46,
+      "train_loss": 0.734529048204422,
+      "learning_rate": 8.500000000000002e-05,
+      "elapsed_seconds": 94.32927671299876,
+      "gradient_norm": 1.7132993936538696,
+      "cuda_peak_allocated_bytes": 1594780672,
+      "cuda_allocated_bytes": 1072999424
+    },
+    {
+      "step": 47,
+      "train_loss": 0.6399058103561401,
+      "learning_rate": 8.25e-05,
+      "elapsed_seconds": 96.10257379500035,
+      "gradient_norm": 1.3748453855514526,
+      "cuda_peak_allocated_bytes": 1594780672,
+      "cuda_allocated_bytes": 1072967680
+    },
+    {
+      "step": 48,
+      "train_loss": 0.7177557647228241,
+      "learning_rate": 8e-05,
+      "elapsed_seconds": 97.8382668639988,
+      "gradient_norm": 1.5419925451278687,
+      "cuda_peak_allocated_bytes": 1594780672,
+      "cuda_allocated_bytes": 1073012224
+    },
+    {
+      "step": 49,
+      "train_loss": 0.7448481470346451,
+      "learning_rate": 7.75e-05,
+      "elapsed_seconds": 99.62721541899919,
+      "gradient_norm": 1.1720086336135864,
+      "cuda_peak_allocated_bytes": 1594780672,
+      "cuda_allocated_bytes": 1072939008
+    },
+    {
+      "step": 50,
+      "train_loss": 0.614030510187149,
+      "learning_rate": 7.500000000000001e-05,
+      "elapsed_seconds": 101.31464211499951,
+      "gradient_norm": 1.0750001668930054,
+      "cuda_peak_allocated_bytes": 1594780672,
+      "cuda_allocated_bytes": 1072982016
+    },
+    {
+      "step": 51,
+      "train_loss": 0.558681920170784,
+      "learning_rate": 7.250000000000001e-05,
+      "elapsed_seconds": 103.31203869399906,
+      "gradient_norm": 1.1257930994033813,
+      "cuda_peak_allocated_bytes": 1594780672,
+      "cuda_allocated_bytes": 1073015296
+    },
+    {
+      "step": 52,
+      "train_loss": 0.6156714931130409,
+      "learning_rate": 7e-05,
+      "elapsed_seconds": 105.85216150199994,
+      "gradient_norm": 1.2049295902252197,
+      "cuda_peak_allocated_bytes": 1594780672,
+      "cuda_allocated_bytes": 1072989184
+    },
+    {
+      "step": 53,
+      "train_loss": 0.6572884619235992,
+      "learning_rate": 6.750000000000001e-05,
+      "elapsed_seconds": 108.46904148499925,
+      "gradient_norm": 1.0663621425628662,
+      "cuda_peak_allocated_bytes": 1594780672,
+      "cuda_allocated_bytes": 1072999424
+    },
+    {
+      "step": 54,
+      "train_loss": 0.8334374874830246,
+      "learning_rate": 6.5e-05,
+      "elapsed_seconds": 113.50778069999978,
+      "gradient_norm": 1.7270359992980957,
+      "cuda_peak_allocated_bytes": 1594780672,
+      "cuda_allocated_bytes": 1072974848
+    },
+    {
+      "step": 55,
+      "train_loss": 0.6981634497642517,
+      "learning_rate": 6.25e-05,
+      "elapsed_seconds": 117.28953385599925,
+      "gradient_norm": 1.491201400756836,
+      "cuda_peak_allocated_bytes": 1594780672,
+      "cuda_allocated_bytes": 1073051136
+    },
+    {
+      "step": 56,
+      "train_loss": 0.7190021723508835,
+      "learning_rate": 6.0000000000000015e-05,
+      "elapsed_seconds": 119.09835750399907,
+      "gradient_norm": 1.4046708345413208,
+      "cuda_peak_allocated_bytes": 1594780672,
+      "cuda_allocated_bytes": 1073033728
+    },
+    {
+      "step": 57,
+      "train_loss": 0.6364571452140808,
+      "learning_rate": 5.7499999999999995e-05,
+      "elapsed_seconds": 120.76642655199976,
+      "gradient_norm": 1.4230760335922241,
+      "cuda_peak_allocated_bytes": 1594780672,
+      "cuda_allocated_bytes": 1072999424
+    },
+    {
+      "step": 58,
+      "train_loss": 0.8136073797941208,
+      "learning_rate": 5.500000000000001e-05,
+      "elapsed_seconds": 122.59040907099916,
+      "gradient_norm": 1.4684606790542603,
+      "cuda_peak_allocated_bytes": 1594780672,
+      "cuda_allocated_bytes": 1073015296
+    },
+    {
+      "step": 59,
+      "train_loss": 0.6873975098133087,
+      "learning_rate": 5.2499999999999995e-05,
+      "elapsed_seconds": 124.42933563199949,
+      "gradient_norm": 1.3734030723571777,
+      "cuda_peak_allocated_bytes": 1594780672,
+      "cuda_allocated_bytes": 1072956416
+    },
+    {
+      "step": 60,
+      "train_loss": 0.7968190908432007,
+      "learning_rate": 5e-05,
+      "elapsed_seconds": 126.17794723999941,
+      "gradient_norm": 1.2776175737380981,
+      "validation_loss": 0.6141974823215068,
+      "cuda_peak_allocated_bytes": 1594780672,
+      "cuda_allocated_bytes": 1072983552
+    },
+    {
+      "step": 61,
+      "train_loss": 0.6199472099542618,
+      "learning_rate": 4.750000000000001e-05,
+      "elapsed_seconds": 131.657998450999,
+      "gradient_norm": 1.3089382648468018,
+      "cuda_peak_allocated_bytes": 1594780672,
+      "cuda_allocated_bytes": 1073019392
+    },
+    {
+      "step": 62,
+      "train_loss": 0.5788597390055656,
+      "learning_rate": 4.4999999999999996e-05,
+      "elapsed_seconds": 133.4096209420004,
+      "gradient_norm": 1.013742446899414,
+      "cuda_peak_allocated_bytes": 1594780672,
+      "cuda_allocated_bytes": 1072974848
+    },
+    {
+      "step": 63,
+      "train_loss": 0.5895060449838638,
+      "learning_rate": 4.250000000000001e-05,
+      "elapsed_seconds": 135.30004587199983,
+      "gradient_norm": 1.162422776222229,
+      "cuda_peak_allocated_bytes": 1594780672,
+      "cuda_allocated_bytes": 1072970752
+    },
+    {
+      "step": 64,
+      "train_loss": 0.627052828669548,
+      "learning_rate": 3.999999999999999e-05,
+      "elapsed_seconds": 137.09952761299974,
+      "gradient_norm": 1.1021687984466553,
+      "cuda_peak_allocated_bytes": 1594780672,
+      "cuda_allocated_bytes": 1073048064
+    },
+    {
+      "step": 65,
+      "train_loss": 0.677185520529747,
+      "learning_rate": 3.7500000000000003e-05,
+      "elapsed_seconds": 138.97492226400027,
+      "gradient_norm": 1.1501996517181396,
+      "cuda_peak_allocated_bytes": 1594780672,
+      "cuda_allocated_bytes": 1072974848
+    },
+    {
+      "step": 66,
+      "train_loss": 0.5621866136789322,
+      "learning_rate": 3.500000000000001e-05,
+      "elapsed_seconds": 140.74728937100008,
+      "gradient_norm": 1.1391615867614746,
+      "cuda_peak_allocated_bytes": 1594780672,
+      "cuda_allocated_bytes": 1073058304
+    },
+    {
+      "step": 67,
+      "train_loss": 0.6449143141508102,
+      "learning_rate": 3.25e-05,
+      "elapsed_seconds": 142.52674291999938,
+      "gradient_norm": 1.291465163230896,
+      "cuda_peak_allocated_bytes": 1594780672,
+      "cuda_allocated_bytes": 1072953344
+    },
+    {
+      "step": 68,
+      "train_loss": 0.6745326071977615,
+      "learning_rate": 3.0000000000000008e-05,
+      "elapsed_seconds": 144.3469457150004,
+      "gradient_norm": 1.310758352279663,
+      "cuda_peak_allocated_bytes": 1594780672,
+      "cuda_allocated_bytes": 1072974848
+    },
+    {
+      "step": 69,
+      "train_loss": 0.7036453634500504,
+      "learning_rate": 2.749999999999999e-05,
+      "elapsed_seconds": 146.086927929,
+      "gradient_norm": 1.378049373626709,
+      "cuda_peak_allocated_bytes": 1594780672,
+      "cuda_allocated_bytes": 1072931840
+    },
+    {
+      "step": 70,
+      "train_loss": 0.7032335549592972,
+      "learning_rate": 2.5e-05,
+      "elapsed_seconds": 147.79024639499949,
+      "gradient_norm": 1.348900556564331,
+      "cuda_peak_allocated_bytes": 1594780672,
+      "cuda_allocated_bytes": 1072970752
+    },
+    {
+      "step": 71,
+      "train_loss": 0.6319752037525177,
+      "learning_rate": 2.250000000000001e-05,
+      "elapsed_seconds": 149.51956966999933,
+      "gradient_norm": 1.315799355506897,
+      "cuda_peak_allocated_bytes": 1594780672,
+      "cuda_allocated_bytes": 1072992256
+    },
+    {
+      "step": 72,
+      "train_loss": 0.6978893131017685,
+      "learning_rate": 2e-05,
+      "elapsed_seconds": 151.4086661649999,
+      "gradient_norm": 1.3942005634307861,
+      "cuda_peak_allocated_bytes": 1594780672,
+      "cuda_allocated_bytes": 1073006592
+    },
+    {
+      "step": 73,
+      "train_loss": 0.6432697772979736,
+      "learning_rate": 2e-05,
+      "elapsed_seconds": 153.12127665799926,
+      "gradient_norm": 1.0479590892791748,
+      "cuda_peak_allocated_bytes": 1594780672,
+      "cuda_allocated_bytes": 1072977920
+    },
+    {
+      "step": 74,
+      "train_loss": 0.679377093911171,
+      "learning_rate": 2e-05,
+      "elapsed_seconds": 154.98433053500048,
+      "gradient_norm": 1.676598310470581,
+      "cuda_peak_allocated_bytes": 1594780672,
+      "cuda_allocated_bytes": 1072953344
+    },
+    {
+      "step": 75,
+      "train_loss": 0.5857658684253693,
+      "learning_rate": 2e-05,
+      "elapsed_seconds": 156.76096948099985,
+      "gradient_norm": 1.1653516292572021,
+      "cuda_peak_allocated_bytes": 1594780672,
+      "cuda_allocated_bytes": 1072999424
+    },
+    {
+      "step": 76,
+      "train_loss": 0.7461099922657013,
+      "learning_rate": 2e-05,
+      "elapsed_seconds": 158.61025384099958,
+      "gradient_norm": 1.9031636714935303,
+      "cuda_peak_allocated_bytes": 1594780672,
+      "cuda_allocated_bytes": 1073026560
+    },
+    {
+      "step": 77,
+      "train_loss": 0.6011685132980347,
+      "learning_rate": 2e-05,
+      "elapsed_seconds": 160.4906105129994,
+      "gradient_norm": 1.3068568706512451,
+      "cuda_peak_allocated_bytes": 1594780672,
+      "cuda_allocated_bytes": 1073006592
+    },
+    {
+      "step": 78,
+      "train_loss": 0.69783715903759,
+      "learning_rate": 2e-05,
+      "elapsed_seconds": 162.27034116699906,
+      "gradient_norm": 1.6626280546188354,
+      "cuda_peak_allocated_bytes": 1594780672,
+      "cuda_allocated_bytes": 1072924672
+    },
+    {
+      "step": 79,
+      "train_loss": 0.5545299723744392,
+      "learning_rate": 2e-05,
+      "elapsed_seconds": 164.111377539999,
+      "gradient_norm": 1.099670171737671,
+      "cuda_peak_allocated_bytes": 1594780672,
+      "cuda_allocated_bytes": 1072999424
+    },
+    {
+      "step": 80,
+      "train_loss": 0.5809760466217995,
+      "learning_rate": 2e-05,
+      "elapsed_seconds": 165.86307692099945,
+      "gradient_norm": 1.3172730207443237,
+      "validation_loss": 0.5955081613400044,
+      "cuda_peak_allocated_bytes": 1594780672,
+      "cuda_allocated_bytes": 1073005056
+    }
+  ],
+  "gpu_evidence": true,
+  "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+  "cuda_version": "12.4",
+  "cuda_peak_allocated_bytes": 1594780672,
+  "adapter_bytes": 2181087,
+  "versions": {
+    "torch": "2.6.0+cu124",
+    "transformers": "4.51.3",
+    "peft": "0.15.2",
+    "accelerate": "1.6.0",
+    "safetensors": "0.5.3"
+  },
+  "python": "3.12.16"
+}

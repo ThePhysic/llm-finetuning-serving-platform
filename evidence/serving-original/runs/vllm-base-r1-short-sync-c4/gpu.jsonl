@@ -1,0 +1,8 @@
+{"devices": [{"device_used_memory_mib": 4363.0, "index": 0, "utilization_percent": 28.0}], "runtime": {"allocated_bytes": null, "reserved_bytes": null, "session_peak_allocated_bytes": null}, "time": 1793674017.9882972}
+{"devices": [{"device_used_memory_mib": 4365.0, "index": 0, "utilization_percent": 53.0}], "runtime": {"allocated_bytes": null, "reserved_bytes": null, "session_peak_allocated_bytes": null}, "time": 1793674018.53116}
+{"devices": [{"device_used_memory_mib": 4365.0, "index": 0, "utilization_percent": 26.0}], "runtime": {"allocated_bytes": null, "reserved_bytes": null, "session_peak_allocated_bytes": null}, "time": 1793674019.0836952}
+{"devices": [{"device_used_memory_mib": 4365.0, "index": 0, "utilization_percent": 35.0}], "runtime": {"allocated_bytes": null, "reserved_bytes": null, "session_peak_allocated_bytes": null}, "time": 1793674019.640391}
+{"devices": [{"device_used_memory_mib": 4365.0, "index": 0, "utilization_percent": 26.0}], "runtime": {"allocated_bytes": null, "reserved_bytes": null, "session_peak_allocated_bytes": null}, "time": 1793674020.1869433}
+{"devices": [{"device_used_memory_mib": 4365.0, "index": 0, "utilization_percent": 35.0}], "runtime": {"allocated_bytes": null, "reserved_bytes": null, "session_peak_allocated_bytes": null}, "time": 1793674020.7280157}
+{"devices": [{"device_used_memory_mib": 4365.0, "index": 0, "utilization_percent": 26.0}], "runtime": {"allocated_bytes": null, "reserved_bytes": null, "session_peak_allocated_bytes": null}, "time": 1793674021.2835054}
+{"devices": [{"device_used_memory_mib": 4365.0, "index": 0, "utilization_percent": 28.0}], "runtime": {"allocated_bytes": null, "reserved_bytes": null, "session_peak_allocated_bytes": null}, "time": 1793674021.830076}

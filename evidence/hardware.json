@@ -1,0 +1,11 @@
+{
+    "cpu":  "AMD Ryzen 9 7940HS w/ Radeon 780M Graphics     ",
+    "logical_processors":  16,
+    "physical_host_ram_bytes":  33515835392,
+    "execution_target":  "Ubuntu WSL2 on Windows 11",
+    "gpu":  "NVIDIA GeForce RTX 4060 Laptop GPU",
+    "driver":  "566.36",
+    "gpu_total_mib":  8188,
+    "torch_cuda_runtime":  "12.4",
+    "notes":  "Host RAM differs from the WSL VM memory allowance. Software and GPU identity are corroborated in environment-training.json and each serving report."
+}

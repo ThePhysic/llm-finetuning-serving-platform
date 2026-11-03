@@ -1,0 +1,9 @@
+{
+  "scope": "Real CPU container control-plane test; no model loaded and no GPU inference claim",
+  "liveness_status": 200,
+  "unloaded_readiness_status": 503,
+  "unauthenticated_model_discovery_status": 401,
+  "authenticated_model_discovery_status": 200,
+  "metrics_status": 200,
+  "credentials": "Ephemeral environment-only test keys, not recorded"
+}

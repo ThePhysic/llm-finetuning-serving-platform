@@ -1,0 +1,280 @@
+{
+  "zero_shot": {
+    "classification": {
+      "accuracy": 0.05,
+      "macro_f1": 0.02,
+      "per_category": {
+        "api_failure": {
+          "support": 5,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "fulfillment_failure": {
+          "support": 5,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "inventory_discrepancy": {
+          "support": 5,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "inventory_sync_failure": {
+          "support": 5,
+          "precision": 0.1,
+          "recall": 0.4,
+          "f1": 0.16
+        },
+        "payment_processing_error": {
+          "support": 5,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "shipment_delay": {
+          "support": 5,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "transaction_missing": {
+          "support": 5,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "unknown": {
+          "support": 5,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        }
+      }
+    },
+    "quality": {
+      "json_validity": 0.5,
+      "required_field_compliance": 0.425,
+      "severity_accuracy": 0.075,
+      "confidence_label_accuracy": 0.2,
+      "evidence_quote_precision": 0.43333333333333335,
+      "evidence_exact_reference_recall": 0.2916666666666667,
+      "unsupported_evidence_claim_rate": 0.09090909090909091,
+      "unsupported_claim_rate": null,
+      "human_action_correctness": null,
+      "action_keyword_coverage": 0.1125,
+      "escalation_accuracy": 0.3,
+      "required_abstention_accuracy": 0.0,
+      "general_instruction_accuracy": 0.5
+    },
+    "uncertainty": {
+      "classification_accuracy_family_bootstrap_95": [
+        0.0,
+        0.15
+      ],
+      "json_validity_wilson_95_descriptive_only": [
+        0.35199526933465386,
+        0.6480047306653461
+      ],
+      "note": "Wording variants within a family are correlated. Classification bootstrap resamples families; Wilson interval assumes independence and is descriptive only."
+    },
+    "failure_categories": {
+      "invalid_json": 20,
+      "incorrect_category": 18,
+      "unsupported_or_missing_evidence": 3,
+      "missed_reference_evidence": 13,
+      "action_keyword_rubric_miss": 18,
+      "incorrect_severity": 17,
+      "schema_violation": 3,
+      "incorrect_escalation": 8,
+      "failed_abstention": 2,
+      "general_instruction_regression": 4
+    }
+  },
+  "prompted": {
+    "classification": {
+      "accuracy": 0.175,
+      "macro_f1": 0.08933933933933934,
+      "per_category": {
+        "api_failure": {
+          "support": 5,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "fulfillment_failure": {
+          "support": 5,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "inventory_discrepancy": {
+          "support": 5,
+          "precision": 0.25,
+          "recall": 0.2,
+          "f1": 0.2222222222222222
+        },
+        "inventory_sync_failure": {
+          "support": 5,
+          "precision": 0.15625,
+          "recall": 1.0,
+          "f1": 0.2702702702702703
+        },
+        "payment_processing_error": {
+          "support": 5,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "shipment_delay": {
+          "support": 5,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "transaction_missing": {
+          "support": 5,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "unknown": {
+          "support": 5,
+          "precision": 0.25,
+          "recall": 0.2,
+          "f1": 0.2222222222222222
+        }
+      }
+    },
+    "quality": {
+      "json_validity": 1.0,
+      "required_field_compliance": 1.0,
+      "severity_accuracy": 0.175,
+      "confidence_label_accuracy": 0.375,
+      "evidence_quote_precision": 0.8875,
+      "evidence_exact_reference_recall": 0.5583333333333333,
+      "unsupported_evidence_claim_rate": 0.0945945945945946,
+      "unsupported_claim_rate": null,
+      "human_action_correctness": null,
+      "action_keyword_coverage": 0.1875,
+      "escalation_accuracy": 0.5,
+      "required_abstention_accuracy": 0.0,
+      "general_instruction_accuracy": 0.5
+    },
+    "uncertainty": {
+      "classification_accuracy_family_bootstrap_95": [
+        0.025,
+        0.425
+      ],
+      "json_validity_wilson_95_descriptive_only": [
+        0.9123783988027135,
+        1.0
+      ],
+      "note": "Wording variants within a family are correlated. Classification bootstrap resamples families; Wilson interval assumes independence and is descriptive only."
+    },
+    "failure_categories": {
+      "incorrect_category": 33,
+      "incorrect_severity": 33,
+      "incorrect_escalation": 20,
+      "missed_reference_evidence": 25,
+      "action_keyword_rubric_miss": 39,
+      "unsupported_or_missing_evidence": 6,
+      "failed_abstention": 5,
+      "general_instruction_regression": 4
+    }
+  },
+  "lora": {
+    "classification": {
+      "accuracy": 0.375,
+      "macro_f1": 0.28694331983805665,
+      "per_category": {
+        "api_failure": {
+          "support": 5,
+          "precision": 0.625,
+          "recall": 1.0,
+          "f1": 0.7692307692307693
+        },
+        "fulfillment_failure": {
+          "support": 5,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "inventory_discrepancy": {
+          "support": 5,
+          "precision": 0.35714285714285715,
+          "recall": 1.0,
+          "f1": 0.5263157894736842
+        },
+        "inventory_sync_failure": {
+          "support": 5,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "payment_processing_error": {
+          "support": 5,
+          "precision": 1.0,
+          "recall": 0.2,
+          "f1": 0.3333333333333333
+        },
+        "shipment_delay": {
+          "support": 5,
+          "precision": 0.5714285714285714,
+          "recall": 0.8,
+          "f1": 0.6666666666666666
+        },
+        "transaction_missing": {
+          "support": 5,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "unknown": {
+          "support": 5,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        }
+      }
+    },
+    "quality": {
+      "json_validity": 1.0,
+      "required_field_compliance": 1.0,
+      "severity_accuracy": 0.625,
+      "confidence_label_accuracy": 0.5,
+      "evidence_quote_precision": 0.9791666666666666,
+      "evidence_exact_reference_recall": 0.8708333333333333,
+      "unsupported_evidence_claim_rate": 0.024691358024691357,
+      "unsupported_claim_rate": null,
+      "human_action_correctness": null,
+      "action_keyword_coverage": 0.5,
+      "escalation_accuracy": 0.5,
+      "required_abstention_accuracy": 0.0,
+      "general_instruction_accuracy": 0.5
+    },
+    "uncertainty": {
+      "classification_accuracy_family_bootstrap_95": [
+        0.125,
+        0.7
+      ],
+      "json_validity_wilson_95_descriptive_only": [
+        0.9123783988027135,
+        1.0
+      ],
+      "note": "Wording variants within a family are correlated. Classification bootstrap resamples families; Wilson interval assumes independence and is descriptive only."
+    },
+    "failure_categories": {
+      "action_keyword_rubric_miss": 31,
+      "incorrect_escalation": 20,
+      "unsupported_or_missing_evidence": 2,
+      "missed_reference_evidence": 13,
+      "incorrect_category": 25,
+      "incorrect_severity": 15,
+      "failed_abstention": 5,
+      "general_instruction_regression": 4
+    }
+  }
+}

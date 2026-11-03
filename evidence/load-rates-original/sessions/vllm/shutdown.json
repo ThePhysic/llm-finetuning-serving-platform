@@ -1,0 +1,14 @@
+[
+  {
+    "exit_code": -15,
+    "forced_shutdown": false,
+    "label": "gateway",
+    "shutdown_seconds": 0.2677776860000449
+  },
+  {
+    "exit_code": 0,
+    "forced_shutdown": false,
+    "label": "vllm-worker",
+    "shutdown_seconds": 2.677451731000474
+  }
+]

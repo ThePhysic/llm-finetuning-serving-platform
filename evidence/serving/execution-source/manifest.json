@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "source_revision": "9aa054144c185a94228ac5e41601404e5f717bbc",
+  "recorded_at": "2026-11-03T02:40:36.629299+00:00",
+  "mode": "retrospective exact Git tree reconstruction",
+  "files": {
+    "scripts/demo.py": "935802d2fd56303979c0cf935b217759217421da290974ce9f23097b3ffba569",
+    "scripts/prepare_human_sample.py": "727e2dadc210a07bc3c878e19c72b0b7110fb2196c49700591ff2d1e1dc3ef18",
+    "scripts/run_quality_experiment.py": "d292aef4f3cab6ce6b2e7edd995e88a90fd53d8775c507d2f302849e344aa72f",
+    "scripts/run_serving_experiments.py": "449a3e400864434113b8025a74cfa7767604118e6f3291c73ee45698a4b72161",
+    "src/llm_platform/__init__.py": "345fc34c2323ca08d5799bc4a7c7b17c2b3b2a59d77f903d3ad8db18970c36d1",
+    "src/llm_platform/backends/__init__.py": "6ac08ec30729dfc90e99dcb1605ded4aa9aaabfa4d9ba55b576db189c39a27a5",
+    "src/llm_platform/backends/launch_vllm.py": "dd37495cc3b6c75fd9ff12eeebf6177c3b27ebf54edc8ca4cc0b2a04a9594ab2",
+    "src/llm_platform/backends/transformers_backend.py": "0081f0f658ddd0d6e814cd466051b5e36a9a53d112d2c87897c9688402120789",
+    "src/llm_platform/backends/vllm_backend.py": "01db391cb0c2e6be309fad991b88e987dc1e7671fed68eb2208b9d88e4753467",
+    "src/llm_platform/benchmark.py": "91a13bf933acc9104dd9ca0efbe1ad377a5014cf0411a37949bb4d7a72956b52",
+    "src/llm_platform/cli.py": "5c32369eb893322e9fba62b51f978ed4c4877efbd365d060be335ba518c8b34c",
+    "src/llm_platform/contracts.py": "6927bc6accbe6040c52d2ba32c32bab25b4eec9a471f2b19e8e2d779e3a1d91e",
+    "src/llm_platform/data.py": "09527e84a485ddd89df695831e51a1e8a044035d0edee2fe2143e5791770b047",
+    "src/llm_platform/evaluation.py": "20aa4b54b8c18bf5566346f3ce9cc5dc1fac2aa39e3e3f171d627997ec7284bc",
+    "src/llm_platform/evidence.py": "7b11b09a289a166891ebcdda2698319c45e5fc6d4301f23a05fe2cc3c5ab714c",
+    "src/llm_platform/prompts.py": "b9d57c5183197f15476bdd5149ebfccdbc1eaa984c5e46ccdae4f599198487c2",
+    "src/llm_platform/provenance.py": "c627ff10df363c6b8be2ba4420ee610bd7c95877e9af0c041f14f75250df1014",
+    "src/llm_platform/registry.py": "71a7b1c84b61aed7edb2a07d72f344b6f1ed1ed014bed72fb1400d485bbb3354",
+    "src/llm_platform/serving.py": "a7eebf4d0f48b44631a5faac7a3cff9dba40552bd7ecadf21455e1fc276f8978",
+    "src/llm_platform/synthetic.py": "5949bcf822ec93b14db8fbfb2d0b54540b03e2642f6f4ef4aee86766aab32add",
+    "src/llm_platform/training.py": "2623208cc55cef850aa2ffc1763408b7d9f118dedbc71911758775d5ac1ee3f0"
+  },
+  "limitations": [
+    "A source inventory establishes bytes and version identity, not remote execution attestation."
+  ],
+  "snapshot_sha256": "d8604bb83674a398bf55934a8a1115bca2d5a91bb5074f8b1c5fb657be8798be"
+}

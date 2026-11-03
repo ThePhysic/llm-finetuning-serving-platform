@@ -11,7 +11,7 @@ htmlcov/
 !.env.example
 runtime/
 artifacts/
-runs/
+/runs/
 registry/
 *.safetensors
 !evidence/adapter-package/adapter/adapter_model.safetensors

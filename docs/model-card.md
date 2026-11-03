@@ -35,7 +35,7 @@ diagnostic action, ordinal confidence, and a human-review flag.
 
 The primary frozen `data/triage-v3` dataset contains 240 training, 40 validation,
 40 test, and eight general-instruction regression records. The 320 triage rows
-represent 64 hand-authored families, with five correlated variants each. Every
+represent 64 explicitly scripted families, with five correlated variants each. Every
 category has 30 training, five validation, and five test rows. All held-out test
 families are unseen during training. General-instruction regression examples are
 excluded from weight fitting and hyperparameter selection.
@@ -166,11 +166,13 @@ remains under `evidence/serving-original/` and `evidence/serving/superseded/`.
 The primary correction aligns BF16 base/adapter compute with FP32 artifact storage
 on both engines and records old/new hashes in
 `evidence/serving/precision-correction.json`. The sixteen valid base/cache arms
-are retained unchanged. Only a completed correction and regenerated index establish
-the corrected comparison; original adapter timings are not fair engine speedups.
+are retained unchanged. The correction and regenerated 28-run index are complete;
+original adapter timings are not fair engine speedups.
 Measurement-isolation exclusions are disclosed in
 [measurement-isolation.json](../evidence/measurement-isolation.json); the original
-startup series is excluded and preserved separately pending its clean replacement.
+startup series is excluded and preserved separately. Three clean paired startup
+repetitions and all four clean-source rate arms are complete. The
+[results report](results.md) summarizes their outcomes and limitations.
 
 The central question is whether observed task improvements justify adaptation and
 serving costs. This run shows task-score gains and substantial remaining quality

@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "mode": "retrospective source clarification",
+  "source_commit": "9aa054144c185a94228ac5e41601404e5f717bbc",
+  "source_snapshot_sha256": "d8604bb83674a398bf55934a8a1115bca2d5a91bb5074f8b1c5fb657be8798be",
+  "orchestrator_source_sha256": "449a3e400864434113b8025a74cfa7767604118e6f3291c73ee45698a4b72161",
+  "method": "The exact orchestrator bytes match the frozen protocol. The source snapshot reconstructs the committed source tree at serving launch; it is explicitly retrospective, not a contemporaneous disk capture.",
+  "loaded_sources": "Gateway, Transformers/vLLM backends, contracts and benchmark measurement code remained unchanged during the matrix. The driver had already imported prompts/data before later dataset-serialization changes. Child gateways do not run dataset preparation.",
+  "later_changes": "Subsequent fixes are confined to portable frozen-data serialization, documentation and offline evidence auditing; they do not change the active serving execution or decoding policy.",
+  "quality_separation": "Historical quality uses the separately recorded startup84a policy. This serving run uses the explicit platform-serving-v1 policy recorded in every engine health snapshot and run metadata."
+}

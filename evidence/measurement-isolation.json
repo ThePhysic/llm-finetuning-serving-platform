@@ -1,0 +1,25 @@
+{
+  "scope": "Conservative exclusion of potentially CUDA-initializing CPU probes; no assertion that no context existed",
+  "incidents": [
+    {
+      "incident": "reviewer_probe",
+      "conservative_window_utc": [
+        "2026-11-03T02:49:55+00:00",
+        "2026-11-03T02:50:10+00:00"
+      ],
+      "overlapping_main_runs": [
+        "vllm-adapter-r0-long-stream-c4"
+      ]
+    },
+    {
+      "incident": "validation_probe",
+      "conservative_window_utc": [
+        "2026-11-03T02:56:35+00:00",
+        "2026-11-03T02:57:00+00:00"
+      ],
+      "overlapping_main_runs": []
+    }
+  ],
+  "startup_series": "The original startup series overlaps the validation probe and is excluded pending a clean rerun.",
+  "resolution": "All original adapter conditions are superseded by aligned and isolated reruns. Base/prefix reports are retained only when their sampled measurement intervals do not overlap these windows."
+}

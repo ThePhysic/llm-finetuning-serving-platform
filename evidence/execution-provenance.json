@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "retrospective clarification of observed execution provenance",
+  "quality_protocol_source_commit": "84a870010c85fbc66b893c0e884c59ada4ab20c2",
+  "execution_source_snapshot_sha256": "e41da1552775f673c845e9a3648879cd1b2a3d9f6b280d957972451bacf634c9",
+  "source_snapshot_mode": "retrospective exact Git tree reconstruction",
+  "authoritative_loaded_project_source": "The quality process imported its project modules from the source tree identified by the initial quality protocol. It remained running and did not reload those modules during subsequent working-tree edits.",
+  "dynamic_disk_metadata": "Training provenance.code_revision/code_files and evaluation metadata.evaluation_code were observed later from the working tree/Git. They remain preserved unchanged and describe source files on disk at observation time, not a second import of edited code.",
+  "training_scope": "The training algorithm, prompts, frozen dataset and fixed training configuration were unchanged. Later gateway, serving-policy and audit edits were not executed by the already-imported quality backend. External torch/transformers/peft dependencies remained in the pinned isolated environment.",
+  "quality_decoding": "See quality-decoding-addendum.json: all three alternatives used historical greedy repetition penalty 1.1 and publisher EOS settings; serving benchmarks use a distinct explicit policy.",
+  "snapshot_integrity": "Every preserved source file is raw git-show bytes at the exact recorded immutable startup revision. This reconstruction was performed after startup and does not pretend to be a contemporaneous on-disk capture.",
+  "future_runs": "The current experiment script captures raw source bytes before generation and refuses uncommitted source/scripts at startup. Use a new output directory and the committed updated script."
+}
