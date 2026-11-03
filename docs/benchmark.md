@@ -85,6 +85,22 @@ silently relabeled as using this serving policy. Its protocol/addendum remains
 authoritative. The serving experiment is a separate engine-performance
 comparison and does not claim identical decoding to earlier quality evidence.
 
+Adapter storage precision and inference precision are recorded independently.
+PEFT can store LoRA tensors as FP32 and silently upcast them during inference
+even when the base is BF16. The supported comparison explicitly disables PEFT's
+`autocast_adapter_dtype` inference upcast, inspects every loaded LoRA parameter,
+and rejects any dtype that differs from the package runtime. The safetensors
+header supplies the actual storage dtype without loading another model. vLLM
+receives an explicit `--lora-dtype` and records that resolved launch setting;
+the gateway verifies it against the package and storage header. vLLM precision
+metadata describes the trusted launcher configuration and pinned version, not
+hardware attestation or inspection of remote CUDA tensors. Both engines expose
+`base_compute_dtype`, `adapter_compute_dtype`, `adapter_storage_dtype` and
+`precision_source` in health and benchmark metadata. Adapter comparisons require
+these fields and matching runtime precision. Earlier runs missing this control
+remain exploratory archives and cannot support adapter-engine speedup claims;
+the corrected adapter matrix must be measured separately with these controls.
+
 Transformers uses one gateway execution slot and serialized generation. vLLM
 uses eight gateway execution slots and up to eight engine sequences. Both
 gateways bound the waiting queue to four. That is an explicit system integration
