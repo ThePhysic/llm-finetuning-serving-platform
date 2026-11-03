@@ -1,5 +1,9 @@
 # Enterprise triage adapter model card
 
+The adapter improved measured accuracy on this small synthetic test, but its
+37.5% classification accuracy, failed abstention, and pending human review do not
+justify unattended incident triage or autonomous operational actions.
+
 ## Identity and intended use
 
 This card describes the platform's small-model LoRA experiment for advisory
@@ -9,7 +13,10 @@ dataset split identities, and measured hardware/software details belong to the
 exported manifests and evidence files. A working model name is not an immutable
 identity. Do not substitute an unrecorded `main` revision when reproducing a result.
 
-Representative base: `Qwen/Qwen2.5-0.5B-Instruct`, with configurable alternatives.
+Measured base: `Qwen/Qwen2.5-0.5B-Instruct`, immutable revision
+`7ae557604adf67be50417f59c2c2f167def9a775`.
+Exported adapter artifact ID:
+`1183832f233f3a2f720a98efad446cffb2ada613cc59860fedd58e186af6838c`.
 The [base publisher's model card](https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct)
 distributes that model under Apache-2.0. The repository code
 uses MIT; the authored synthetic dataset uses CC0-1.0. Base weights are downloaded
@@ -44,18 +51,75 @@ V3 replaces those identifiers with opaque values and freezes new hashes. Superse
 manifests and this correction remain visible; the corrected experiment is not a
 claim of an untouched real-world dataset or unseen authored templates.
 
-The configured core method is supervised LoRA with completion-only loss on a
-pretrained instruction model. The checked configuration specifies rank, alpha,
-dropout, target modules, precision, learning rate, optimizer steps, accumulation,
-checkpointing, and seed. The actual training manifest is authoritative. Optional
-NF4 training is separate from serving quantization and must not be inferred from
-an adapter filename.
+The completed run used supervised LoRA with completion-only loss, rank 8, alpha 16,
+dropout 0.05, `q_proj`/`v_proj` adapters, BF16, batch size 1, accumulation 4,
+maximum sequence length 768, seed 42, and 80 optimizer steps. It used ordinary
+unquantized LoRA. QLoRA support is a separate capability, not a measured result of
+this run. Serving quantization is also a separate choice.
+
+| Recorded training measurement | Result |
+|---|---:|
+| GPU | NVIDIA GeForce RTX 4060 Laptop GPU |
+| Optimizer steps | 80 |
+| Trainable parameters | 540,672 / 494,573,440 (0.1093%) |
+| Reported training/export elapsed time | 171.165 seconds |
+| Peak CUDA allocated tensor memory | 1,594,780,672 bytes (about 1.49 GiB) |
+| Adapter-directory files, including configuration | 2,181,087 bytes |
+| Final recorded train / validation loss | 0.58098 / 0.59551 |
+
+These are the training function's measurements, not total environment setup,
+download, or model-load time. Allocated tensor memory is distinct from device-wide
+usage and reserved memory. The runtime used Python 3.12.16, PyTorch 2.6.0+cu124,
+Transformers 4.51.3, PEFT 0.15.2, Accelerate 1.6.0, and safetensors 0.5.3. See
+[raw training metrics](../evidence/training/metrics.json),
+[events](../evidence/training/events.jsonl), and the
+[exported manifest](../evidence/adapter-package/manifest.json).
 
 ## Evidence and comparisons
 
-Measured numbers are intentionally not estimated here. Consult these generated
-evidence destinations and their manifests; a missing file means its experiment has
-not supplied evidence yet:
+The frozen v3 test has 40 triage renderings from eight independent families, plus
+eight separate general-instruction checks. All three alternatives used the same
+historical Transformers implementation, BF16 weights, greedy generation, seed 42,
+and output cap 320. Zero-shot and LoRA shared the same task instruction.
+
+| Held-out measurement | Zero-shot | Stronger prompt | LoRA |
+|---|---:|---:|---:|
+| Category accuracy | 2/40 (5.0%) | 7/40 (17.5%) | 15/40 (37.5%) |
+| Macro F1 | 0.020000 | 0.089339 | 0.286943 |
+| Strict JSON validity | 50.0% | 100.0% | 100.0% |
+| Required-field compliance | 42.5% | 100.0% | 100.0% |
+| Extractive evidence quote precision | 43.33% | 88.75% | 97.92% |
+| Exact reference evidence recall | 29.17% | 55.83% | 87.08% |
+| Human-review escalation accuracy | 30.0% | 50.0% | 50.0% |
+| Required abstention | 0/5 | 0/5 | 0/5 |
+| General-instruction checks | 4/8 | 4/8 | 4/8 |
+
+LoRA accuracy was 20 percentage points above the stronger prompt in this run.
+This is an observed difference, not a statistical significance or real-world
+generalization claim. Family-cluster bootstrap 95% accuracy intervals were 0–15%,
+2.5–42.5%, and 12.5–70%, respectively. There is only one independent test family
+per category, and the five renderings within each family are correlated.
+
+The gains are incomplete. LoRA still misclassified 25/40 triage rows, had zero
+recall for four categories, and failed every required-abstention case. Its 50%
+action-keyword coverage is a lexical proxy, not evidence that half of its actions
+are correct or safe. The unchanged 4/8 general score establishes no measured change
+on those eight checks; it cannot establish broad preservation of general ability.
+High quote precision applies only to extractive evidence, not all summary or action
+claims. Overall unsupported-claim rate and semantic action correctness remain
+pending genuine human review.
+
+The source process started from
+`84a870010c85fbc66b893c0e884c59ada4ab20c2`. It retained publisher repetition penalty
+1.1 and EOS IDs `[151645, 151643]` under greedy decoding. This was clarified
+retrospectively in
+[quality-decoding-addendum.json](../evidence/quality-decoding-addendum.json),
+rather than falsely represented as a fully explicit pre-frozen policy. Subsequent
+serving experiments use a separate explicit repetition penalty 1.0 and single
+tokenizer EOS policy; these quality numbers must not be attributed to that policy.
+See [reproducibility.md](reproducibility.md) for the historical reference replay.
+
+Evidence locations:
 
 | Evidence | Destination |
 |---|---|
@@ -63,18 +127,24 @@ not supplied evidence yet:
 | Original model, shared task instruction | `evidence/evaluation/zero_shot/` |
 | Original model, stronger authored diagnostic prompt | `evidence/evaluation/prompted/` |
 | Reloaded LoRA model, same instruction as zero-shot | `evidence/evaluation/lora/` |
-| Blinded human annotation packet and import result | Created by `llm-platform review prepare` / `review import` |
-| Serving raw observations and optimization comparisons | `evidence/benchmarks/` |
+| Blinded human annotation packet | `evidence/human-review/` |
+| Serving raw observations and optimization comparisons | `evidence/serving/` |
+| Historical loaded source and retrospective clarification | `evidence/execution-source/`, `evidence/execution-provenance.json` |
 
 Quality reports preserve individual generations, strict JSON/field compliance,
 classification accuracy and macro F1, exact extractive evidence metrics, action
 keyword coverage, escalation and abstention, general regressions, category/tag
 slices, failure examples, and uncertainty. Automatic action keywords do not prove
 action correctness. Overall unsupported claims and semantic action correctness
-remain pending until an actual blinded human-reviewed subset is imported.
+remain pending until an actual blinded human-reviewed subset is imported. The
+requested small review packet contains two independent incident families and six
+blinded responses across the three alternatives; it is exploratory, not a
+population-level semantic accuracy estimate. Its labels remain empty while
+awaiting a person. No agent-generated judgments are represented as human labels.
 
 The central question is whether observed task improvements justify adaptation and
-serving costs. Fine-tuning is not presumed better than prompting. Preserve mixed or
+serving costs. This run shows task-score gains and substantial remaining quality
+defects; it does not establish a justified unattended deployment. Preserve mixed or
 negative results and general-instruction regressions. Different engine speed does
 not establish different model quality; different weights do not establish a fair
 same-model engine optimization.

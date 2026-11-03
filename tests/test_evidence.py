@@ -5,12 +5,17 @@ from pathlib import Path
 import shutil
 import hashlib
 import subprocess
+import copy
+import time
 
 import pytest
 
 from llm_platform.data import file_hash, load_records, write_jsonl
+from llm_platform.contracts import serving_decoding_policy
 from llm_platform.evaluation import make_blinded_review
-from llm_platform.evidence import _source_hashes, _within, validate_evidence
+from llm_platform.evidence import (PendingEvidence, _execution_snapshot, _runtime_memory, _serving_policy,
+                                   _shutdown_inventory, _source_hashes, _within, validate_evidence)
+from llm_platform.provenance import capture_source_snapshot
 
 
 def copy_primary_data(destination: Path) -> None:
@@ -171,3 +176,164 @@ def test_uncommitted_old_bytes_cannot_be_recovered_from_dirty_flag(recorded_sour
     with pytest.raises(ValueError, match="both checkout and recorded revision"):
         _source_hashes(source.parents[1], {"src/worker.py": hashlib.sha256(uncommitted).hexdigest()},
                        "training", code_revision=revision)
+
+
+def serving_metadata():
+    policy = serving_decoding_policy(151645, None, 151643)
+    return {"decoding_policy": policy, "decoding_policy_sha256": policy["sha256"],
+            "actual_startup": {"ready_engine_state": {"decoding_policy": copy.deepcopy(policy)}}}
+
+
+def test_serving_audit_requires_full_semantic_policy_and_digest():
+    metadata = serving_metadata()
+    _serving_policy(metadata)
+    metadata["decoding_policy"]["repetition_penalty"] = 1.1
+    with pytest.raises(ValueError, match="explicit platform defaults"):
+        _serving_policy(metadata)
+
+
+def test_rehashing_a_different_policy_does_not_restore_fairness():
+    metadata = serving_metadata()
+    policy = metadata["decoding_policy"]
+    policy["repetition_penalty"] = 1.1
+    fields = {key: value for key, value in policy.items() if key != "sha256"}
+    policy["sha256"] = hashlib.sha256(json.dumps(fields, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+    metadata["decoding_policy_sha256"] = policy["sha256"]
+    metadata["actual_startup"]["ready_engine_state"]["decoding_policy"] = copy.deepcopy(policy)
+    with pytest.raises(ValueError, match="explicit platform defaults"):
+        _serving_policy(metadata)
+
+
+def test_reported_policy_must_match_ready_engine_policy():
+    metadata = serving_metadata()
+    metadata["actual_startup"]["ready_engine_state"]["decoding_policy"] = serving_decoding_policy(151643, None, 151643)
+    with pytest.raises(ValueError, match="recorded ready engine"):
+        _serving_policy(metadata)
+
+
+def prepare_execution_evidence(recorded_source, historical):
+    source, _, revision, _ = recorded_source
+    root = source.parents[1]
+    manifest = capture_source_snapshot(root, root / "evidence" / "execution-source",
+                                       revision=revision if historical else None)
+    protocol = {"source_commit": revision, "frozen_at_unix": time.time()}
+    if historical:
+        clarification = {"status": "retrospective exact-source clarification",
+                         "quality_protocol_source_commit": revision,
+                         "execution_source_snapshot_sha256": manifest["snapshot_sha256"],
+                         "source_snapshot_mode": manifest["mode"]}
+        (root / "evidence" / "execution-provenance.json").write_text(json.dumps(clarification), encoding="utf-8")
+    else:
+        protocol["execution_source_snapshot_sha256"] = manifest["snapshot_sha256"]
+    (root / "evidence" / "quality-protocol.json").write_text(json.dumps(protocol), encoding="utf-8")
+    return root, manifest
+
+
+def test_current_execution_snapshot_is_linked_to_frozen_protocol(recorded_source):
+    root, manifest = prepare_execution_evidence(recorded_source, historical=False)
+    details = _execution_snapshot(root)
+    assert details["snapshot_sha256"] == manifest["snapshot_sha256"]
+    assert details["contemporaneous_capture"] is True
+
+
+def test_retrospective_execution_snapshot_does_not_invent_startup_capture(recorded_source):
+    root, _ = prepare_execution_evidence(recorded_source, historical=True)
+    protocol = json.loads((root / "evidence" / "quality-protocol.json").read_text())
+    assert "execution_source_snapshot_sha256" not in protocol
+    details = _execution_snapshot(root)
+    assert details["contemporaneous_capture"] is False
+    assert details["mode"].startswith("retrospective")
+
+
+def test_execution_snapshot_rejects_changed_preserved_source(recorded_source):
+    root, _ = prepare_execution_evidence(recorded_source, historical=True)
+    source = root / "evidence" / "execution-source" / "src" / "worker.py"
+    source.write_bytes(b"tampered archived source\n")
+    with pytest.raises(ValueError, match="source file hash differs"):
+        _execution_snapshot(root)
+
+
+def test_retrospective_snapshot_requires_matching_clarification(recorded_source):
+    root, _ = prepare_execution_evidence(recorded_source, historical=True)
+    path = root / "evidence" / "execution-provenance.json"
+    clarification = json.loads(path.read_text())
+    clarification["source_snapshot_mode"] = "captured at startup"
+    path.write_text(json.dumps(clarification), encoding="utf-8")
+    with pytest.raises(ValueError, match="Retrospective execution clarification"):
+        _execution_snapshot(root)
+
+
+def test_snapshot_claim_cannot_omit_committed_source_even_with_consistent_rehash(recorded_source):
+    source, _, revision, git = recorded_source
+    root = source.parents[1]
+    second = root / "src" / "second.py"
+    second.write_bytes(b"# another imported module\n")
+    git("add", "src/second.py")
+    git("commit", "-m", "Record another module")
+    new_revision = git("rev-parse", "HEAD")
+    updated = (source, hashlib.sha256(source.read_bytes()).hexdigest(), new_revision, git)
+    root, _ = prepare_execution_evidence(updated, historical=True)
+    directory = root / "evidence" / "execution-source"
+    manifest = json.loads((directory / "manifest.json").read_text())
+    del manifest["files"]["src/second.py"]
+    (directory / "src" / "second.py").unlink()
+    unsigned = {key: value for key, value in manifest.items() if key != "snapshot_sha256"}
+    manifest["snapshot_sha256"] = hashlib.sha256(json.dumps(unsigned, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+    (directory / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+    with pytest.raises(ValueError, match="omits or invents committed source"):
+        _execution_snapshot(root)
+
+
+def test_runtime_memory_audit_recomputes_observed_median_and_session_peak():
+    samples = [{"runtime": {"allocated_bytes": value, "session_peak_allocated_bytes": peak,
+                            "reserved_bytes": 10_000}} for value, peak in [(1000, 6000), (5000, 8000), (3000, 8000)]]
+    summary = {"runtime_allocated_sample_median_bytes": 3000, "runtime_session_peak_allocated_bytes": 8000}
+    _runtime_memory(samples, summary)
+    summary["runtime_session_peak_allocated_bytes"] = 10_000
+    with pytest.raises(ValueError, match="differs from raw runtime samples"):
+        _runtime_memory(samples, summary)
+
+
+def test_unsupported_runtime_memory_stays_null_instead_of_invented_zero():
+    samples = [{"runtime": {"allocated_bytes": None, "session_peak_allocated_bytes": None, "reserved_bytes": None}}]
+    summary = {"runtime_allocated_sample_median_bytes": None, "runtime_session_peak_allocated_bytes": None}
+    _runtime_memory(samples, summary)
+    summary["runtime_allocated_sample_median_bytes"] = 0
+    with pytest.raises(ValueError, match="differs from raw runtime samples"):
+        _runtime_memory(samples, summary)
+
+
+@pytest.mark.parametrize("bad_value", [-1, float("nan"), float("inf"), True])
+def test_runtime_memory_samples_require_finite_nonnegative_byte_values(bad_value):
+    samples = [{"runtime": {"allocated_bytes": None, "session_peak_allocated_bytes": None, "reserved_bytes": bad_value}}]
+    with pytest.raises(ValueError, match="runtime reserved_bytes"):
+        _runtime_memory(samples, {})
+
+
+@pytest.mark.parametrize("completed", [False, True])
+def test_partial_shutdown_inventory_is_pending_only_while_matrix_in_progress(tmp_path, completed):
+    serving = tmp_path / "serving"
+    session = serving / "sessions" / "transformers-base-r0"
+    session.mkdir(parents=True)
+    (session / "shutdown.json").write_text("[]", encoding="utf-8")
+    if completed:
+        (serving / "index.json").write_text('{"completed_runs":28}', encoding="utf-8")
+        with pytest.raises(ValueError, match="shutdown inventory"):
+            _shutdown_inventory(serving, expected=10)
+    else:
+        with pytest.raises(PendingEvidence, match="still in progress"):
+            _shutdown_inventory(serving, expected=10)
+
+
+def test_missing_shutdown_inventory_fails_after_completion_index_exists(tmp_path):
+    (tmp_path / "index.json").write_text('{"completed_runs":28}', encoding="utf-8")
+    with pytest.raises(ValueError, match="shutdown inventory"):
+        _shutdown_inventory(tmp_path, expected=10)
+
+
+def test_complete_shutdown_inventory_can_pass_before_final_index_is_written(tmp_path):
+    for number in range(10):
+        session = tmp_path / "sessions" / f"session-{number}"
+        session.mkdir(parents=True)
+        (session / "shutdown.json").write_text("[]", encoding="utf-8")
+    assert len(_shutdown_inventory(tmp_path, expected=10)) == 10

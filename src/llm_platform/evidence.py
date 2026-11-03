@@ -12,9 +12,11 @@ import math
 from pathlib import Path, PureWindowsPath
 import re
 import subprocess
+from datetime import datetime
 from typing import Any, Callable
 
 from llm_platform.benchmark import compare_reports, summarize
+from llm_platform.contracts import serving_decoding_policy
 from llm_platform.data import canonical_json, content_hash, file_hash, load_records, verify_dataset
 from llm_platform.evaluation import evaluate_records, import_human_review
 from llm_platform.prompts import prompt_identity
@@ -100,6 +102,71 @@ def _dataset(root: Path) -> dict[str, Any]:
     return {"manifest_sha256": data["manifest_sha256"], "dataset_id": data["dataset_id"],
             "frozen_test_sha256": data["frozen_test_sha256"],
             "counts": {name: info["count"] for name, info in data["files"].items()}}
+
+
+def _execution_snapshot(root: Path) -> dict[str, Any]:
+    directory = root / "evidence" / "execution-source"
+    manifest = _read(directory / "manifest.json")
+    protocol = _read(root / "evidence" / "quality-protocol.json")
+    supplied = manifest["snapshot_sha256"]
+    unsigned = {key: value for key, value in manifest.items() if key != "snapshot_sha256"}
+    expected = hashlib.sha256(json.dumps(unsigned, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+    _require(supplied == expected, "Execution snapshot manifest integrity failure")
+    revision = manifest["source_revision"]
+    _require(isinstance(revision, str) and re.fullmatch(r"[a-f0-9]{40}|[a-f0-9]{64}", revision) is not None,
+             "Execution snapshot has no immutable source revision")
+    _require(protocol["source_commit"] == revision, "Execution snapshot and quality protocol source revisions differ")
+    hashes = manifest["files"]
+    _require(isinstance(hashes, dict) and bool(hashes), "Execution snapshot has no source inventory")
+    actual = set()
+    for path in directory.rglob("*"):
+        _require(not path.is_symlink(), "Execution snapshot cannot contain symlinks")
+        if path.is_file():
+            actual.add(path.relative_to(directory).as_posix())
+    _require(actual == set(hashes) | {"manifest.json"}, "Execution snapshot file inventory differs")
+    for name, digest in hashes.items():
+        _require(name.startswith(("src/", "scripts/")) and name.endswith(".py")
+                 and "\\" not in name and ":" not in name
+                 and all(part not in {"", ".", ".."} for part in name.split("/")),
+                 "Unsafe execution source reference")
+        _require(file_hash(_within(directory, name)) == digest, "Execution snapshot source file hash differs")
+    try:
+        tree = subprocess.run(["git", "-C", str(root), "ls-tree", "-r", "-z", revision, "--", "src", "scripts"],
+                              shell=False, capture_output=True, timeout=10, check=True).stdout
+        entries = [entry.decode("utf-8").split("\t", 1) for entry in tree.split(b"\0") if entry]
+        source_names = set()
+        for description, name in entries:
+            if name.endswith(".py"):
+                _require(description.split()[0] in {"100644", "100755"}, "Execution revision contains linked Python source")
+                source_names.add(name)
+        _require(source_names == set(hashes), "Execution snapshot omits or invents committed source files")
+        mode = manifest["mode"]
+        if mode == "retrospective exact Git tree reconstruction":
+            for name, digest in hashes.items():
+                content = subprocess.run(["git", "-C", str(root), "show", f"{revision}:{name}"],
+                                         shell=False, capture_output=True, timeout=10, check=True).stdout
+                _require(hashlib.sha256(content).hexdigest() == digest, "Retrospective snapshot differs from exact recorded Git bytes")
+        elif mode == "pre-generation filesystem source capture":
+            _require(protocol.get("execution_source_snapshot_sha256") == supplied,
+                     "Quality protocol lacks its pre-generation snapshot identity")
+            captured_at = datetime.fromisoformat(manifest["recorded_at"])
+            _require(captured_at.tzinfo is not None and captured_at.timestamp() <= protocol["frozen_at_unix"] + 2,
+                     "Pre-generation source snapshot was recorded after the frozen protocol")
+        else:
+            raise ValueError("Unknown execution snapshot capture mode")
+    except (OSError, subprocess.SubprocessError) as exc:
+        raise ValueError("Execution snapshot recorded Git tree is unavailable") from exc
+    if mode == "retrospective exact Git tree reconstruction":
+        clarification = _read(root / "evidence" / "execution-provenance.json")
+        _require(clarification["quality_protocol_source_commit"] == revision
+                 and clarification["execution_source_snapshot_sha256"] == supplied
+                 and clarification["source_snapshot_mode"] == mode
+                 and isinstance(clarification["status"], str)
+                 and clarification["status"].startswith("retrospective"),
+                 "Retrospective execution clarification does not identify the exact reconstruction")
+    return {"snapshot_sha256": supplied, "source_revision": revision, "files": len(hashes), "mode": mode,
+            "contemporaneous_capture": mode == "pre-generation filesystem source capture",
+            "trust_boundary": "Snapshot proves preserved bytes and links; retrospective reconstruction is not evidence of a contemporaneous capture or execution attestation."}
 
 
 def _adapter(root: Path) -> dict[str, Any]:
@@ -260,6 +327,42 @@ def _semantic_ids(manifest: dict[str, Any]) -> dict[str, str]:
             "tokenizer_id": digest({"tokenizer": manifest["tokenizer"], "files": token_files})}
 
 
+def _serving_policy(metadata: dict[str, Any]) -> None:
+    policy = metadata.get("decoding_policy")
+    _require(isinstance(policy, dict), "Benchmark lacks full effective serving decoding policy")
+    eos = policy.get("eos_token_ids")
+    _require(isinstance(eos, list) and len(eos) == 1, "Serving policy must identify a single effective EOS token")
+    expected = serving_decoding_policy(eos[0], policy.get("bos_token_id"), policy.get("pad_token_id"))
+    _require(policy == expected and metadata.get("decoding_policy_sha256") == expected["sha256"],
+             "Benchmark serving policy or digest differs from explicit platform defaults")
+    engine_policy = metadata["actual_startup"]["ready_engine_state"].get("decoding_policy")
+    _require(engine_policy == policy, "Benchmark decoding policy differs from the recorded ready engine")
+
+
+def _runtime_memory(samples: list[dict[str, Any]], summary: dict[str, Any]) -> None:
+    keys = ("allocated_bytes", "session_peak_allocated_bytes", "reserved_bytes")
+    summary_keys = ("runtime_allocated_sample_median_bytes", "runtime_session_peak_allocated_bytes")
+    has_runtime = any("runtime" in sample for sample in samples)
+    if not has_runtime:
+        _require(all(summary.get(key) is None for key in summary_keys),
+                 "Runtime memory summary has no supporting raw samples")
+        return
+    for sample in samples:
+        runtime = sample.get("runtime")
+        _require(isinstance(runtime, dict) and set(keys) <= set(runtime), "Incomplete runtime memory sample")
+        for key in keys:
+            if runtime[key] is not None:
+                _positive(runtime[key], f"runtime {key} (bytes)", allow_zero=True)
+    allocated = sorted(sample["runtime"]["allocated_bytes"] for sample in samples
+                       if sample["runtime"]["allocated_bytes"] is not None)
+    peaks = [sample["runtime"]["session_peak_allocated_bytes"] for sample in samples
+             if sample["runtime"]["session_peak_allocated_bytes"] is not None]
+    expected = {"runtime_allocated_sample_median_bytes": allocated[len(allocated) // 2] if allocated else None,
+                "runtime_session_peak_allocated_bytes": max(peaks) if peaks else None}
+    for key, value in expected.items():
+        _require(key in summary and summary[key] == value, f"{key} differs from raw runtime samples")
+
+
 def _benchmarks(root: Path) -> dict[str, Any]:
     serving = root / "evidence" / "serving"
     index, protocol = _read(serving / "index.json"), _read(serving / "protocol.json")
@@ -291,6 +394,7 @@ def _benchmarks(root: Path) -> dict[str, Any]:
             _require(canonical_json(report["summary"][key]) == canonical_json(value),
                      f"Benchmark summary {key} disagrees with raw observations")
         metadata = report["metadata"]
+        _serving_policy(metadata)
         _require(metadata["engine"] in {"transformers", "vllm"}, "Unknown benchmark engine")
         expected_ids = _semantic_ids(manifests[metadata["weight_label"]])
         _require(all(metadata[key] == value for key, value in expected_ids.items()),
@@ -319,6 +423,7 @@ def _benchmarks(root: Path) -> dict[str, Any]:
         _require(bool(memory) and all(type(value) in {int, float} and value > 0 for value in memory),
                  "Benchmark lacks measured GPU memory observations")
         _require(report["summary"]["gpu_device_used_peak_mib"] == max(memory), "Benchmark GPU peak differs from raw samples")
+        _runtime_memory(gpu, report["summary"])
         reports.append(report)
     repetitions = protocol["repetitions"]
     _require(type(repetitions) is int and repetitions >= 2, "Serving comparison lacks experimental repetitions")
@@ -356,6 +461,15 @@ def _completion(body: dict[str, Any], artifact: dict[str, Any]) -> None:
     _require(usage["total_tokens"] == usage["prompt_tokens"] + usage["completion_tokens"], "HTTP usage totals differ")
 
 
+def _shutdown_inventory(serving: Path, expected: int) -> list[Path]:
+    _require(type(expected) is int and expected > 0, "Invalid expected server session count")
+    sessions = list((serving / "sessions").glob("*/shutdown.json"))
+    if len(sessions) < expected and not (serving / "index.json").exists():
+        raise PendingEvidence("Serving matrix is still in progress; owned server shutdown inventory is not complete yet")
+    _require(len(sessions) == expected, "Owned server session shutdown inventory is incomplete or inconsistent")
+    return sessions
+
+
 def _lifecycle(root: Path) -> dict[str, Any]:
     directory = root / "evidence" / "serving" / "lifecycle"
     facts = _read(directory / "lifecycle.json")
@@ -385,11 +499,8 @@ def _lifecycle(root: Path) -> dict[str, Any]:
     metrics = (directory / "metrics.txt").read_text(encoding="utf-8")
     _require("llm_requests_total" in metrics and "llm_active_requests 0.0" in metrics,
              "Lifecycle metrics lack request totals or released slots")
-    sessions = list((root / "evidence" / "serving" / "sessions").glob("*/shutdown.json"))
-    if not sessions:
-        raise PendingEvidence("No recorded owned-process shutdown evidence")
     protocol = _read(root / "evidence" / "serving" / "protocol.json")
-    _require(len(sessions) == 5 * protocol["repetitions"], "Owned server session shutdown inventory is incomplete")
+    sessions = _shutdown_inventory(root / "evidence" / "serving", 5 * protocol["repetitions"])
     for path in sessions:
         for child in _read(path):
             _require(child["forced_shutdown"] is False, "Owned server required forced shutdown")
@@ -422,7 +533,8 @@ def validate_evidence(root: Path) -> dict[str, Any]:
     """
     root = Path(root).resolve()
     checks: dict[str, Callable[[Path], dict[str, Any]]] = {
-        "frozen_dataset": _dataset, "gpu_training": _training, "adapter_reload": _reload,
+        "frozen_dataset": _dataset, "execution_snapshot": _execution_snapshot,
+        "gpu_training": _training, "adapter_reload": _reload,
         "controlled_quality": _quality, "gpu_benchmarks_and_optimization": _benchmarks,
         "http_lifecycle_and_recovery": _lifecycle, "blinded_human_review": _human,
     }
