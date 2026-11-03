@@ -13,6 +13,7 @@ from pathlib import Path, PureWindowsPath
 import re
 import subprocess
 from datetime import datetime
+import statistics
 from typing import Any, Callable
 
 from llm_platform.benchmark import compare_reports, summarize
@@ -363,6 +364,99 @@ def _runtime_memory(samples: list[dict[str, Any]], summary: dict[str, Any]) -> N
         _require(key in summary and summary[key] == value, f"{key} differs from raw runtime samples")
 
 
+def _tree_hashes(directory: Path) -> dict[str, str]:
+    _require(directory.is_dir() and not directory.is_symlink(), "Evidence tree must be an ordinary directory")
+    hashes = {}
+    for path in sorted(directory.rglob("*")):
+        _require(not path.is_symlink(), "Evidence tree cannot contain symlinks")
+        if path.is_file():
+            hashes[path.relative_to(directory).as_posix()] = file_hash(path)
+        else:
+            _require(path.is_dir(), "Evidence tree contains special files")
+    return hashes
+
+
+def _adapter_precision(metadata: dict[str, Any]) -> None:
+    if metadata.get("weight_label") != "adapter":
+        return
+    expected = {"base_compute_dtype": "bfloat16", "adapter_compute_dtype": "bfloat16", "adapter_storage_dtype": "float32"}
+    for label, value in (("metadata", metadata), ("engine settings", metadata["engine_settings"]),
+                         ("actual ready engine", metadata["actual_startup"]["ready_engine_state"])):
+        _require(all(value.get(key) == dtype for key, dtype in expected.items()),
+                 f"Adapter {label} does not establish aligned BF16 compute and FP32 storage")
+        _require(isinstance(value.get("precision_source"), str) and bool(value["precision_source"].strip()),
+                 f"Adapter {label} lacks a precision verification source")
+
+
+def _precision_correction(root: Path) -> dict[str, Any]:
+    serving = root / "evidence" / "serving"
+    amendment = _read(serving / "precision-correction.json")
+    _require(amendment["original_archive"]["path"] == "../serving-original", "Precision amendment archive binding differs")
+    archive = root / "evidence" / "serving-original"
+    original = _tree_hashes(archive)
+    _require(original == amendment["original_archive"]["files_sha256"], "Original serving archive bytes changed")
+    identity = hashlib.sha256(json.dumps(original, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+    _require(identity == amendment["original_archive"]["tree_sha256"], "Original serving archive tree identity differs")
+    _require(file_hash(serving / "protocol.json") == original["protocol.json"] == amendment["original_protocol_sha256"],
+             "Precision correction rewrote the original protocol")
+    protocol = _read(serving / "protocol.json")
+    replacements = {f"{engine}-adapter-r{rep}-{workload['name']}" for engine in ("transformers", "vllm")
+                    for rep in range(protocol["repetitions"]) for workload in protocol["workloads"]}
+    retained = {name.replace("-adapter-", "-base-") for name in replacements}
+    retained |= {f"prefix-{toggle}-r{rep}" for toggle in ("off", "on") for rep in range(protocol["repetitions"])}
+    _require(len(replacements) == 12 and len(retained) == 16
+             and set(amendment["replacement_runs"]) == replacements and set(amendment["retained_runs"]) == retained,
+             "Precision amendment changes the affected/retained experiment inventory")
+    session_names = {f"sessions/{engine}-adapter-r{rep}" for engine in ("transformers", "vllm")
+                     for rep in range(protocol["repetitions"])}
+    old_paths = {"index.json", "comparisons", "comparison.md", *[f"runs/{name}" for name in replacements], *session_names}
+    moved = {name for name in original if any(name == prefix or name.startswith(prefix + "/") for prefix in old_paths)}
+    untouched = {name: digest for name, digest in original.items() if name not in moved}
+    for name, digest in untouched.items():
+        _require(file_hash(_within(serving, name)) == digest, "Retained base/cache/lifecycle/protocol evidence changed")
+    for name in moved:
+        _require(file_hash(_within(serving / "superseded", name)) == original[name], "Superseded original evidence changed")
+    _require(amendment["status"] in {"in_progress", "complete"}, "Precision correction is explicitly incomplete/failed")
+    if amendment["status"] != "complete":
+        raise PendingEvidence("Adapter precision correction is in progress; original observations are archived")
+    _require(set(amendment["completed_replacement_runs"]) == replacements
+             and len(amendment["completed_replacement_runs"]) == 12, "Precision correction omits replacement runs")
+    _require(amendment["unchanged_original_files_sha256"] == untouched, "Retained-file amendment inventory differs")
+    _require(set(amendment["replacements"]) == {f"runs/{name}" for name in replacements}
+             and set(amendment["session_replacements"]) == session_names, "Precision run/session binding inventory differs")
+    for mapping in (amendment["replacements"], amendment["session_replacements"]):
+        for name, binding in mapping.items():
+            _require(_tree_hashes(_within(archive, name)) == binding["original_files_sha256"], "Original replacement binding differs")
+            _require(_tree_hashes(_within(serving, name)) == binding["corrected_files_sha256"], "Corrected replacement binding differs")
+    _require(set(amendment["corrected_report_sha256"]) == replacements, "Corrected report inventory differs")
+    for name in replacements:
+        directory = serving / "runs" / name
+        _require(file_hash(directory / "report.json") == amendment["corrected_report_sha256"][name], "Corrected report hash differs")
+        new, old = _read(directory / "report.json"), _read(archive / "runs" / name / "report.json")
+        _adapter_precision(new["metadata"])
+        _require(new["metadata"]["experiment_source"] == amendment["source"], "Corrected run source differs from amendment")
+        _require(new["config"] == old["config"] and all(new["metadata"][key] == old["metadata"][key]
+                 for key in ("weights_id", "tokenizer_id", "prompt_set_sha256", "decoding_policy_sha256")),
+                 "Precision correction also changed weights, prompts, or controlled generation settings")
+    for name, digest in amendment["derived_files_sha256"].items():
+        _require(file_hash(_within(serving, name)) == digest, "Corrected derived comparison hash differs")
+    _source_hashes(root, amendment["source"]["source_files_sha256"], "precision correction",
+                   code_revision=amendment["source"]["code_revision"])
+    manifest = _adapter(root)
+    weights = _within(root / "evidence" / "adapter-package", manifest["adapter"]["path"] + "/adapter_model.safetensors")
+    with weights.open("rb") as stream:
+        length = int.from_bytes(stream.read(8), "little")
+        _require(0 < length <= 16 * 1024 * 1024, "Invalid adapter tensor header length")
+        tensors = json.loads(stream.read(length))
+    dtypes = {value["dtype"] for name, value in tensors.items() if name != "__metadata__"}
+    _require(dtypes == {"F32"}, "Actual adapter artifact storage is not uniformly FP32")
+    index = _read(serving / "index.json")
+    _require(index["precision_correction"] == "precision-correction.json" and index["source"] == amendment["source"],
+             "Final serving index is not bound to the completed precision amendment")
+    return {"replacement_runs": 12, "retained_runs": 16, "original_tree_sha256": identity,
+            "compute": "BF16 base and adapter; FP32 serialized adapter", "protocol": "Original retained; post-discovery amendment explicitly recorded"}
+
+
 def _benchmarks(root: Path) -> dict[str, Any]:
     serving = root / "evidence" / "serving"
     index, protocol = _read(serving / "index.json"), _read(serving / "protocol.json")
@@ -395,6 +489,7 @@ def _benchmarks(root: Path) -> dict[str, Any]:
                      f"Benchmark summary {key} disagrees with raw observations")
         metadata = report["metadata"]
         _serving_policy(metadata)
+        _adapter_precision(metadata)
         _require(metadata["engine"] in {"transformers", "vllm"}, "Unknown benchmark engine")
         expected_ids = _semantic_ids(manifests[metadata["weight_label"]])
         _require(all(metadata[key] == value for key, value in expected_ids.items()),
