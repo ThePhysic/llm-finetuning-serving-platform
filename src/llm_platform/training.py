@@ -18,6 +18,8 @@ from dataclasses import asdict, dataclass, fields
 from pathlib import Path
 from typing import Any
 
+from llm_platform.tokenization import single_sequence_token_ids
+
 
 def sha256_file(path: Path) -> str:
     digest = hashlib.sha256()
@@ -146,9 +148,10 @@ def completion_example(tokenizer: Any, record: dict[str, Any], max_length: int) 
     response = json.dumps(target, ensure_ascii=False, separators=(",", ":")) if isinstance(target, dict) else target
     if not isinstance(response, str) or not response:
         raise ValueError("Empty or invalid target response")
-    prefix = tokenizer.apply_chat_template(messages, tokenize=True, add_generation_prompt=True)
-    complete = tokenizer.apply_chat_template(
-        [*messages, {"role": "assistant", "content": response}], tokenize=True, add_generation_prompt=False)
+    prefix = single_sequence_token_ids(tokenizer.apply_chat_template(
+        messages, tokenize=True, add_generation_prompt=True))
+    complete = single_sequence_token_ids(tokenizer.apply_chat_template(
+        [*messages, {"role": "assistant", "content": response}], tokenize=True, add_generation_prompt=False))
     if complete[:len(prefix)] != prefix:
         raise ValueError("Chat template changes the prompt prefix; completion mask would be invalid")
     if len(complete) > max_length:

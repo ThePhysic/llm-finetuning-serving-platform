@@ -101,8 +101,12 @@ def stage_build_context(root: Path, output: Path) -> dict:
 
 def image_inventory(recorder: Recorder, reference: str, label: str) -> dict:
     # Filter in Docker itself: Recorder must never receive image Config.Env.
-    template = '{"Id":{{json .Id}},"RepoDigests":{{json .RepoDigests}},"User":{{json .Config.User}}}'
+    template = '{"Id":{{json .Id}},"RepoDigests":{{json .RepoDigests}},"User":{{json (index .Config "User")}}}'
     return json.loads(recorder.run(["docker", "image", "inspect", reference, "--format", template], label=label))
+
+
+def configured_nonroot(value: object) -> bool:
+    return isinstance(value, str) and bool(value.strip()) and value.split(":", 1)[0] not in {"0", "root", ""}
 
 
 def build(root: Path, output: Path) -> dict:
@@ -126,7 +130,7 @@ def build(root: Path, output: Path) -> dict:
         image = image_inventory(recorder, tag, "image-inspect")
         status.update(status="built", image_id=image["Id"], repo_digests=image.get("RepoDigests") or [],
                       configured_user=image["User"])
-        if status["configured_user"] in {"", "root", "0"}:
+        if not configured_nonroot(status["configured_user"]):
             raise ValueError("Built image is configured as root")
         return status
     except Exception as exc:

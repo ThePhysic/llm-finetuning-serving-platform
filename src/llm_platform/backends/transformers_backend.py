@@ -11,6 +11,7 @@ from typing import Any, AsyncIterator
 
 from llm_platform.contracts import GenerationConfig, TokenChunk, serving_decoding_policy
 from llm_platform.backends.precision import adapter_storage_dtype, inspect_lora_compute_dtype, normalized_dtype
+from llm_platform.tokenization import single_sequence_token_ids
 
 
 class TransformersBackend:
@@ -199,7 +200,8 @@ class TransformersBackend:
     def count_tokens(self, messages: list[dict[str, str]]) -> int:
         if self.tokenizer is None:
             raise RuntimeError("Model is not loaded")
-        return len(self.tokenizer.apply_chat_template(messages, tokenize=True, add_generation_prompt=True))
+        return len(single_sequence_token_ids(self.tokenizer.apply_chat_template(
+            messages, tokenize=True, add_generation_prompt=True)))
 
     async def cancel(self, request_id: str) -> None:
         event = self._cancel.get(request_id)

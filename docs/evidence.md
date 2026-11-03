@@ -22,6 +22,9 @@ The exception requires machine code `independent_human_judgments_not_supplied`,
 emitted only after the archive, correction, fresh packet, selection, generation
 bindings, and available sealed-key commitment validate. Missing provenance or
 other review prerequisites cannot receive this code and cannot be waived by CI.
+The current fresh review has been imported after the owner's explicit personal
+assessment/no-AI-judgments attestation; it no longer needs this pending exception.
+The original six AI-origin ratings remain separate, with their archive unchanged.
 
 This is an **offline integrity and consistency audit**, not project-completion
 certification. A JSON flag cannot prove physical GPU execution, that observations

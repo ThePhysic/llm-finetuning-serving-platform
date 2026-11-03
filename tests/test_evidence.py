@@ -408,7 +408,7 @@ def test_empty_shutdown_file_cannot_count_as_recorded_graceful_process_exit(tmp_
     _graceful_shutdown(path)
 
 
-def copy_actual_human_sources(destination):
+def copy_actual_human_sources(destination, *, pending=False):
     repository = Path(__file__).resolve().parents[1]
     copy_primary_data(destination)
     shutil.copytree(repository / "evidence/human-review", destination / "evidence/human-review")
@@ -418,15 +418,33 @@ def copy_actual_human_sources(destination):
         directory = destination / "evidence/evaluation" / variant
         directory.mkdir(parents=True)
         shutil.copy2(repository / "evidence/evaluation" / variant / "outputs.jsonl", directory / "outputs.jsonl")
+    if pending:
+        directory = destination / "evidence/independent-human-review"
+        # Simulate the original pre-import state in isolated test data. Real
+        # owner judgments and the repository's completed report remain untouched.
+        for name in ("annotated.jsonl", "report.json", "reviewer-provenance.json", "independent-confirmation.json"):
+            (directory / name).unlink(missing_ok=True)
+        shutil.copy2(directory / "status-at-creation.json", directory / "status.json")
 
 
 def test_historical_ai_annotations_do_not_complete_independent_human_review(tmp_path):
-    copy_actual_human_sources(tmp_path)
+    copy_actual_human_sources(tmp_path, pending=True)
     with pytest.raises(PendingEvidence, match="historical labels are AI-assisted"):
         _human(tmp_path)
     report = json.loads((tmp_path / "evidence/human-review/report.json").read_text())
     assert report["classification_counts"] == {"ai_assisted": 6, "independent_human": 0, "unverified": 0}
     assert report["independent_human_runs"] == {}
+
+
+def test_fresh_owner_attested_judgments_complete_separately_from_historical_ai(tmp_path):
+    copy_actual_human_sources(tmp_path)
+    result = _human(tmp_path)
+    assert result["status"] == "independent_complete"
+    assert result["result"]["classification_counts"] == {"ai_assisted": 0, "independent_human": 6, "unverified": 0}
+    assert result["result"]["ai_assisted_runs"] == {}
+    assert set(result["result"]["independent_human_runs"]) == {"zero_shot", "prompted", "lora"}
+    historical = json.loads((tmp_path / "evidence/human-review/report.json").read_text())
+    assert historical["independent_human_runs"] == {}
 
 
 def test_human_key_cannot_swap_model_labels_even_if_imported_report_is_recomputed(tmp_path):
@@ -443,7 +461,7 @@ def test_human_key_cannot_swap_model_labels_even_if_imported_report_is_recompute
 
 
 def test_pending_independent_review_does_not_require_publishing_its_sealed_model_key(tmp_path):
-    copy_actual_human_sources(tmp_path)
+    copy_actual_human_sources(tmp_path, pending=True)
     key = tmp_path / "evidence/independent-human-review/review_key.json"
     if key.exists():
         key.unlink()
@@ -456,7 +474,7 @@ def test_pending_independent_review_does_not_require_publishing_its_sealed_model
                                      "evidence/review-provenance-correction/archive-manifest.json",
                                      "evidence/human-review/reviewer-provenance.json"])
 def test_missing_review_prerequisites_never_receive_expected_judgments_pending_code(tmp_path, missing):
-    copy_actual_human_sources(tmp_path)
+    copy_actual_human_sources(tmp_path, pending=True)
     (tmp_path / missing).unlink()
     result = validate_evidence(tmp_path)["criteria"]["blinded_human_review"]
     assert result["status"] != "pass"
@@ -472,7 +490,7 @@ def test_completed_fresh_review_without_a_sealed_key_fails(tmp_path):
     key = directory / "review_key.json"
     if key.exists():
         key.unlink()
-    with pytest.raises(ValueError, match="claims completion without annotated"):
+    with pytest.raises(ValueError, match="Completed/annotated review requires its original sealed key"):
         _human(tmp_path)
 
 

@@ -115,6 +115,32 @@ def test_template_rewrite_cannot_corrupt_completion_mask():
         completion_example(RewritingTokenizer(), record, 8)
 
 
+@pytest.mark.parametrize("batched", [False, True])
+def test_mapping_chat_outputs_preserve_exact_loss_boundary_and_length_guards(batched):
+    from collections import UserDict
+
+    class MappingTokenizer:
+        rewrite = False
+
+        def apply_chat_template(self, messages, tokenize, add_generation_prompt):
+            values = [1, 2, 3] if add_generation_prompt else [1, 2, 3, 4, 5, 6]
+            if self.rewrite and not add_generation_prompt:
+                values[1] = 99
+            return UserDict(input_ids=[values] if batched else values,
+                            attention_mask=[[1] * len(values)] if batched else [1] * len(values))
+
+    tokenizer = MappingTokenizer()
+    record = {"messages": [{"role": "user", "content": "Report"}], "target": "target"}
+    result = completion_example(tokenizer, record, 6)
+    assert result["input_ids"] == [1, 2, 3, 4, 5, 6]
+    assert result["labels"] == [-100, -100, -100, 4, 5, 6]
+    with pytest.raises(ValueError, match="no truncation"):
+        completion_example(tokenizer, record, 5)
+    tokenizer.rewrite = True
+    with pytest.raises(ValueError, match="prefix"):
+        completion_example(tokenizer, record, 6)
+
+
 @pytest.mark.parametrize("completed", [False, True])
 def test_nonempty_resume_output_is_refused_before_heavy_imports_or_writes(tmp_path, monkeypatch, completed):
     from llm_platform.training import train

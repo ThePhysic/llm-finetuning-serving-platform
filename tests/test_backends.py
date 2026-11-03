@@ -94,6 +94,36 @@ class FakeTokenizer:
         return "".join(chr(v) for v in values)
 
 
+@pytest.mark.parametrize("backend_type", [TransformersBackend, VLLMBackend])
+@pytest.mark.parametrize("batched", [False, True])
+def test_backend_token_counts_use_mapping_ids_not_keys(backend_type, batched):
+    class MappingTokenizer:
+        def apply_chat_template(self, messages, **kwargs):
+            values = [1, 2, 3, 4, 5]
+            return {"input_ids": [values] if batched else values, "attention_mask": [1] * 5}
+
+    backend = backend_type()
+    backend.tokenizer = MappingTokenizer()
+    assert backend.count_tokens([{"role": "user", "content": "x"}]) == 5
+
+
+async def test_vllm_mapping_prompt_count_refuses_overflow_before_worker_dispatch():
+    backend = VLLMBackend()
+    backend.max_model_len = 7
+    backend.tokenizer = SimpleNamespace(apply_chat_template=lambda *a, **k: {
+        "input_ids": [[1, 2, 3, 4, 5]], "attention_mask": [[1, 1, 1, 1, 1]]})
+    dispatched = []
+    backend.client = httpx.AsyncClient(transport=httpx.MockTransport(
+        lambda request: dispatched.append(request) or httpx.Response(500)), base_url="http://worker")
+    try:
+        with pytest.raises(ValueError, match="context length"):
+            _ = [chunk async for chunk in backend.stream([{"role": "user", "content": "x"}],
+                                                         GenerationConfig(max_tokens=3), "overflow")]
+        assert not dispatched and not backend._active
+    finally:
+        await backend.unload()
+
+
 class FakeStreamer:
     def __init__(self, tokenizer, skip_prompt, **kwargs):
         self.skip_prompt = skip_prompt

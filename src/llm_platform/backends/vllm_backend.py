@@ -18,6 +18,7 @@ import httpx
 
 from llm_platform.contracts import GenerationConfig, TokenChunk, serving_decoding_policy
 from llm_platform.backends.precision import adapter_storage_dtype
+from llm_platform.tokenization import single_sequence_token_ids
 
 
 def verify_runtime_identity(manifest: dict[str, Any], identity: dict[str, Any]) -> str:
@@ -174,7 +175,8 @@ class VLLMBackend:
     def count_tokens(self, messages: list[dict[str, str]]) -> int:
         if self.tokenizer is None:
             raise RuntimeError("vLLM backend is not loaded")
-        return len(self.tokenizer.apply_chat_template(messages, tokenize=True, add_generation_prompt=True))
+        return len(single_sequence_token_ids(self.tokenizer.apply_chat_template(
+            messages, tokenize=True, add_generation_prompt=True)))
 
     async def cancel(self, request_id: str) -> None:
         response = self._active.get(request_id)

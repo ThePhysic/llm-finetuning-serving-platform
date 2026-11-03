@@ -14,6 +14,8 @@ from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any, Callable
 
+from llm_platform.tokenization import single_sequence_token_ids
+
 CATEGORIES = (
     "inventory_sync_failure", "inventory_discrepancy", "fulfillment_failure",
     "payment_processing_error", "shipment_delay", "transaction_missing", "api_failure", "unknown",
@@ -247,10 +249,10 @@ def prepare_dataset(source: Path, output: Path, seed: int = 42, max_chars: int =
                 text = canonical_json(row["target"]) if row["kind"] == "triage" else row["target"]
                 conversation = row["messages"] + [{"role": "assistant", "content": text}]
                 if hasattr(tokenizer, "apply_chat_template"):
-                    token_count = len(tokenizer.apply_chat_template(conversation, tokenize=True))
+                    token_count = len(single_sequence_token_ids(tokenizer.apply_chat_template(conversation, tokenize=True)))
                 else:
                     encoded = tokenizer(canonical_json(conversation))
-                    token_count = len(encoded["input_ids"] if isinstance(encoded, dict) else encoded)
+                    token_count = len(single_sequence_token_ids(encoded))
                 if token_count > max_tokens:
                     raise ValueError(f"tokenized example length {token_count} exceeds {max_tokens}")
                 row["metadata"] = {**row["metadata"], "validated_tokens": token_count}

@@ -84,6 +84,23 @@ def test_near_duplicate_detection_and_exact_token_limit(tmp_path):
         prepare_dataset(source, tmp_path / "too_long", tokenizer=lambda _: list(range(10)), max_tokens=9)
 
 
+@pytest.mark.parametrize("chat_template", [False, True])
+def test_mapping_tokenizer_outputs_cannot_bypass_dataset_token_limit(tmp_path, chat_template):
+    from collections import UserDict
+    from types import SimpleNamespace
+
+    def encoded(*args, **kwargs):
+        return UserDict(input_ids=[[1, 2, 3, 4, 5]], attention_mask=[[1, 1, 1, 1, 1]])
+
+    tokenizer = SimpleNamespace(apply_chat_template=encoded) if chat_template else encoded
+    source = tmp_path / "raw.jsonl"
+    write_jsonl(source, generate_records())
+    output = tmp_path / "rejected"
+    with pytest.raises(ValueError, match="tokenized example length 5 exceeds 4"):
+        prepare_dataset(source, output, tokenizer=tokenizer, max_tokens=4)
+    assert not output.exists()
+
+
 def test_duplicate_json_keys_and_nan_rejected(tmp_path):
     path = tmp_path / "bad.jsonl"
     path.write_text('{"id":"one","id":"two"}\n', encoding="utf-8")
