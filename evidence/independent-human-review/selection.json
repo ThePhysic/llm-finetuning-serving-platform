@@ -1,0 +1,17 @@
+{
+  "seed": 20261103,
+  "excluded_prior_families": [
+    "api_failure-scenario-03",
+    "unknown-scenario-05"
+  ],
+  "selected_families": [
+    "fulfillment_failure-scenario-03",
+    "inventory_discrepancy-scenario-03"
+  ],
+  "selected_ids": [
+    "fulfillment_failure-scenario-03-wording-1",
+    "inventory_discrepancy-scenario-03-wording-1"
+  ],
+  "frozen_test_sha256": "3619389fe0165d757ed7d15f04f5f5f6ddaa70c3488cfaf4c68566d924cebaff",
+  "policy": "Seeded selection from sorted eligible frozen families, one seeded wording each; selection precedes loading model outputs; no output/score based choice"
+}

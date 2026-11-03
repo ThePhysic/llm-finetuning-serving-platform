@@ -1,8 +1,13 @@
 # Enterprise triage adapter model card
 
 The adapter improved measured accuracy on this small synthetic test, but its
-37.5% classification accuracy, failed abstention, and very small human review do not
+37.5% classification accuracy, failed abstention, and absent qualifying independent human review do not
 justify unattended incident triage or autonomous operational actions.
+
+The six historical A–F ratings are AI-generated/AI-assisted annotations submitted
+through the project owner. They are not independently verified human judgments.
+[The provenance correction](review-provenance.md) supersedes earlier attribution;
+the exact original labels and records remain available.
 
 ## Identity and intended use
 
@@ -92,7 +97,7 @@ and LoRA shared the same task instruction.
 | Required-field compliance | 42.5% | 100.0% | 100.0% |
 | Extractive evidence quote precision | 43.33% | 88.75% | 97.92% |
 | Exact reference evidence recall | 29.17% | 55.83% | 87.08% |
-| Human-review escalation accuracy | 30.0% | 50.0% | 50.0% |
+| Escalation accuracy against synthetic reference policy | 30.0% | 50.0% | 50.0% |
 | Required abstention | 0/5 | 0/5 | 0/5 |
 | General-instruction checks | 4/8 | 4/8 | 4/8 |
 
@@ -108,8 +113,8 @@ action-keyword coverage is a lexical proxy, not evidence that half of its action
 are correct or safe. The unchanged 4/8 general score establishes no measured change
 on those eight checks; it cannot establish broad preservation of general ability.
 High quote precision applies only to extractive evidence, not all summary or action
-claims. Semantic human judgments are reported separately on the two-case subset
-below; they do not estimate population-level quality.
+claims. The AI-assisted two-case annotation summary below is separate from these
+automatic metrics and does not qualify as independent human evaluation.
 
 The source process started from
 `84a870010c85fbc66b893c0e884c59ada4ab20c2`. It retained publisher repetition penalty
@@ -129,7 +134,8 @@ Evidence locations:
 | Original model, shared task instruction | `evidence/evaluation/zero_shot/` |
 | Original model, stronger authored diagnostic prompt | `evidence/evaluation/prompted/` |
 | Reloaded LoRA model, same instruction as zero-shot | `evidence/evaluation/lora/` |
-| Completed blinded human subset and original user replies | `evidence/human-review/` |
+| Historical AI-assisted annotations and original submitted replies | `evidence/human-review/` |
+| Fresh unannotated independent-review packet | `evidence/independent-human-review/` |
 | Serving raw observations and optimization comparisons | `evidence/serving/` |
 | Historical loaded source and retrospective clarification | `evidence/execution-source/`, `evidence/execution-provenance.json` |
 
@@ -138,26 +144,28 @@ classification accuracy and macro F1, exact extractive evidence metrics, action
 keyword coverage, escalation and abstention, general regressions, category/tag
 slices, failure examples, and uncertainty. Automatic action keywords do not prove
 action correctness. Overall unsupported claims and semantic action correctness
-are distinguished from the separately imported human subset. One human project
-owner supplied all six ratings through two blinded A–F annotation replies, covering
-an API prompt-injection case and an ambiguous delivery case. Original replies,
-packet contents, reviewer provenance, and imported aggregates are retained in
+are unavailable as independent-human results until qualifying review exists.
+The historical six A–F ratings were generated with ChatGPT assistance and supplied
+through the user, covering an API prompt-injection case and an ambiguous delivery
+case. Submission by a human did not establish independent assessment of those
+judgments. Original replies, packet contents, corrected attribution, and the
+separately labeled AI-assisted aggregate are retained in
 [human-review/report.json](../evidence/human-review/report.json).
 
-| Human-reviewed subset measurement | Zero-shot | Stronger prompt | LoRA |
+| AI-assisted annotation summary, independently unverified | Zero-shot | Stronger prompt | LoRA |
 |---|---:|---:|---:|
-| Reviewed responses | 2 | 2 | 2 |
+| Annotated responses | 2 | 2 | 2 |
 | Mean action rubric score (0 / 0.5 / 1) | 0.00 | 0.50 | 0.50 |
 | Faithful summaries | 1/2 | 1/2 | 2/2 |
 | Unsupported factual claim rate on reviewed outputs | 37.5% | 44.4% | 0.0% |
 
-This is one reviewer and two deliberately selected independent incidents, with
-three alternatives per incident. Zero unsupported claims in two LoRA responses
-does not establish a zero hallucination rate. A mean action score of 0.5 does not
-mean half of actions are correct or safe. The historical automatic reports remain
-immutable with their original pending human fields; this separate imported report
-contains the actual completed judgments. No AI labels were substituted for the
-user's annotations.
+These are AI-assisted labels for two selected incidents, with three alternatives
+per incident. The numeric scores are preserved; their origin changes how they can
+be interpreted. They establish neither independently judged action correctness
+nor a population hallucination rate. The historical automatic reports remain
+immutable with pending human fields. A fresh blinded packet excludes the two
+previously displayed families and awaits actual independent judgments and explicit
+provenance attestation. Its model mapping stays local until review is complete.
 
 The original serving matrix had a separate precision confound: Transformers used
 FP32 adapter compute while vLLM used BF16, despite identical FP32 serialized adapter

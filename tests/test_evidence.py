@@ -106,7 +106,7 @@ def test_unannotated_real_review_packet_stays_pending(tmp_path):
     (directory / "status.json").write_text(json.dumps(status), encoding="utf-8")
     result = validate_evidence(tmp_path)["criteria"]["blinded_human_review"]
     assert result["status"] == "pending"
-    assert "genuine human annotations" in result["reason"]
+    assert "independent human annotations" in result["reason"]
 
 
 @pytest.mark.parametrize("name", ["../outside.json", "nested/../../outside.json", "C:\\outside.json"])
@@ -412,22 +412,24 @@ def copy_actual_human_sources(destination):
     repository = Path(__file__).resolve().parents[1]
     copy_primary_data(destination)
     shutil.copytree(repository / "evidence/human-review", destination / "evidence/human-review")
+    shutil.copytree(repository / "evidence/review-provenance-correction", destination / "evidence/review-provenance-correction")
+    shutil.copytree(repository / "evidence/independent-human-review", destination / "evidence/independent-human-review")
     for variant in ("zero_shot", "prompted", "lora"):
         directory = destination / "evidence/evaluation" / variant
         directory.mkdir(parents=True)
         shutil.copy2(repository / "evidence/evaluation" / variant / "outputs.jsonl", directory / "outputs.jsonl")
 
 
-def test_genuine_original_human_annotations_match_frozen_records_and_model_outputs(tmp_path):
+def test_historical_ai_annotations_do_not_complete_independent_human_review(tmp_path):
     copy_actual_human_sources(tmp_path)
-    result = _human(tmp_path)
-    assert result["status"] == "complete"
-    assert sum(run["reviewed_examples"] for run in result["result"]["runs"].values()) == 6
+    with pytest.raises(PendingEvidence, match="historical labels are AI-assisted"):
+        _human(tmp_path)
+    report = json.loads((tmp_path / "evidence/human-review/report.json").read_text())
+    assert report["classification_counts"] == {"ai_assisted": 6, "independent_human": 0, "unverified": 0}
+    assert report["independent_human_runs"] == {}
 
 
 def test_human_key_cannot_swap_model_labels_even_if_imported_report_is_recomputed(tmp_path):
-    from llm_platform.evaluation import import_human_review
-
     copy_actual_human_sources(tmp_path)
     directory = tmp_path / "evidence/human-review"
     key_path = directory / "review_key.json"
@@ -436,7 +438,47 @@ def test_human_key_cannot_swap_model_labels_even_if_imported_report_is_recompute
         if binding["run"] in {"zero_shot", "lora"}:
             binding["run"] = {"zero_shot": "lora", "lora": "zero_shot"}[binding["run"]]
     key_path.write_text(json.dumps(key), encoding="utf-8")
-    rebound = import_human_review(directory / "annotated.jsonl", key_path)
-    (directory / "report.json").write_text(json.dumps(rebound), encoding="utf-8")
-    with pytest.raises(ValueError, match="actual frozen record or per-model generation"):
+    with pytest.raises(ValueError, match="Original raw annotations"):
+        _human(tmp_path)
+
+
+def test_pending_independent_review_does_not_require_publishing_its_sealed_model_key(tmp_path):
+    copy_actual_human_sources(tmp_path)
+    key = tmp_path / "evidence/independent-human-review/review_key.json"
+    if key.exists():
+        key.unlink()
+    with pytest.raises(PendingEvidence, match="Independent human review pending") as pending:
+        _human(tmp_path)
+    assert pending.value.code == "independent_human_judgments_not_supplied"
+
+
+@pytest.mark.parametrize("missing", ["evidence/independent-human-review/review_protocol.json",
+                                     "evidence/review-provenance-correction/archive-manifest.json",
+                                     "evidence/human-review/reviewer-provenance.json"])
+def test_missing_review_prerequisites_never_receive_expected_judgments_pending_code(tmp_path, missing):
+    copy_actual_human_sources(tmp_path)
+    (tmp_path / missing).unlink()
+    result = validate_evidence(tmp_path)["criteria"]["blinded_human_review"]
+    assert result["status"] != "pass"
+    assert "pending_code" not in result
+
+
+def test_completed_fresh_review_without_a_sealed_key_fails(tmp_path):
+    copy_actual_human_sources(tmp_path)
+    directory = tmp_path / "evidence/independent-human-review"
+    status = json.loads((directory / "status.json").read_text())
+    status["status"] = "independent_complete"
+    (directory / "status.json").write_text(json.dumps(status), encoding="utf-8")
+    key = directory / "review_key.json"
+    if key.exists():
+        key.unlink()
+    with pytest.raises(ValueError, match="claims completion without annotated"):
+        _human(tmp_path)
+
+
+def test_original_review_archive_is_immutable_even_after_attribution_correction(tmp_path):
+    copy_actual_human_sources(tmp_path)
+    original = tmp_path / "evidence/review-provenance-correction/original-human-review/user-response-1.json"
+    original.write_bytes(original.read_bytes() + b"\n")
+    with pytest.raises(ValueError, match="Original six-label review archive changed"):
         _human(tmp_path)

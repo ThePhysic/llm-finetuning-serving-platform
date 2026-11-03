@@ -30,6 +30,10 @@ VARIANTS = ("zero_shot", "prompted", "lora")
 class PendingEvidence(Exception):
     """An experiment or required review has not supplied its evidence yet."""
 
+    def __init__(self, message: str, code: str | None = None):
+        super().__init__(message)
+        self.code = code
+
 
 def _require(condition: bool, message: str) -> None:
     if not condition:
@@ -790,19 +794,9 @@ def _lifecycle(root: Path) -> dict[str, Any]:
             "checks": "Recorded sync/SSE identity, authorization, limits, promotion, rollback, corruption refusal, disconnect cleanup and overload recovery."}
 
 
-def _human(root: Path) -> dict[str, Any]:
-    directory = root / "evidence" / "human-review"
-    status = _read(directory / "status.json")
+def _review_output_bindings(root: Path, directory: Path, annotated: bool) -> set[str]:
     packet, key = directory / "review_packet.jsonl", directory / "review_key.json"
-    annotated = directory / "annotated.jsonl"
-    if not annotated.exists():
-        _require(status.get("status") != "complete", "Human review claims completion without annotated evidence")
-        # Pending packet contents must still match the recorded initial inventory.
-        _require(file_hash(packet) == _read(key)["packet_sha256"], "Pending human packet was changed")
-        raise PendingEvidence("Blinded packet exists; genuine human annotations have not been supplied")
-    result = import_human_review(annotated, key)
-    _require(set(result["runs"]) == set(VARIANTS), "Human review omits one comparison variant")
-    _require(_read(directory / "report.json") == result, "Imported human report differs from actual annotated packet")
+    _require(key.is_file(), "Annotated/completed review requires the sealed model-mapping key")
     key_data = _read(key)
     _require(file_hash(packet) == key_data["packet_sha256"], "Original blinded human packet changed")
     records = {row["id"]: row for row in load_records(root / "data" / "triage-v3" / "test.jsonl")}
@@ -811,18 +805,128 @@ def _human(root: Path) -> dict[str, Any]:
         rows = load_records(root / "evidence" / "evaluation" / variant / "outputs.jsonl")
         outputs[variant] = {row["id"]: row for row in rows}
         _require(len(outputs[variant]) == len(rows), "Human review source run has duplicate output IDs")
-    for row in load_records(annotated):
+    families = set()
+    for row in load_records(directory / "annotated.jsonl" if annotated else packet):
         binding = key_data["mapping"][row["blind_id"]]
         variant, identity = binding["run"], binding["id"]
         _require(variant in VARIANTS and identity in records and identity in outputs[variant],
                  "Human blind mapping does not identify a frozen example and model output")
         record, output = records[identity], outputs[variant][identity]
+        families.add(record["family"])
         expected = {"blind_id": row["blind_id"], "messages": record["messages"], "reference": record["target"],
                     "output": output.get("output", ""), "error": output.get("error")}
         _require({name: value for name, value in row.items() if name != "annotation"} == expected,
                  "Human blind mapping differs from the actual frozen record or per-model generation")
-    return {"status": "complete", "result": result,
-            "trust_boundary": "Importer checks contents and annotations, not humanity; operator must retain genuine human provenance."}
+    return families
+
+
+def _review_provenance_correction(root: Path) -> set[str]:
+    directory = root / "evidence" / "human-review"
+    correction = root / "evidence" / "review-provenance-correction"
+    inventory = _read(correction / "archive-manifest.json")
+    _require(inventory["archive"] == "evidence/review-provenance-correction/original-human-review", "Original review archive binding differs")
+    original = _tree_hashes(correction / "original-human-review")
+    _require(original == inventory["files_sha256"] and content_hash(original) == inventory["tree_sha256"],
+             "Original six-label review archive changed")
+    notice = _read(correction / "correction.json")
+    _require(notice["annotation_origin"] == "ai_generated" and notice["submitter"] == "project_owner" and notice["reviewer_type"] == "ai_assisted"
+             and notice["independent_verification"] == "unverified"
+             and notice["archive_manifest_sha256"] == file_hash(correction / "archive-manifest.json")
+             and notice["original_tree_sha256"] == inventory["tree_sha256"], "Review attribution correction is inconsistent")
+    unchanged = {name: digest for name, digest in original.items()
+                 if name not in {"report.json", "status.json", "reviewer-provenance.json"}}
+    _require(notice["unchanged_original_files"] == unchanged, "Original raw-review preservation inventory differs")
+    for name, digest in unchanged.items():
+        _require(file_hash(_within(directory, name)) == digest, "Original raw annotations, scores, responses or packet changed")
+    _require(set(notice["corrected_current_files"]) == {"report.json", "status.json", "reviewer-provenance.json"},
+             "Corrected attribution file inventory differs")
+    for name, digest in notice["corrected_current_files"].items():
+        _require(file_hash(_within(directory, name)) == digest, "Corrected review attribution file changed")
+    result = import_human_review(directory / "annotated.jsonl", directory / "review_key.json", directory / "reviewer-provenance.json")
+    _require(_read(directory / "report.json") == result and result["status"] == "ai_assisted" and result["submitter"] == "project_owner"
+             and result["classification_counts"] == {"ai_assisted": 6, "independent_human": 0, "unverified": 0}
+             and result["independent_human_runs"] == {}, "Historical AI-generated labels are not separately attributed")
+    prior = _read(correction / "original-human-review" / "report.json")
+    for variant in VARIANTS:
+        _require(all(result["ai_assisted_runs"][variant][name] == prior["runs"][variant][name]
+                     for name in ("reviewed_examples", "action_correctness", "summary_faithfulness", "unsupported_claim_rate")),
+                 "Historical raw-score aggregates changed during attribution correction")
+    return _review_output_bindings(root, directory, annotated=True)
+
+
+def _human(root: Path) -> dict[str, Any]:
+    legacy_status_path = root / "evidence" / "human-review" / "status.json"
+    legacy_status = _read(legacy_status_path)
+    if not (legacy_status_path.parent / "annotated.jsonl").exists():
+        _require(legacy_status.get("status") not in {"complete", "independent_complete"}, "Human review claims completion without annotated evidence")
+        raise PendingEvidence("No qualifying independent human annotations have been supplied")
+    prior_families = _review_provenance_correction(root)
+    directory = root / "evidence" / "independent-human-review"
+    status, protocol = _read(directory / "status.json"), _read(directory / "review_protocol.json")
+    _require(protocol.get("schema_version") == 2 and protocol.get("status") == "unannotated"
+             and protocol.get("annotation_origin") == "not_yet_supplied"
+             and isinstance(protocol.get("review_key_sha256"), str)
+             and re.fullmatch(r"[0-9a-f]{64}", protocol["review_key_sha256"]) is not None,
+             "Fresh review creation protocol or sealed-key commitment is invalid")
+    packet = directory / "review_packet.jsonl"
+    _require(file_hash(packet) == protocol["review_packet_sha256"], "Fresh blinded packet changed")
+    selection = _read(directory / "selection.json")
+    records = {row["id"]: row for row in load_records(root / "data" / "triage-v3" / "test.jsonl")}
+    identities = selection["selected_ids"]
+    _require(len(identities) == 2 and len(set(identities)) == 2 and all(identity in records for identity in identities),
+             "Fresh independent review does not select two frozen held-out cases")
+    selected = {records[identity]["family"] for identity in identities}
+    _require(len(selected) == 2 and not selected & prior_families
+             and set(selection["excluded_prior_families"]) == prior_families and set(selection["selected_families"]) == selected
+             and selection["frozen_test_sha256"] == file_hash(root / "data" / "triage-v3" / "test.jsonl"),
+             "Fresh independent review reuses a prior reviewed family")
+    original = load_records(packet)
+    _require(len(original) == 6 and all(all(value is None for value in row["annotation"].values()) for row in original),
+             "Fresh independent packet must preserve its six originally empty annotations")
+    _require(all(any(row["messages"] == records[identity]["messages"] and row["reference"] == records[identity]["target"]
+                     for identity in identities) for row in original), "Fresh packet input/reference differs from selected frozen cases")
+    _require(all(sum(row["messages"] == records[identity]["messages"] and row["reference"] == records[identity]["target"]
+                     for row in original) == len(VARIANTS) for identity in identities), "Fresh review omits one selected case's responses")
+    # The mapping can remain sealed while pending, but the public blinded packet
+    # must still contain exactly the actual per-variant generations, not fixtures.
+    expected_outputs = []
+    for variant in VARIANTS:
+        rows = load_records(root / "evidence" / "evaluation" / variant / "outputs.jsonl")
+        by_id = {row["id"]: row for row in rows}
+        _require(len(by_id) == len(rows), "Fresh review source run contains duplicate IDs")
+        for identity in identities:
+            _require(identity in by_id, "Fresh review source output is missing")
+            output, record = by_id[identity], records[identity]
+            expected_outputs.append(canonical_json({"messages": record["messages"], "reference": record["target"],
+                                                    "output": output.get("output", ""), "error": output.get("error")}))
+    actual_outputs = [canonical_json({name: value for name, value in row.items() if name not in {"annotation", "blind_id"}})
+                      for row in original]
+    _require(sorted(actual_outputs) == sorted(expected_outputs), "Fresh pending packet differs from actual per-variant outputs")
+    key = directory / "review_key.json"
+    annotated = directory / "annotated.jsonl"
+    if not annotated.exists():
+        _require(status.get("status") == "pending", "Independent review claims completion without annotated evidence")
+        _require(status.get("reviewer_type") == "not_yet_supplied" and status.get("independent_verification") == "unverified",
+                 "Unannotated fresh review has inconsistent reviewer provenance")
+        if key.exists():
+            _require(file_hash(key) == protocol["review_key_sha256"], "Sealed fresh model mapping changed")
+            _review_output_bindings(root, directory, annotated=False)
+        raise PendingEvidence("Independent human review pending: six historical labels are AI-assisted; fresh packet has no qualifying judgments",
+                              code="independent_human_judgments_not_supplied")
+    _require(key.is_file() and file_hash(key) == protocol["review_key_sha256"], "Completed/annotated review requires its original sealed key")
+    result = import_human_review(annotated, key, directory / "reviewer-provenance.json")
+    _require(_read(directory / "report.json") == result, "Fresh review aggregate disagrees with its annotations and provenance")
+    _review_output_bindings(root, directory, annotated=True)
+    if result["status"] != "independent_complete":
+        _require(status.get("status") == result["status"] and status.get("independent_verification") == "unverified",
+                 "Assisted annotations are mislabeled or have inconsistent verification status")
+        raise PendingEvidence("Fresh review is assisted or unverified; qualifying independent-human judgments remain pending",
+                              code="independent_human_judgments_not_supplied")
+    _require(status.get("status") == "independent_complete" and set(result["independent_human_runs"]) == set(VARIANTS),
+             "Independent completion status or variant coverage differs")
+    return {"status": "independent_complete", "result": result,
+            "historical_labels": "Six AI-generated annotations remain separate and preserved",
+            "trust_boundary": "Artifact bindings and explicit owner confirmation are verified; machine checks cannot attest a person's identity."}
 
 
 def validate_evidence(root: Path) -> dict[str, Any]:
@@ -847,6 +951,8 @@ def validate_evidence(root: Path) -> dict[str, Any]:
         except (FileNotFoundError, PendingEvidence) as exc:
             reason = str(exc) if isinstance(exc, PendingEvidence) else "Required evidence artifact is missing"
             criteria[name] = {"status": "pending", "reason": reason}
+            if isinstance(exc, PendingEvidence) and exc.code is not None:
+                criteria[name]["pending_code"] = exc.code
         except (ValueError, TypeError, KeyError, IndexError, OSError) as exc:
             criteria[name] = {"status": "fail", "reason": f"{type(exc).__name__}: {exc}"}
     statuses = {value["status"] for value in criteria.values()}

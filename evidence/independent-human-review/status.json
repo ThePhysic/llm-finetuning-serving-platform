@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "seed": 20261103,
+  "selected_examples": 2,
+  "annotations_required": 6,
+  "packet_sha256": "ae2156f63c163eb06419f07b6da1a60022e07ad9c2a262c37b1e1bcb8eef8349",
+  "status": "pending",
+  "reviewer_type": "not_yet_supplied",
+  "independent_verification": "unverified"
+}

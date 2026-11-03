@@ -19,8 +19,9 @@ jobs:
           cache-dependency-path: requirements/cpu.lock
       - run: python -m pip install --require-hashes -r requirements/cpu.lock
       - run: python -m pip install --no-deps -e .
-      - run: ruff check src tests
+      - run: ruff check src tests scripts
       - run: pytest -q
       - run: llm-platform data verify data/triage-v3
       - run: llm-platform doctor
-      - run: llm-platform audit-evidence
+      # Preserve the external human-review gap without waiving any failed/other pending criterion.
+      - run: llm-platform audit-evidence --allow-expected-human-pending

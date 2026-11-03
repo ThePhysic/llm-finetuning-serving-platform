@@ -1,0 +1,9 @@
+{
+  "dataset_manifest_sha256": "855a9c6006d8fc440a09a7b4a122f6b40d6cb520b3acd8c7baed19f7a4bf7527",
+  "records": [
+    "api_failure-scenario-03-wording-3",
+    "unknown-scenario-05-wording-0"
+  ],
+  "policy": "Fixed category/tag selection; outputs and scores are not used to select examples.",
+  "scope": "Two independent families, six blinded responses; exploratory human review only."
+}

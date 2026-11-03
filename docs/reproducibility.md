@@ -224,7 +224,8 @@ Prepare the blinded review with a JSON mapping of run names to their outputs:
 
 ```bash
 llm-platform review prepare data/triage-v3 runtime/review-runs.json runtime/blinded-review
-llm-platform review import runtime/human-annotated.jsonl runtime/blinded-review/review_key.json runtime/human-results.json
+llm-platform review import runtime/human-annotated.jsonl runtime/blinded-review/review_key.json runtime/human-results.json \
+  --provenance runtime/blinded-review/reviewer-provenance.json
 ```
 
 Give only `review_packet.jsonl` and the rubric to the human reviewer; keep the key
@@ -234,13 +235,22 @@ types, not the humanity of a claimed reviewer. Preserve the annotated packet has
 and review provenance. Overall unsupported-claim and action-correctness metrics
 remain pending until this step is complete.
 
-The completed primary packet is `evidence/human-review/review_packet.jsonl`:
-two independent incident families and six responses displayed as A–F. The human
-project owner supplied the ratings directly while model identities were hidden.
-Original replies, `annotated.jsonl`, the validated aggregate, and reviewer
-provenance are preserved. Keys are published after completion for auditability.
-For a new blinded review, generate a fresh packet and keep its key separate until
-annotations are complete. The larger archived packet was not additionally reviewed.
+The historical packet `evidence/human-review/review_packet.jsonl` contains two
+families and six responses displayed as A–F. Its ratings were AI-generated/AI-assisted
+and pasted through the user; that does not establish independently performed human
+evaluation. Original replies, scores, packet, key and historical metadata are
+preserved byte-for-byte in the provenance-correction archive. The current report
+attributes them as AI-assisted and keeps independent-human estimates unavailable.
+
+The fresh `evidence/independent-human-review/review_packet.jsonl` uses two different
+held-out families selected without inspecting scores. Its annotation fields are
+empty until the owner actually reviews the responses. The model mapping stays
+local and ignored until judgments are complete; a published hash commits to it.
+Qualifying review requires explicit origin, submitter, reviewer type and an
+attestation of independent assessment. Pasted values or a reviewer-name string
+alone cannot establish human provenance. If AI assistance is used, preserve that
+fact and report those labels separately. See [review provenance](review-provenance.md).
+The larger original packet was not additionally reviewed.
 
 ## Evidence checklist
 

@@ -195,11 +195,13 @@ def prepare_review(dataset: Path, runs: Path, output: Path, sample_size: int = 1
 
 
 @review_app.command("import")
-def import_review(packet: Path, key: Path, output: Path):
+def import_review(packet: Path, key: Path, output: Path, provenance: Path | None = None):
     from .evaluation import import_human_review
     if output.exists():
         raise typer.BadParameter("Review output already exists")
-    report = import_human_review(packet, key)
+    if provenance is None:
+        raise typer.BadParameter("Supply --provenance with explicit annotation origin, submitter and independent-verification evidence")
+    report = import_human_review(packet, key, provenance)
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     emit(report)
@@ -212,14 +214,22 @@ def doctor():
 
 
 @app.command("audit-evidence")
-def audit_evidence(root: Path = Path(".")):
+def audit_evidence(root: Path = Path("."), allow_expected_human_pending: bool = False):
     """Check local evidence integrity; external approval/publication remain separate."""
     from .evidence import validate_evidence
     result = validate_evidence(root)
+    pending = {name for name, value in result["criteria"].items() if value["status"] == "pending"}
+    allowed = (allow_expected_human_pending and result["status"] == "pending" and pending == {"blinded_human_review"}
+               and result["criteria"]["blinded_human_review"].get("pending_code") == "independent_human_judgments_not_supplied"
+               and all(value["status"] in {"pass", "pending"} for value in result["criteria"].values()))
+    if allow_expected_human_pending:
+        result["ci_policy"] = {"expected_pending_allowed": allowed, "allowed_criterion": "blinded_human_review",
+                               "allowed_pending_code": "independent_human_judgments_not_supplied",
+                               "raw_status": result["status"], "acceptance_complete": result["status"] == "pass"}
     emit(result)
     if result["status"] == "fail":
         raise typer.Exit(code=1)
-    if result["status"] == "pending":
+    if result["status"] == "pending" and not allowed:
         raise typer.Exit(code=2)
 
 

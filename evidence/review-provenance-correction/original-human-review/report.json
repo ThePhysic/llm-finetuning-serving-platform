@@ -1,0 +1,33 @@
+{
+  "status": "complete",
+  "annotated_packet_sha256": "22766a707bd13be43e3fa21a0515c4f2e1e684be7301d9a53adbdc92d75e9fea",
+  "runs": {
+    "prompted": {
+      "reviewed_examples": 2,
+      "action_correctness": 0.5,
+      "summary_faithfulness": 0.5,
+      "unsupported_claim_rate": 0.4444444444444444,
+      "reviewers": [
+        "human-project-owner"
+      ]
+    },
+    "lora": {
+      "reviewed_examples": 2,
+      "action_correctness": 0.5,
+      "summary_faithfulness": 1,
+      "unsupported_claim_rate": 0.0,
+      "reviewers": [
+        "human-project-owner"
+      ]
+    },
+    "zero_shot": {
+      "reviewed_examples": 2,
+      "action_correctness": 0,
+      "summary_faithfulness": 0.5,
+      "unsupported_claim_rate": 0.375,
+      "reviewers": [
+        "human-project-owner"
+      ]
+    }
+  }
+}

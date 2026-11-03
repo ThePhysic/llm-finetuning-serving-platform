@@ -4,7 +4,9 @@
 |---|---|
 | `training/`, `adapter-package/` | Actual 80-step CUDA LoRA run, exported adapter, configuration, byte hashes and provenance. |
 | `evaluation/`, `quality-comparison.json` | Frozen 40-incident plus eight-regression comparisons. Historical quality decoding is disclosed separately. |
-| `human-review/` | Six actual human ratings, two incidents, model identities hidden until completion; original replies, packet, key and aggregate remain available. |
+| `human-review/` | Six historical AI-generated/AI-assisted ratings submitted through the user; original scores retained, current attribution corrected. This is not completed independent-human review. |
+| `review-provenance-correction/` | Byte-preserved historical attribution and the correction that supersedes its human-completion claims. |
+| `independent-human-review/` | Fresh blinded packet from two different held-out families. Qualifying judgments are pending; its identity key stays local until completion. |
 | `execution-source/`, `execution-provenance.json` | Explicitly retrospective reconstruction of the quality process's startup source; later disk observations remain unchanged in raw manifests. |
 | `serving/` | Completed authoritative 28-run serving matrix, including twelve precision-corrected adapter replacements. The amendment binds the original archive and new raw observations. |
 | `startup/` | Clean paired fresh-process first-load and same-process warm-reload measurements. Local weight cache and uncontrolled OS cache are disclosed. |
@@ -36,3 +38,8 @@ human interaction, independent review and live publication checks.
 
 [The results report](../docs/results.md) summarizes the completed measurements,
 negative outcomes and validation scopes without replacing the raw records.
+
+Historical audit exports and review verdicts that called the original six labels
+independent human evidence are superseded by [the attribution correction](../docs/review-provenance.md).
+The current audit retains independent-human review as pending until qualifying
+judgments and provenance exist; successful integrity checks alone cannot supply them.

@@ -1,5 +1,11 @@
 # Follow-up bug and evidence audit
 
+Later provenance correction: the six historical ratings were AI-generated/AI-assisted
+and pasted through the user. The earlier human-completion claims in this audit's
+supporting exports and review are superseded by [the correction](review-provenance.md).
+Independent-human acceptance is pending; the original score and experiment records
+remain unchanged.
+
 The follow-up audit starts from published commit
 `5e130eb18f8506d7bcd1855a198a4ecc9a576208`. Passing tests and the earlier review
 did not rule out additional defects. Independent adversarial probes found the
@@ -63,7 +69,7 @@ vulnerabilities are fixed or that the project is free of bugs.
 | Full Linux suite, CUDA hidden | 338 passed; three expected PEFT tiny-CPU-model warnings |
 | Full Windows suite, CUDA hidden | 333 passed; five platform/privilege or missing optional training-dependency skips |
 | Ruff over source, tests and scripts | Passed |
-| Offline evidence audit | All eleven criteria passed |
+| Offline evidence audit | Historical export reported eleven passes; its independent-human completion claim is superseded and now pending |
 | Lossless historical rescore | All 144 generations unchanged across all eight score sections |
 | Rebuilt CPU container | Build, doctor, authenticated HTTP controls and graceful exit 0 passed |
 | Real GPU HTTP smoke | Transformers and vLLM adapter sync/SSE passed at source `030d61d` |
@@ -73,4 +79,5 @@ vulnerabilities are fixed or that the project is free of bugs.
 results. The [new independent Astra review](../evidence/review/post-release.md)
 addresses the discovered project-code defects and retained dependency risks.
 The original validation records and earlier verdict describe their original
-review scopes; they do not override the later findings or certify production security.
+review scopes; they do not override the later findings, corrected annotation origin,
+or pending independent review, and do not certify production security.

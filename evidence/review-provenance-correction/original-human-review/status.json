@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "seed": 42,
+  "selected_examples": 2,
+  "annotations_required": 6,
+  "packet_sha256": "916fbb73a59fc07ee76bddda52e9eee854393cb654ae655a8b3d05aae13792a1",
+  "status": "complete",
+  "annotations_received": 6,
+  "annotated_packet_sha256": "22766a707bd13be43e3fa21a0515c4f2e1e684be7301d9a53adbdc92d75e9fea",
+  "report_sha256": "b48118221b373d14d2736c9b70970c42f77b45af85aabdd662e19144eb765abd",
+  "reviewer_provenance": "reviewer-provenance.json"
+}

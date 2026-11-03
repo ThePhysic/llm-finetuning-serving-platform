@@ -6,7 +6,7 @@ import json
 import pytest
 
 from llm_platform.contracts import GenerationConfig, TokenChunk
-from llm_platform.data import load_records, write_jsonl
+from llm_platform.data import content_hash, file_hash, load_records, write_jsonl
 from llm_platform.evaluation import (evaluate_records, import_human_review, make_blinded_review,
                                     run_evaluation, score_example, wilson_interval)
 from llm_platform.prompts import messages_for, prompt_identity
@@ -74,7 +74,7 @@ def test_human_packet_requires_actual_labels_and_preserves_blind_content(tmp_pat
     path = tmp_path / "review" / "review_packet.jsonl"
     key = tmp_path / "review" / "review_key.json"
     assert '"run"' not in path.read_text(encoding="utf-8")
-    with pytest.raises(ValueError, match="human reviewer"):
+    with pytest.raises(ValueError, match="reviewer label"):
         import_human_review(path, key)
     packet = load_records(path)
     for row in packet:
@@ -82,12 +82,138 @@ def test_human_packet_requires_actual_labels_and_preserves_blind_content(tmp_pat
                              "unsupported_claims": 1, "total_claims": 4, "summary_faithful": False}
     annotated = tmp_path / "annotated.jsonl"
     write_jsonl(annotated, packet)
-    report = import_human_review(annotated, key)
-    assert report["runs"]["base"]["unsupported_claim_rate"] == 0.25
+    with pytest.raises(ValueError, match="Explicit annotation provenance"):
+        import_human_review(annotated, key)
+    provenance = write_review_provenance(annotated, key)
+    report = import_human_review(annotated, key, provenance)
+    assert report["status"] == "ai_assisted"
+    assert report["ai_assisted_runs"]["base"]["unsupported_claim_rate"] == 0.25
+    assert report["independent_human_runs"] == {}
     packet[0]["output"] = "changed to hide a failure"
     write_jsonl(annotated, packet)
     with pytest.raises(ValueError, match="changed"):
-        import_human_review(annotated, key)
+        import_human_review(annotated, key, provenance)
+
+
+def write_review_provenance(annotated, key, independent=False):
+    directory = key.parent
+    packet = load_records(annotated)
+    source = directory / "fixture-source.json"
+    source.write_text(json.dumps({"fixture_only": True, "response": "Unit-test provenance input; not actual independent review."}), encoding="utf-8")
+    origin = "human_authored" if independent else "ai_generated"
+    provenance = {"schema_version": 2, "submitter": "test-submitter", "annotation_origin": origin,
+                  "reviewer_type": "independent_human" if independent else "ai_assisted",
+                  "independent_verification": "verified_by_human" if independent else "unverified",
+                  "review_status": "independent_complete" if independent else "ai_assisted",
+                  "source_type": "direct_human_assessment" if independent else "ai_generated_pasted_by_submitter",
+                  "source_ids": ["fixture"], "source_records": [{"id": "fixture", "path": source.name,
+                                                                    "sha256": file_hash(source), "annotation_origin": origin}],
+                  "artifact_bindings": {"annotated_packet_sha256": file_hash(annotated), "review_key_sha256": file_hash(key),
+                                        "review_packet_sha256": json.loads(key.read_text())["packet_sha256"]},
+                  "independent_confirmation": None}
+    if independent:
+        confirmation = directory / "fixture-confirmation.json"
+        confirmation.write_text(json.dumps({"reviewer_id": packet[0]["annotation"]["reviewer"],
+                                           "personally_assessed_each_response": True, "used_ai_generated_scores": False,
+                                           "statement": "Unit-test simulation of an explicit independent assessment statement.",
+                                           "blind_ids": [row["blind_id"] for row in packet],
+                                           "annotated_packet_sha256": file_hash(annotated),
+                                           "source_records_sha256": content_hash({source["id"]: source["sha256"]
+                                                                                   for source in provenance["source_records"]})}), encoding="utf-8")
+        provenance["independent_confirmation"] = {"path": confirmation.name, "sha256": file_hash(confirmation)}
+    path = directory / "fixture-provenance.json"
+    path.write_text(json.dumps(provenance), encoding="utf-8")
+    return path
+
+
+def complete_fixture_packet(tmp_path):
+    rows = generate_records()[:2]
+    outputs = [{"id": row["id"], "output": json.dumps(row["target"])} for row in rows]
+    directory = tmp_path / "review"
+    make_blinded_review(rows, {"base": outputs, "adapter": outputs}, directory, sample_size=2)
+    packet = load_records(directory / "review_packet.jsonl")
+    for row in packet:
+        row["annotation"] = {"reviewer": "fixture-reviewer", "action_correctness": 0.5, "summary_faithful": True,
+                             "unsupported_claims": 0, "total_claims": 2}
+    annotated = directory / "annotated.jsonl"
+    write_jsonl(annotated, packet)
+    return annotated, directory / "review_key.json"
+
+
+@pytest.mark.parametrize("change", [{"reviewer_type": "independent_human"}, {"independent_verification": "verified_by_human"},
+                                    {"review_status": "independent_complete"}, {"annotation_origin": "human_authored"}])
+def test_ai_labels_cannot_be_laundered_by_changing_reviewer_fields(tmp_path, change):
+    annotated, key = complete_fixture_packet(tmp_path)
+    path = write_review_provenance(annotated, key)
+    provenance = json.loads(path.read_text())
+    provenance.update(change)
+    path.write_text(json.dumps(provenance), encoding="utf-8")
+    with pytest.raises(ValueError, match="AI-origin|Inconsistent|disagree"):
+        import_human_review(annotated, key, path)
+
+
+def test_independent_fixture_needs_explicit_bound_confirmation_and_empty_original_packet(tmp_path):
+    annotated, key = complete_fixture_packet(tmp_path)
+    path = write_review_provenance(annotated, key, independent=True)
+    result = import_human_review(annotated, key, path)
+    assert result["status"] == "independent_complete"
+    assert result["ai_assisted_runs"] == {}
+    provenance = json.loads(path.read_text())
+    provenance["independent_confirmation"] = None
+    path.write_text(json.dumps(provenance), encoding="utf-8")
+    with pytest.raises(ValueError, match="explicit, bound human assessment confirmation"):
+        import_human_review(annotated, key, path)
+
+
+def test_mixed_annotations_keep_ai_and_human_aggregates_separate(tmp_path):
+    annotated, key = complete_fixture_packet(tmp_path)
+    path = write_review_provenance(annotated, key, independent=True)
+    provenance = json.loads(path.read_text())
+    source = key.parent / "ai-source.json"
+    source.write_text('{"fixture_only":true,"origin":"ai"}', encoding="utf-8")
+    provenance["source_records"].append({"id": "ai", "path": source.name, "sha256": file_hash(source), "annotation_origin": "ai_generated"})
+    confirmation = key.parent / provenance["independent_confirmation"]["path"]
+    confirmation_data = json.loads(confirmation.read_text())
+    confirmation_data["source_records_sha256"] = content_hash({source["id"]: source["sha256"] for source in provenance["source_records"]})
+    confirmation.write_text(json.dumps(confirmation_data), encoding="utf-8")
+    provenance["independent_confirmation"]["sha256"] = file_hash(confirmation)
+    first = load_records(annotated)[0]["blind_id"]
+    provenance["annotations"] = {first: {"annotation_origin": "ai_generated", "reviewer_type": "ai_assisted",
+                                        "independent_verification": "unverified", "review_status": "ai_assisted",
+                                        "source_type": "ai_generated_pasted_by_submitter", "source_ids": ["ai"]}}
+    path.write_text(json.dumps(provenance), encoding="utf-8")
+    report = import_human_review(annotated, key, path)
+    assert report["status"] == "mixed"
+    assert report["classification_counts"] == {"ai_assisted": 1, "independent_human": 3, "unverified": 0}
+    assert sum(row["reviewed_examples"] for row in report["ai_assisted_runs"].values()) == 1
+    assert sum(row["reviewed_examples"] for row in report["independent_human_runs"].values()) == 3
+    assert report["independent_human_review"]["status"] == "pending"
+
+
+def test_changed_ratings_cannot_reuse_original_independent_confirmation(tmp_path):
+    annotated, key = complete_fixture_packet(tmp_path)
+    path = write_review_provenance(annotated, key, independent=True)
+    assert import_human_review(annotated, key, path)["status"] == "independent_complete"
+    packet = load_records(annotated)
+    packet[0]["annotation"]["action_correctness"] = 1
+    write_jsonl(annotated, packet)
+    provenance = json.loads(path.read_text())
+    provenance["artifact_bindings"]["annotated_packet_sha256"] = file_hash(annotated)
+    path.write_text(json.dumps(provenance), encoding="utf-8")
+    with pytest.raises(ValueError, match="confirmation must bind the exact annotation packet"):
+        import_human_review(annotated, key, path)
+
+
+def test_changed_raw_source_cannot_reuse_original_independent_confirmation(tmp_path):
+    annotated, key = complete_fixture_packet(tmp_path)
+    path = write_review_provenance(annotated, key, independent=True)
+    provenance = json.loads(path.read_text())
+    source = key.parent / provenance["source_records"][0]["path"]
+    source.write_text('{"fixture_only":true,"response":"changed after confirmation"}', encoding="utf-8")
+    provenance["source_records"][0]["sha256"] = file_hash(source)
+    path.write_text(json.dumps(provenance), encoding="utf-8")
+    with pytest.raises(ValueError, match="confirmation must bind the exact annotation packet"):
+        import_human_review(annotated, key, path)
 
 
 @pytest.mark.asyncio

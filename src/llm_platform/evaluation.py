@@ -373,14 +373,83 @@ def make_blinded_review(records: list[dict[str, Any]], runs: dict[str, list[dict
                 "content_hashes": {row["blind_id"]: content_hash({k: v for k, v in row.items() if k != "annotation"})
                                    for row in packet}}
     (destination / "review_key.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+    protocol = {"schema_version": 2, "status": "unannotated", "purpose": "Independent human judgments requested; no scores supplied",
+                "review_packet_sha256": manifest["packet_sha256"], "review_key_sha256": file_hash(destination / "review_key.json"),
+                "independent_human_review": "pending", "annotation_origin": "not_yet_supplied"}
+    (destination / "review_protocol.json").write_text(json.dumps(protocol, indent=2) + "\n", encoding="utf-8")
     return {key: value for key, value in manifest.items() if key not in {"mapping", "content_hashes"}}
 
 
-def import_human_review(annotated_packet: Path, key_path: Path) -> dict[str, Any]:
+def _review_source(directory: Path, entry: dict[str, Any]) -> dict[str, Any]:
+    if not isinstance(entry, dict):
+        raise ValueError("Review provenance source must be an object")
+    name = entry.get("path")
+    if (not isinstance(name, str) or not name or "\\" in name or ":" in name
+            or any(part in {"", ".", ".."} for part in name.split("/"))):
+        raise ValueError("Review provenance sources must use safe relative paths")
+    path = directory / name
+    if path.is_symlink() or not path.resolve().is_relative_to(directory.resolve()) or not path.is_file():
+        raise ValueError("Review provenance source is missing or unsafe")
+    if file_hash(path) != entry.get("sha256"):
+        raise ValueError("Review provenance source hash differs")
+    return strict_json_loads(path.read_text(encoding="utf-8"))
+
+
+def _classify_review(provenance: dict[str, Any], source_records: dict[str, dict[str, Any]],
+                     confirmation: dict[str, Any] | None, blind_id: str, reviewer: str) -> str:
+    origin = provenance.get("annotation_origin")
+    reviewer_type = provenance.get("reviewer_type")
+    verification = provenance.get("independent_verification")
+    status = provenance.get("review_status")
+    source_type = provenance.get("source_type")
+    source_ids = provenance.get("source_ids")
+    if (not isinstance(source_ids, list) or not source_ids
+            or any(not isinstance(identity, str) or identity not in source_records for identity in source_ids)):
+        raise ValueError("Every annotation needs bound provenance sources")
+    origins = {source_records[identity].get("annotation_origin") for identity in source_ids}
+    if origin in {"ai_generated", "ai_assisted"}:
+        if (reviewer_type != "ai_assisted" or verification != "unverified" or status != "ai_assisted"
+                or source_type != "ai_generated_pasted_by_submitter" or not origins <= {"ai_generated", "ai_assisted"}):
+            raise ValueError("AI-origin labels cannot be imported as independently verified human review")
+        return "ai_assisted"
+    if origin == "human_authored" and reviewer_type == "independent_human":
+        if (verification != "verified_by_human" or status != "independent_complete"
+                or source_type != "direct_human_assessment" or origins != {"human_authored"}):
+            raise ValueError("Independent-human type, origin, source and verification disagree")
+        if (not isinstance(confirmation, dict) or confirmation.get("reviewer_id") != reviewer
+                or confirmation.get("personally_assessed_each_response") is not True
+                or confirmation.get("used_ai_generated_scores") is not False
+                or not isinstance(confirmation.get("statement"), str) or not confirmation["statement"].strip()
+                or blind_id not in confirmation.get("blind_ids", [])):
+            raise ValueError("Independent review requires explicit, bound human assessment confirmation; pasted scores are insufficient")
+        return "independent_human"
+    if (origin == "unknown" and reviewer_type == "unverified" and verification == "unverified"
+            and status == "unverified" and source_type == "unverified"):
+        return "unverified"
+    raise ValueError("Inconsistent or unsupported annotation provenance")
+
+
+def _aggregate_review(grouped: dict[str, list[dict[str, Any]]]) -> dict[str, Any]:
+    return {name: {"reviewed_examples": len(rows),
+                   "action_correctness": statistics.mean(row["action_correctness"] for row in rows),
+                   "summary_faithfulness": statistics.mean(row["summary_faithful"] for row in rows),
+                   "unsupported_claim_rate": (sum(row["unsupported_claims"] for row in rows)
+                                              / sum(row["total_claims"] for row in rows)
+                                              if sum(row["total_claims"] for row in rows) else None),
+                   "recorded_reviewer_labels": sorted({row["reviewer"] for row in rows})}
+            for name, rows in grouped.items()}
+
+
+def import_human_review(annotated_packet: Path, key_path: Path,
+                        provenance_path: Path | None = None) -> dict[str, Any]:
+    """Import scores only with explicit origin; reviewer strings never establish humanity."""
     from llm_platform.data import load_records
     packet = load_records(annotated_packet)
-    key = json.loads(Path(key_path).read_text(encoding="utf-8"))
-    seen, grouped = set(), defaultdict(list)
+    if not packet:
+        raise ValueError("Review packet must contain annotations")
+    key_path = Path(key_path)
+    key = strict_json_loads(key_path.read_text(encoding="utf-8"))
+    seen = set()
     for row in packet:
         identity = row.get("blind_id")
         if identity not in key["mapping"] or identity in seen:
@@ -389,25 +458,79 @@ def import_human_review(annotated_packet: Path, key_path: Path) -> dict[str, Any
         if content_hash({k: v for k, v in row.items() if k != "annotation"}) != key["content_hashes"][identity]:
             raise ValueError("review prompt/reference/output changed")
         annotation = row.get("annotation", {})
+        if not isinstance(annotation, dict):
+            raise ValueError("Review annotation must be an object")
         reviewer = annotation.get("reviewer")
         action = annotation.get("action_correctness")
         unsupported, total = annotation.get("unsupported_claims"), annotation.get("total_claims")
         if (not isinstance(reviewer, str) or not reviewer.strip()
                 or type(action) not in {int, float} or action not in {0, 0.5, 1}):
-            raise ValueError("human reviewer and action correctness score 0/0.5/1 are required")
+            raise ValueError("recorded reviewer label and action correctness score 0/0.5/1 are required")
         if type(unsupported) is not int or type(total) is not int or not 0 <= unsupported <= total:
             raise ValueError("human claim counts must be nonnegative integers with unsupported <= total")
         if type(annotation.get("summary_faithful")) is not bool:
             raise ValueError("human summary_faithful judgment must be boolean")
-        grouped[key["mapping"][identity]["run"]].append(annotation)
     if seen != set(key["mapping"]):
         raise ValueError("human review must annotate the complete blinded packet")
-    return {"status": "complete", "annotated_packet_sha256": file_hash(annotated_packet),
-            "runs": {name: {"reviewed_examples": len(rows),
-                            "action_correctness": statistics.mean(row["action_correctness"] for row in rows),
-                            "summary_faithfulness": statistics.mean(row["summary_faithful"] for row in rows),
-                            "unsupported_claim_rate": (sum(row["unsupported_claims"] for row in rows)
-                                                       / sum(row["total_claims"] for row in rows)
-                                                       if sum(row["total_claims"] for row in rows) else None),
-                            "reviewers": sorted({row["reviewer"] for row in rows})}
-                     for name, rows in grouped.items()}}
+    if provenance_path is None:
+        raise ValueError("Explicit annotation provenance is required; a reviewer label or pasted scores cannot establish independent human review")
+    provenance_path = Path(provenance_path)
+    provenance = strict_json_loads(provenance_path.read_text(encoding="utf-8"))
+    if (not isinstance(provenance, dict) or provenance.get("schema_version") != 2 or not isinstance(provenance.get("submitter"), str)
+            or not provenance["submitter"].strip()):
+        raise ValueError("Review provenance requires schema version 2 and a separate submitter")
+    bindings = provenance.get("artifact_bindings")
+    expected = {"annotated_packet_sha256": file_hash(annotated_packet), "review_key_sha256": file_hash(key_path),
+                "review_packet_sha256": key["packet_sha256"]}
+    if bindings != expected:
+        raise ValueError("Review provenance artifact bindings differ")
+    sources = provenance.get("source_records")
+    if not isinstance(sources, list) or not sources:
+        raise ValueError("Review provenance requires preserved source records")
+    source_records = {}
+    for source in sources:
+        if not isinstance(source, dict):
+            raise ValueError("Review provenance source must be an object")
+        identity = source.get("id")
+        if not isinstance(identity, str) or not identity or identity in source_records:
+            raise ValueError("Review source identifiers must be unique strings")
+        contents = _review_source(provenance_path.parent, source)
+        source_records[identity] = {**source, "_contents": contents}
+    confirmation = None
+    if provenance.get("independent_confirmation") is not None:
+        confirmation = _review_source(provenance_path.parent, provenance["independent_confirmation"])
+        source_hashes = {identity: source["sha256"] for identity, source in source_records.items()}
+        if (not isinstance(confirmation, dict) or confirmation.get("annotated_packet_sha256") != expected["annotated_packet_sha256"]
+                or confirmation.get("source_records_sha256") != content_hash(source_hashes)):
+            raise ValueError("Independent confirmation must bind the exact annotation packet and preserved source hashes")
+    grouped = {name: defaultdict(list) for name in ("ai_assisted", "independent_human", "unverified")}
+    overrides = provenance.get("annotations", {})
+    if not isinstance(overrides, dict) or set(overrides) - seen:
+        raise ValueError("Provenance annotation overrides contain unknown blind IDs")
+    categories = []
+    for row in packet:
+        identity = row["blind_id"]
+        attribution = {**provenance, **overrides.get(identity, {})}
+        category = _classify_review(attribution, source_records, confirmation, identity, row["annotation"]["reviewer"])
+        categories.append(category)
+        grouped[category][key["mapping"][identity]["run"]].append(row["annotation"])
+    if "independent_human" in categories:
+        protocol_path = key_path.parent / "review_protocol.json"
+        protocol = strict_json_loads(protocol_path.read_text(encoding="utf-8"))
+        original = key_path.parent / "review_packet.jsonl"
+        if (protocol.get("status") != "unannotated" or protocol.get("review_packet_sha256") != key["packet_sha256"]
+                or protocol.get("review_key_sha256") != file_hash(key_path) or file_hash(original) != key["packet_sha256"]
+                or any(any(value is not None for value in row["annotation"].values()) for row in load_records(original))):
+            raise ValueError("Independent judgments require the original empty blinded packet and matching sealed-key commitment")
+    counts = {name: categories.count(name) for name in grouped}
+    distinct = set(categories)
+    status = "mixed" if len(distinct) > 1 else {"ai_assisted": "ai_assisted", "independent_human": "independent_complete", "unverified": "unverified"}[next(iter(distinct))]
+    return {"schema_version": 2, "status": status, **expected,
+            "annotation_provenance_sha256": file_hash(provenance_path), "submitter": provenance["submitter"],
+            "classification_counts": counts,
+            "ai_assisted_runs": _aggregate_review(grouped["ai_assisted"]),
+            "independent_human_runs": _aggregate_review(grouped["independent_human"]),
+            "unverified_runs": _aggregate_review(grouped["unverified"]),
+            "independent_human_review": {"status": "complete" if counts["independent_human"] == len(packet) else "pending",
+                                         "qualifying_annotations": counts["independent_human"], "annotations_required": len(packet)},
+            "verification_boundary": "Artifact consistency and explicit human confirmation are checked; JSON metadata cannot attest a person's identity or independence."}

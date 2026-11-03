@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "status": "corrected_attribution",
+  "annotation_origin": "ai_generated",
+  "submitter": "project_owner",
+  "reviewer_type": "ai_assisted",
+  "independent_verification": "unverified",
+  "independent_human_review": "pending",
+  "authoritative_handoff": "LLM Fine Tuning and Inference Serving Platform Codex Polish Handoff.md",
+  "archive_manifest_sha256": "254e49965ba55bb364bc4666d0e0901bcb2497bc7dda397350994b066cdf742b",
+  "original_tree_sha256": "532c599bd266d18cf237691ca15077445cf4a18383ce56184dfd22ad95cac382",
+  "unchanged_original_files": {
+    "annotated.jsonl": "22766a707bd13be43e3fa21a0515c4f2e1e684be7301d9a53adbdc92d75e9fea",
+    "display-map.json": "eaab96613eb54b24a95bdf2157055be976ea6f356ad760faf63fbce60c8ae5df",
+    "packet-status-at-creation.json": "cf18cfff34c339ff50d03dedc76c99fc477859082f2cb2d03fc4058e39abff3d",
+    "review_key.json": "616709974bd4c03798a09f48a3e4a8e6300153bb9b66e350da3cf95b8f24df6a",
+    "review_packet.jsonl": "916fbb73a59fc07ee76bddda52e9eee854393cb654ae655a8b3d05aae13792a1",
+    "selection.json": "df64ba15a1fcc470d575fe6814de2ada8bd56696f3087edd015f0c5105f2b090",
+    "user-response-1.json": "be12f3cad3864512951103b19e3d3dbbc8e2bcda87fd145020377030373ffe65",
+    "user-response-2.json": "d386102b852ca33ffe0cfd5468d33ed9b0c9716c0f700c963e54b72a76bccf16"
+  },
+  "corrected_current_files": {
+    "reviewer-provenance.json": "4820a6a429e6ed043ff5976f13974b4cf54b9debe4014dbd99ae7e1e1a15c499",
+    "report.json": "d69be7fd8c606b87bb7bc24d33c2c3961524e966cc8bc589932cda21756b7bce",
+    "status.json": "8af589f5f1e1ec77c6ead291e9b5480c6b68899093d76019e9d0ed1e35e14016"
+  },
+  "supersedes": [
+    "Original six-label attribution as independently human-reviewed",
+    "Historical audit/report statements that counted those labels as completed independent human review"
+  ],
+  "preservation": "Historical files are retained as records of what was claimed; this correction does not silently rewrite old review, training, quality or benchmark reports.",
+  "fresh_review": "evidence/independent-human-review",
+  "fresh_review_status": "pending_unannotated"
+}

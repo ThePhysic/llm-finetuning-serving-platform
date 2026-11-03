@@ -4,9 +4,15 @@
   "selected_examples": 2,
   "annotations_required": 6,
   "packet_sha256": "916fbb73a59fc07ee76bddda52e9eee854393cb654ae655a8b3d05aae13792a1",
-  "status": "complete",
+  "status": "ai_assisted",
   "annotations_received": 6,
   "annotated_packet_sha256": "22766a707bd13be43e3fa21a0515c4f2e1e684be7301d9a53adbdc92d75e9fea",
-  "report_sha256": "b48118221b373d14d2736c9b70970c42f77b45af85aabdd662e19144eb765abd",
-  "reviewer_provenance": "reviewer-provenance.json"
+  "report_sha256": "d69be7fd8c606b87bb7bc24d33c2c3961524e966cc8bc589932cda21756b7bce",
+  "reviewer_provenance": "reviewer-provenance.json",
+  "annotation_origin": "ai_generated",
+  "submitter": "project_owner",
+  "reviewer_type": "ai_assisted",
+  "independent_verification": "unverified",
+  "independent_human_review": "pending",
+  "reviewer_provenance_sha256": "4820a6a429e6ed043ff5976f13974b4cf54b9debe4014dbd99ae7e1e1a15c499"
 }

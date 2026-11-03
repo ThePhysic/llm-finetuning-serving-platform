@@ -144,3 +144,50 @@ def test_package_base_rejects_named_templates_before_any_save(tmp_path, monkeypa
     with pytest.raises(ValueError, match="string chat template"):
         package_base(tmp_path / "package")
     assert not (tmp_path / "package").exists()
+
+
+def test_review_import_requires_structured_provenance_not_a_reviewer_label(tmp_path):
+    result = runner.invoke(app, ["review", "import", str(tmp_path / "packet.jsonl"), str(tmp_path / "key.json"),
+                                 str(tmp_path / "result.json")])
+    assert result.exit_code != 0
+    assert "--provenance" in result.output
+    assert not (tmp_path / "result.json").exists()
+
+
+def test_expected_human_pending_exit_policy_preserves_raw_pending_status(tmp_path, monkeypatch):
+    import llm_platform.evidence
+
+    report = {"status": "pending", "criteria": {"model_quality": {"status": "pass"}, "blinded_human_review": {
+        "status": "pending", "pending_code": "independent_human_judgments_not_supplied"}}}
+    monkeypatch.setattr(llm_platform.evidence, "validate_evidence", lambda root: report.copy())
+    ordinary = runner.invoke(app, ["audit-evidence", "--root", str(tmp_path)])
+    assert ordinary.exit_code == 2
+    allowed = runner.invoke(app, ["audit-evidence", "--root", str(tmp_path), "--allow-expected-human-pending"])
+    assert allowed.exit_code == 0
+    result = json.loads(allowed.stdout)
+    assert result["status"] == "pending"
+    assert result["ci_policy"]["expected_pending_allowed"] is True
+    assert result["ci_policy"]["acceptance_complete"] is False
+
+
+@pytest.mark.parametrize("pending_code", [None, "required_artifact_missing", "missing_review_protocol", ""])
+def test_expected_human_pending_does_not_waive_missing_provenance_or_protocol(tmp_path, monkeypatch, pending_code):
+    import llm_platform.evidence
+
+    report = {"status": "pending", "criteria": {"model_quality": {"status": "pass"}, "blinded_human_review": {
+        "status": "pending", "reason": "Required evidence artifact is missing", "pending_code": pending_code}}}
+    monkeypatch.setattr(llm_platform.evidence, "validate_evidence", lambda root: report.copy())
+    result = runner.invoke(app, ["audit-evidence", "--root", str(tmp_path), "--allow-expected-human-pending"])
+    assert result.exit_code == 2
+    assert json.loads(result.stdout)["ci_policy"]["expected_pending_allowed"] is False
+
+
+@pytest.mark.parametrize("extra_status,overall,expected", [("pending", "pending", 2), ("fail", "fail", 1)])
+def test_human_pending_policy_does_not_waive_other_missing_or_failed_evidence(tmp_path, monkeypatch, extra_status, overall, expected):
+    import llm_platform.evidence
+
+    report = {"status": overall, "criteria": {"gpu_training": {"status": extra_status}, "blinded_human_review": {"status": "pending"}}}
+    monkeypatch.setattr(llm_platform.evidence, "validate_evidence", lambda root: report.copy())
+    result = runner.invoke(app, ["audit-evidence", "--root", str(tmp_path), "--allow-expected-human-pending"])
+    assert result.exit_code == expected
+    assert json.loads(result.stdout)["ci_policy"]["expected_pending_allowed"] is False

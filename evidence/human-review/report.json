@@ -1,13 +1,23 @@
 {
-  "status": "complete",
+  "schema_version": 2,
+  "status": "ai_assisted",
   "annotated_packet_sha256": "22766a707bd13be43e3fa21a0515c4f2e1e684be7301d9a53adbdc92d75e9fea",
-  "runs": {
+  "review_key_sha256": "616709974bd4c03798a09f48a3e4a8e6300153bb9b66e350da3cf95b8f24df6a",
+  "review_packet_sha256": "916fbb73a59fc07ee76bddda52e9eee854393cb654ae655a8b3d05aae13792a1",
+  "annotation_provenance_sha256": "4820a6a429e6ed043ff5976f13974b4cf54b9debe4014dbd99ae7e1e1a15c499",
+  "submitter": "project_owner",
+  "classification_counts": {
+    "ai_assisted": 6,
+    "independent_human": 0,
+    "unverified": 0
+  },
+  "ai_assisted_runs": {
     "prompted": {
       "reviewed_examples": 2,
       "action_correctness": 0.5,
       "summary_faithfulness": 0.5,
       "unsupported_claim_rate": 0.4444444444444444,
-      "reviewers": [
+      "recorded_reviewer_labels": [
         "human-project-owner"
       ]
     },
@@ -16,7 +26,7 @@
       "action_correctness": 0.5,
       "summary_faithfulness": 1,
       "unsupported_claim_rate": 0.0,
-      "reviewers": [
+      "recorded_reviewer_labels": [
         "human-project-owner"
       ]
     },
@@ -25,9 +35,17 @@
       "action_correctness": 0,
       "summary_faithfulness": 0.5,
       "unsupported_claim_rate": 0.375,
-      "reviewers": [
+      "recorded_reviewer_labels": [
         "human-project-owner"
       ]
     }
-  }
+  },
+  "independent_human_runs": {},
+  "unverified_runs": {},
+  "independent_human_review": {
+    "status": "pending",
+    "qualifying_annotations": 0,
+    "annotations_required": 6
+  },
+  "verification_boundary": "Artifact consistency and explicit human confirmation are checked; JSON metadata cannot attest a person's identity or independence."
 }

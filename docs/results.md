@@ -35,12 +35,15 @@ preserve uncertainty, faithfulness, actions, escalation, slices and failures.
 Historical quality decoding differs from the current serving policy, as
 disclosed in the [decoding addendum](../evidence/quality-decoding-addendum.json).
 
-The project owner rated six blinded responses across two selected incidents.
-Mean action scores were 0 for zero-shot and 0.5 for both prompting and LoRA.
-LoRA's two summaries were judged supported; its unsupported-claim count was zero
-in this subset. Two cases cannot establish a general hallucination rate or
-safety advantage. The [human report](../evidence/human-review/report.json)
-links to the packet, separate identity key, original replies and provenance.
+Six historical A–F scores were AI-generated/AI-assisted and submitted through the
+project owner. Their AI-assisted action averages remain 0 for zero-shot and 0.5
+for both prompting and LoRA; these are not independent human judgments. Independent
+human action correctness, summary faithfulness and unsupported-claim estimates
+remain unavailable pending a fresh review. The
+[corrected annotation report](../evidence/human-review/report.json) and
+[provenance correction](review-provenance.md) preserve the original values and
+explain the new attribution. A fresh blinded packet uses two previously unshown
+families; its model mapping remains local until judgments are complete.
 
 ## Serving and optimization
 
@@ -90,6 +93,11 @@ exact preserved bytes, source identities and valid replacements.
 
 ## Reliability and validation
 
+The table preserves the original release's validation scope. Current polish
+checks and container/dependency outcomes are reported in the
+[polish handoff](polish-handoff.md); old exported pass flags do not override the
+annotation provenance correction.
+
 Actual loaded-model HTTP checks exercised synchronous and streamed generation,
 authentication, bounded inputs, promotion, rollback, corrupt-candidate rejection,
 client cancellation, overload refusal, recovery, metrics and graceful shutdown.
@@ -101,7 +109,7 @@ unit tests and throughput runs.
 | Linux CPU suite, CUDA hidden | 215 passed |
 | Windows CPU suite | 213 passed, 2 platform/privilege skips |
 | Ruff | Passed |
-| Offline evidence consistency audit | All 11 criteria passed |
+| Offline evidence consistency audit | Historical export reported all 11 passed; independent-human criterion is superseded and now pending |
 | Final CPU Docker build and doctor | Passed |
 | Real CPU-container HTTP control plane | Live 200, unloaded ready 503, unauthorized models 401, authorized models 200, metrics 200; graceful exit 0 |
 | GPU Docker image | Definition provided; build and execution unverified |
@@ -113,3 +121,9 @@ physical execution, human identity, independent review or live GitHub privacy.
 The requested Astra medium review is recorded separately under
 [review](../evidence/review/), and publication requires live private-repository
 and remote-commit verification.
+
+Historical audit exports and Astra reviews contain the earlier unsupported human
+attribution. They remain unchanged as records of those checks; the
+[provenance correction](review-provenance.md) overrides their independent-human
+completion claim. The current audit must retain that criterion as pending until
+qualifying judgments exist. Historical model/performance measurements are unchanged.

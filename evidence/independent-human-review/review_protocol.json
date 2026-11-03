@@ -1,0 +1,9 @@
+{
+  "schema_version": 2,
+  "status": "unannotated",
+  "purpose": "Independent human judgments requested; no scores supplied",
+  "review_packet_sha256": "ae2156f63c163eb06419f07b6da1a60022e07ad9c2a262c37b1e1bcb8eef8349",
+  "review_key_sha256": "a01c9d8528fed69079e6b77da58dec1a5c2518a0da4bd61e75ded9d930c941ac",
+  "independent_human_review": "pending",
+  "annotation_origin": "not_yet_supplied"
+}

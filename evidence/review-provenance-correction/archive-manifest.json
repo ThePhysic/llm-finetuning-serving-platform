@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "original_source_commit": "c1a38281f6764e501c3c7ccf4265db83271a8dd9",
+  "archive": "evidence/review-provenance-correction/original-human-review",
+  "files_sha256": {
+    "annotated.jsonl": "22766a707bd13be43e3fa21a0515c4f2e1e684be7301d9a53adbdc92d75e9fea",
+    "display-map.json": "eaab96613eb54b24a95bdf2157055be976ea6f356ad760faf63fbce60c8ae5df",
+    "packet-status-at-creation.json": "cf18cfff34c339ff50d03dedc76c99fc477859082f2cb2d03fc4058e39abff3d",
+    "report.json": "b48118221b373d14d2736c9b70970c42f77b45af85aabdd662e19144eb765abd",
+    "reviewer-provenance.json": "90da41f7f10941db8c25f6e25c18ace92ea0751271d1f8d4ccacf6bb98826a28",
+    "review_key.json": "616709974bd4c03798a09f48a3e4a8e6300153bb9b66e350da3cf95b8f24df6a",
+    "review_packet.jsonl": "916fbb73a59fc07ee76bddda52e9eee854393cb654ae655a8b3d05aae13792a1",
+    "selection.json": "df64ba15a1fcc470d575fe6814de2ada8bd56696f3087edd015f0c5105f2b090",
+    "status.json": "78ba0de498161541caea2b107b01881529cb0bf57a336e9effd71e760220207c",
+    "user-response-1.json": "be12f3cad3864512951103b19e3d3dbbc8e2bcda87fd145020377030373ffe65",
+    "user-response-2.json": "d386102b852ca33ffe0cfd5468d33ed9b0c9716c0f700c963e54b72a76bccf16"
+  },
+  "tree_sha256": "532c599bd266d18cf237691ca15077445cf4a18383ce56184dfd22ad95cac382",
+  "preservation": "Exact original six-label files, scores, packet, key and historical attribution; superseded for provenance only"
+}
