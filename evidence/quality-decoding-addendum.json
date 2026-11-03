@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "kind": "retrospective provenance clarification; not a pre-frozen setting",
+  "quality_source_commit": "84a870010c85fbc66b893c0e884c59ada4ab20c2",
+  "base_revision": "7ae557604adf67be50417f59c2c2f167def9a775",
+  "publisher_generation_config_sha256": "e558847a8b4402616f1273797b015104dc266fe4b520056fca88823ba8f8ebe6",
+  "publisher_generation_config": {
+    "bos_token_id": 151643,
+    "pad_token_id": 151643,
+    "do_sample": true,
+    "eos_token_id": [
+      151645,
+      151643
+    ],
+    "repetition_penalty": 1.1,
+    "temperature": 0.7,
+    "top_p": 0.8,
+    "top_k": 20,
+    "transformers_version": "4.37.0"
+  },
+  "effective_quality_decoding": {
+    "max_new_tokens": 320,
+    "do_sample": false,
+    "seed": 42,
+    "repetition_penalty": 1.1,
+    "eos_token_id": [
+      151645,
+      151643
+    ],
+    "top_p": "ignored during greedy generation",
+    "top_k": "ignored during greedy generation",
+    "temperature": "request 0 selects do_sample=False; publisher sampling temperature is ignored"
+  },
+  "applies_to": [
+    "zero_shot",
+    "prompted",
+    "lora"
+  ],
+  "justification": "The same already-imported historical Transformers implementation and immutable base generation config are used for all three quality alternatives. No configuration or prompt was selected or changed from test outcomes.",
+  "serving_experiments": "Subsequent serving experiments use a separate explicit shared platform decoding policy (repetition penalty 1, disabled top-k, top-p 1, aligned single tokenizer EOS). Engine quality is not claimed identical to this earlier quality experiment.",
+  "discovery": "Independent Astra medium review found the publisher/engine default mismatch before serving benchmarks. The quality experiment remains internally controlled; defaults are disclosed retrospectively rather than represented as pre-frozen."
+}

@@ -25,11 +25,10 @@ operators, source review, and live external verification remain necessary.
 | HTTP lifecycle and recovery | Actual recorded response identities/usage, sync/SSE completion, access-control status codes, generation limit rejection, promotion, rollback, corruption refusal, disconnect cleanup, overload refusal/recovery, metrics, and owned-process graceful shutdown records satisfy the documented assertions. |
 | Blinded human review | The original packet remains intact while pending. Completion requires `evidence/human-review/annotated.jsonl`, validated against its separate review key using the actual importer. A `complete` flag without annotations fails. All three variants must be reviewed. |
 
-Historical training and scoring source hashes are checked against the current
-checkout. Audit historical runs from their recorded source or preserve matching
-sources; later code edits can correctly invalidate a claim that the current tree
-exactly reproduces an earlier experiment. New unrelated files do not invalidate
-earlier recorded source inventories.
+Historical training and scoring source hashes must match this checkout or the raw
+bytes at the exact recorded immutable Git revision and path. Branch names,
+unavailable objects, and unverifiable uncommitted bytes do not satisfy historical
+verification. New unrelated files do not invalidate earlier source inventories.
 
 The auditor permits negative and mixed model-quality outcomes. There is no
 requirement for fine-tuning to outperform prompting, no fabricated speedup target,

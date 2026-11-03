@@ -378,7 +378,11 @@ async def server_session(engine: str, package: Path, manifest: dict[str, Any],
 
 def metadata_for(manifest: dict[str, Any], engine: str, session: dict[str, Any],
                  prefix_cache: bool) -> dict[str, Any]:
+    policy = session["startup"]["ready_engine_state"].get("decoding_policy")
+    if not isinstance(policy, dict) or not policy.get("sha256"):
+        raise RuntimeError("Engine did not report an explicit effective serving decoding policy")
     return {**semantic_ids(manifest), "engine": engine,
+        "decoding_policy": policy, "decoding_policy_sha256": policy["sha256"],
         "engine_settings": {"dtype": manifest["runtime"]["dtype"], "quantization": manifest["runtime"]["quantization"],
             "base_model": manifest["base_model"], "adapter": manifest["kind"] == "adapter",
             "gateway_concurrency": 1 if engine == "transformers" else 8, "gateway_queue": 4,

@@ -1,6 +1,7 @@
 """Execution-control tests with explicit test doubles, never GPU evidence."""
 import asyncio
 from contextlib import nullcontext
+import hashlib
 import json
 import sys
 import time
@@ -12,7 +13,7 @@ import pytest
 from llm_platform.backends import TransformersBackend, VLLMBackend
 from llm_platform.backends.vllm_backend import verify_runtime_identity
 from llm_platform.backends.launch_vllm import launch_command
-from llm_platform.contracts import GenerationConfig
+from llm_platform.contracts import GenerationConfig, serving_decoding_policy
 
 
 def identity_fixture():
@@ -37,6 +38,7 @@ def test_vllm_rejects_unbound_runtime(field):
 async def test_vllm_uses_authoritative_usage_and_rejects_truncated_stream():
     backend = VLLMBackend()
     backend.model_name = "a" * 64
+    backend._decoding_policy = serving_decoding_policy(151645, 151643, 151643)
     finish = {"model": backend.model_name, "choices": [{"delta": {}, "finish_reason": "stop"}],
               "usage": {"completion_tokens": 7}}
     body = "data: " + json.dumps({"model": backend.model_name, "choices": [{"delta": {"content": "hello"}}]})
@@ -49,6 +51,7 @@ async def test_vllm_uses_authoritative_usage_and_rejects_truncated_stream():
     assert chunks[-1].finish_reason == "stop"
     await backend.unload()
     backend.model_name = "a" * 64
+    backend._decoding_policy = serving_decoding_policy(151645, 151643, 151643)
     backend.client = httpx.AsyncClient(transport=httpx.MockTransport(
         lambda request: httpx.Response(200, text=body.replace("data: [DONE]", ""))), base_url="http://test")
     with pytest.raises(RuntimeError, match="Incomplete"):
@@ -76,6 +79,8 @@ class FakeTensor:
 
 class FakeTokenizer:
     pad_token_id = 0
+    eos_token_id = 9
+    bos_token_id = None
 
     def apply_chat_template(self, messages, **kwargs):
         if kwargs.get("return_dict"):
@@ -110,8 +115,12 @@ class FakeModel:
         self.text = text
         self.fail = fail
         self.finished = False
+        self.generation_config = SimpleNamespace(repetition_penalty=1.1, top_p=0.8, top_k=20,
+                                                 eos_token_id=[9, 10], bad_words_ids=[[11]])
+        self.generated_kwargs = None
 
     def generate(self, input_ids, streamer, stopping_criteria, **kwargs):
+        self.generated_kwargs = kwargs
         generated = [1, 2]
         try:
             streamer.put(input_ids)
@@ -133,8 +142,19 @@ def reference_backend(monkeypatch):
     monkeypatch.setitem(sys.modules, "torch", SimpleNamespace(
         manual_seed=lambda seed: None, inference_mode=nullcontext,
         cuda=SimpleNamespace(is_available=lambda: False)))
+    class FakeHFGenerationConfig:
+        def __init__(self, **kwargs):
+            self.bad_words_ids = None
+            self.forced_bos_token_id = None
+            self.__dict__.update(kwargs)
+
+        @classmethod
+        def from_model_config(cls, config):
+            return cls(bos_token_id=7, eos_token_id=[9, 10], repetition_penalty=1.5)
+
     monkeypatch.setitem(sys.modules, "transformers", SimpleNamespace(
-        StoppingCriteria=object, StoppingCriteriaList=list, TextIteratorStreamer=FakeStreamer))
+        StoppingCriteria=object, StoppingCriteriaList=list, TextIteratorStreamer=FakeStreamer,
+        GenerationConfig=FakeHFGenerationConfig))
     backend = TransformersBackend(device="cpu", dtype="float32")
     backend.model = FakeModel()
     backend.tokenizer = FakeTokenizer()
@@ -271,3 +291,107 @@ async def test_vllm_context_overflow_rejected_before_network_request():
     with pytest.raises(ValueError, match="context length"):
         _ = [c async for c in backend.stream([], GenerationConfig(max_tokens=64), "overflow")]
     await backend.unload()
+
+
+@pytest.mark.parametrize("temperature", [0.0, 0.7])
+async def test_publisher_generation_settings_do_not_override_serving_policy(reference_backend, temperature):
+    model = reference_backend.model
+    publisher = model.generation_config
+    _ = [c async for c in reference_backend.stream([], GenerationConfig(temperature=temperature), "policy")]
+    passed = model.generated_kwargs
+    assert passed["generation_config"] is not publisher
+    assert passed["generation_config"].bad_words_ids is None
+    assert passed["generation_config"].forced_bos_token_id is None
+    assert passed["generation_config"].eos_token_id == 9
+    assert passed["eos_token_id"] == 9  # Publisher supplied a wider [9,10] EOS list.
+    assert passed["repetition_penalty"] == 1.0
+    assert passed["top_p"] == 1.0 and passed["top_k"] == 0
+    assert passed["num_beams"] == 1 and passed["num_return_sequences"] == 1
+    assert passed["do_sample"] is (temperature > 0)
+    assert passed["temperature"] == (temperature if temperature else 1.0)
+    assert passed["min_new_tokens"] == 0
+
+
+async def test_vllm_request_explicitly_matches_platform_sampling_and_single_eos():
+    backend = VLLMBackend()
+    backend.model_name = "a" * 64
+    backend._decoding_policy = serving_decoding_policy(151645, 151643, 151643)
+    observed = []
+    def route(request):
+        observed.append(json.loads(request.content))
+        response = {"model": backend.model_name,
+                    "choices": [{"delta": {"content": "hello"}, "finish_reason": "stop"}],
+                    "usage": {"completion_tokens": 1}}
+        return httpx.Response(200, text="data: " + json.dumps(response) + "\n\ndata: [DONE]\n\n")
+    backend.client = httpx.AsyncClient(transport=httpx.MockTransport(route), base_url="http://engine")
+    _ = [c async for c in backend.stream([], GenerationConfig(temperature=0.7, stop=("STOP",)), "policy")]
+    payload = observed[0]
+    assert payload["repetition_penalty"] == 1.0
+    assert payload["top_p"] == 1.0 and payload["top_k"] == -1 and payload["min_p"] == 0
+    assert payload["presence_penalty"] == 0 and payload["frequency_penalty"] == 0
+    assert payload["n"] == 1 and payload["use_beam_search"] is False
+    assert payload["stop_token_ids"] == [151645] and payload["ignore_eos"] is False
+    assert payload["min_tokens"] == 0 and payload["stop"] == ["STOP"]
+    assert backend.health()["decoding_policy"] == serving_decoding_policy(151645, 151643, 151643)
+    await backend.unload()
+
+
+def test_decoding_policy_hash_covers_effective_eos_and_is_copy_safe():
+    first = serving_decoding_policy(9, 7, 0)
+    second = serving_decoding_policy(9, 7, 0)
+    assert first == second
+    assert first["sha256"] != serving_decoding_policy(10, 7, 0)["sha256"]
+    first["eos_token_ids"].append(99)
+    assert second["eos_token_ids"] == [9]
+    with pytest.raises(ValueError, match="single eos"):
+        serving_decoding_policy([9, 10], 7, 0)
+
+
+async def test_cuda_cleanup_runs_off_event_loop_and_retains_ownership_on_cancellation(reference_backend, monkeypatch):
+    backend = reference_backend
+    entered = asyncio.Event()
+    released = []
+    loop = asyncio.get_running_loop()
+
+    def slow_cleanup():
+        loop.call_soon_threadsafe(entered.set)
+        time.sleep(0.07)
+        backend.model = None
+        released.append(True)
+
+    monkeypatch.setattr(backend, "_unload_sync", slow_cleanup)
+    task = asyncio.create_task(backend.unload())
+    await asyncio.wait_for(entered.wait(), 1)
+    assert backend.health()["cleanup_pending"]
+    assert not backend.health()["ready"]
+    task.cancel()
+    # The cancellation cannot abandon the thread. The event loop still ticks
+    # while cleanup is in progress, allowing health and admin requests.
+    await asyncio.sleep(0.01)
+    assert not task.done() and backend._cleanup_task is not None
+    with pytest.raises(asyncio.CancelledError):
+        await task
+    assert released and backend.model is None and backend._cleanup_task is None
+
+
+async def test_vllm_rejects_additional_architectural_eos_before_connecting(monkeypatch, tmp_path):
+    manifest, identity = identity_fixture()
+    manifest["base_model"]["id"] = "base-model"
+    manifest["tokenizer"].update(id="base-model", revision=manifest["base_model"]["revision"], path="tokenizer",
+                                  chat_template_sha256=hashlib.sha256(b"template").hexdigest())
+    manifest["runtime"]["backend"] = "vllm"
+    identity.update(tokenizer_revision=manifest["tokenizer"]["revision"],
+                    chat_template_sha256=manifest["tokenizer"]["chat_template_sha256"], max_model_len=32)
+    identity_path = tmp_path / "identity.json"
+    identity_path.write_text(json.dumps(identity))
+    tokenizer = FakeTokenizer()
+    tokenizer.chat_template = "template"
+    monkeypatch.setattr("llm_platform.registry.verify_package", lambda path: manifest)
+    monkeypatch.setitem(sys.modules, "transformers", SimpleNamespace(
+        AutoTokenizer=SimpleNamespace(from_pretrained=lambda *a, **kw: tokenizer),
+        AutoConfig=SimpleNamespace(from_pretrained=lambda *a, **kw: SimpleNamespace(
+            eos_token_id=[9, 10], bos_token_id=7))))
+    backend = VLLMBackend(identity_path=identity_path)
+    with pytest.raises(ValueError, match="architectural EOS"):
+        await backend.load(tmp_path, manifest)
+    assert backend.client is None and not backend.health()["ready"]

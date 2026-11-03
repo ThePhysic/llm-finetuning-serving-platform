@@ -66,6 +66,25 @@ token caps, deterministic temperature zero and seed 42. Reports with changed
 weights, tokenization, prompts, decoding, request count or warmup settings are
 rejected by `compare_reports`.
 
+The serving policy is explicitly versioned as `platform-serving-v1`. It ignores
+publisher `generation_config.json` sampling settings: repetition penalty is 1.0,
+top-p is 1.0, top-k and min-p filtering are disabled, beam count and output count
+are one, and no minimum generation length, forced tokens, bad-word filters or
+custom constraints are inherited. Transformers receives a pristine generation
+configuration and explicit request parameters; vLLM receives the equivalent
+OpenAI extension parameters (`top_k=-1` rather than Transformers' `top_k=0`).
+Both stop on exactly the packaged tokenizer's single EOS token. vLLM also checks
+that its pinned architectural EOS matches that token before accepting the
+runtime. Effective EOS/BOS/pad IDs, all semantic policy fields and a canonical
+SHA256 policy identity are recorded in engine health and benchmark metadata.
+Different policy hashes cannot support a controlled engine comparison.
+
+Historical quality runs have their own frozen decoding configuration and source
+revision. In particular, a quality run that retained publisher defaults is not
+silently relabeled as using this serving policy. Its protocol/addendum remains
+authoritative. The serving experiment is a separate engine-performance
+comparison and does not claim identical decoding to earlier quality evidence.
+
 Transformers uses one gateway execution slot and serialized generation. vLLM
 uses eight gateway execution slots and up to eight engine sequences. Both
 gateways bound the waiting queue to four. That is an explicit system integration

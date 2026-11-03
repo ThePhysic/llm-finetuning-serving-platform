@@ -9,7 +9,7 @@ import threading
 from pathlib import Path
 from typing import Any, AsyncIterator
 
-from llm_platform.contracts import GenerationConfig, TokenChunk
+from llm_platform.contracts import GenerationConfig, TokenChunk, serving_decoding_policy
 
 
 class TransformersBackend:
@@ -30,6 +30,9 @@ class TransformersBackend:
         self._cancel: dict[str, threading.Event] = {}
         self._workers: dict[str, threading.Thread] = {}
         self._last_error: str | None = None
+        self._unloading = False
+        self._cleanup_task: asyncio.Task[None] | None = None
+        self._decoding_policy: dict[str, Any] | None = None
 
     async def load(self, package: Path, manifest: dict[str, Any]) -> None:
         if self.model is not None:
@@ -111,7 +114,12 @@ class TransformersBackend:
                 model = PeftModel.from_pretrained(model, adapter_path, is_trainable=False)
             model.eval()
             model.config.use_cache = True
+            # Discard publisher generation_config.json and any unsupported
+            # generation defaults. The same explicit policy is passed per request.
+            model.generation_config = self._generation_parameters(model, tokenizer, GenerationConfig())["generation_config"]
             self.model, self.tokenizer, self.manifest = model, tokenizer, manifest
+            self._decoding_policy = serving_decoding_policy(
+                tokenizer.eos_token_id, model.generation_config.bos_token_id, tokenizer.pad_token_id)
             self.device, self.dtype = device, dtype_name
             self._last_error = None
         except BaseException:
@@ -124,15 +132,55 @@ class TransformersBackend:
         for event in tuple(self._cancel.values()):
             event.set()
         async with self._lock:
-            self.model = None
-            self.tokenizer = None
-            self.manifest = None
+            self._unloading = True
+            cleanup = asyncio.create_task(asyncio.to_thread(self._unload_sync))
+            self._cleanup_task = cleanup
+            interrupted = False
             try:
-                import torch
-                if torch.cuda.is_available():
-                    torch.cuda.empty_cache()
-            except ImportError:
-                pass
+                while not cleanup.done():
+                    try:
+                        await asyncio.shield(cleanup)
+                    except asyncio.CancelledError:
+                        interrupted = True
+                cleanup.result()
+            finally:
+                self._cleanup_task = None
+                self._unloading = False
+                if interrupted:
+                    raise asyncio.CancelledError
+
+    def _unload_sync(self) -> None:
+        # Tensor destruction and CUDA allocator cleanup can block in the driver.
+        # Keep them off the ASGI event loop and retain this task until settled.
+        self.model = None
+        self.tokenizer = None
+        self.manifest = None
+        self._decoding_policy = None
+        try:
+            import torch
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+        except ImportError:
+            pass
+
+    @staticmethod
+    def _generation_parameters(model: Any, tokenizer: Any, config: GenerationConfig) -> dict[str, Any]:
+        from transformers import GenerationConfig as HFGenerationConfig
+
+        architecture = HFGenerationConfig.from_model_config(model.config)
+        bos = tokenizer.bos_token_id if tokenizer.bos_token_id is not None else architecture.bos_token_id
+        serving_decoding_policy(tokenizer.eos_token_id, bos, tokenizer.pad_token_id)
+        # Copy only architectural token IDs into a pristine generation object.
+        # Bad-word filters, forced tokens, constraints, custom penalties, etc.
+        # from either publisher configuration are deliberately not inherited.
+        clean = HFGenerationConfig(bos_token_id=bos, eos_token_id=tokenizer.eos_token_id,
+                                   pad_token_id=tokenizer.pad_token_id)
+        return {"generation_config": clean, "max_new_tokens": config.max_tokens,
+                "do_sample": config.temperature > 0, "temperature": config.temperature if config.temperature > 0 else 1.0,
+                "top_p": 1.0, "top_k": 0, "repetition_penalty": 1.0,
+                "num_beams": 1, "num_return_sequences": 1, "min_new_tokens": 0,
+                "eos_token_id": tokenizer.eos_token_id, "bos_token_id": bos,
+                "pad_token_id": tokenizer.pad_token_id, "use_cache": True}
 
     def count_tokens(self, messages: list[dict[str, str]]) -> int:
         if self.tokenizer is None:
@@ -145,9 +193,11 @@ class TransformersBackend:
             event.set()
 
     def health(self) -> dict[str, Any]:
-        status: dict[str, Any] = {"ready": self.model is not None, "backend": "transformers",
+        status: dict[str, Any] = {"ready": self.model is not None and not self._unloading, "backend": "transformers",
                                   "device": self.device, "dtype": self.dtype,
                                   "active_requests": len(self._workers), "last_error": self._last_error}
+        status["cleanup_pending"] = self._unloading
+        status["decoding_policy"] = self._decoding_policy
         if self.model is not None:
             import torch
             status["max_model_len"] = getattr(self.model.config, "max_position_embeddings", None)
@@ -219,12 +269,8 @@ class TransformersBackend:
                     torch.manual_seed(config.seed)
                     if torch.cuda.is_available():
                         torch.cuda.manual_seed_all(config.seed)
-                    kwargs: dict[str, Any] = {**encoded, "max_new_tokens": config.max_tokens,
-                        "do_sample": config.temperature > 0, "streamer": streamer,
-                        "stopping_criteria": StoppingCriteriaList([Stop()]),
-                        "pad_token_id": tokenizer.pad_token_id, "use_cache": True}
-                    if config.temperature > 0:
-                        kwargs["temperature"] = config.temperature
+                    kwargs: dict[str, Any] = {**encoded, **self._generation_parameters(model, tokenizer, config),
+                        "streamer": streamer, "stopping_criteria": StoppingCriteriaList([Stop()])}
                     with torch.inference_mode():
                         model.generate(**kwargs)
                 except BaseException as exc:

@@ -2,8 +2,35 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import hashlib
+import json
 from pathlib import Path
 from typing import Any, AsyncIterator, Protocol
+
+
+def serving_decoding_policy(eos_token_id: int, bos_token_id: int | None,
+                            pad_token_id: int | None) -> dict[str, Any]:
+    """The platform owns serving defaults; publisher generation files do not.
+
+    Request-specific max_tokens/temperature/seed/stop are recorded separately.
+    Semantic top-k is disabled: Transformers spells it 0 and vLLM spells it -1.
+    The canonical digest covers every policy field, including effective token IDs.
+    """
+    for label, value in (("eos", eos_token_id), ("bos", bos_token_id), ("pad", pad_token_id)):
+        if value is None and label != "eos":
+            continue
+        if type(value) is not int or value < 0:
+            raise ValueError(f"Packaged tokenizer must declare a valid single {label} token id")
+    policy = {"version": "platform-serving-v1", "publisher_generation_config": "ignored",
+              "repetition_penalty": 1.0, "presence_penalty": 0.0, "frequency_penalty": 0.0,
+              "top_p": 1.0, "top_k": "disabled", "num_beams": 1, "num_return_sequences": 1,
+              "min_p": "disabled", "length_penalty": 1.0, "no_repeat_ngram_size": 0,
+              "bad_words_ids": None, "forced_token_ids": None, "constraints": None,
+              "min_new_tokens": 0, "eos_token_ids": [eos_token_id],
+              "bos_token_id": bos_token_id, "pad_token_id": pad_token_id,
+              "eos_policy": "packaged-tokenizer-single-eos", "ignore_eos": False}
+    encoded = json.dumps(policy, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
+    return {**policy, "sha256": hashlib.sha256(encoded).hexdigest()}
 
 
 @dataclass(frozen=True)

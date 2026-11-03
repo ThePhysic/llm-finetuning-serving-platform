@@ -230,7 +230,8 @@ async def run_benchmark(base_url: str, model: str, prompts: list[list[dict[str, 
     """Run a bounded closed-loop workload (or paced arrivals with client backpressure)."""
     if not prompts:
         raise ValueError("At least one prompt is required")
-    for required in ("weights_id", "tokenizer_id", "engine", "engine_settings", "cache_state"):
+    for required in ("weights_id", "tokenizer_id", "engine", "engine_settings", "cache_state",
+                     "decoding_policy_sha256"):
         if required not in metadata:
             raise ValueError(f"Benchmark metadata is missing {required}")
     output_dir = Path(output_dir)
@@ -323,7 +324,7 @@ def compare_reports(reports: list[dict[str, Any]]) -> dict[str, Any]:
         raise ValueError("At least two reports are required")
     first = reports[0]
     for report in reports[1:]:
-        for key in ("weights_id", "tokenizer_id", "prompt_set_sha256"):
+        for key in ("weights_id", "tokenizer_id", "prompt_set_sha256", "decoding_policy_sha256"):
             if report["metadata"][key] != first["metadata"][key]:
                 raise ValueError(f"Unfair comparison: {key} differs")
         for key in ("max_tokens", "temperature", "seed", "stream", "requests", "warmup",

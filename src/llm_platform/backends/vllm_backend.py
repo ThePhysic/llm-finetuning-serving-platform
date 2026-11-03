@@ -16,7 +16,7 @@ from typing import Any, AsyncIterator
 
 import httpx
 
-from llm_platform.contracts import GenerationConfig, TokenChunk
+from llm_platform.contracts import GenerationConfig, TokenChunk, serving_decoding_policy
 
 
 def verify_runtime_identity(manifest: dict[str, Any], identity: dict[str, Any]) -> str:
@@ -50,12 +50,13 @@ class VLLMBackend:
         self._last_probe = 0.0
         self._probe_task: asyncio.Task[None] | None = None
         self.max_model_len: int | None = None
+        self._decoding_policy: dict[str, Any] | None = None
 
     async def load(self, package: Path, manifest: dict[str, Any]) -> None:
         if self.client is not None:
             raise RuntimeError("Backend already loaded")
         from llm_platform.registry import verify_package
-        from transformers import AutoTokenizer
+        from transformers import AutoConfig, AutoTokenizer
 
         verified = verify_package(Path(package))
         if verified["artifact_id"] != manifest.get("artifact_id"):
@@ -77,6 +78,15 @@ class VLLMBackend:
         tokenizer = AutoTokenizer.from_pretrained(tokenizer_path, revision=meta["revision"], trust_remote_code=False)
         if hashlib.sha256((tokenizer.chat_template or "").encode()).hexdigest() != meta["chat_template_sha256"]:
             raise ValueError("Tokenizer chat template mismatch")
+        architecture = AutoConfig.from_pretrained(manifest["base_model"]["id"],
+                                                   revision=manifest["base_model"]["revision"], trust_remote_code=False)
+        # The OpenAI engine always recognizes its architectural EOS in addition
+        # to stop_token_ids. Reject a different EOS rather than silently widening
+        # the platform's packaged-tokenizer termination policy.
+        if architecture.eos_token_id != tokenizer.eos_token_id:
+            raise ValueError("vLLM architectural EOS differs from packaged tokenizer EOS")
+        bos = tokenizer.bos_token_id if tokenizer.bos_token_id is not None else architecture.bos_token_id
+        decoding_policy = serving_decoding_policy(tokenizer.eos_token_id, bos, tokenizer.pad_token_id)
         headers = {"Authorization": f"Bearer {self.api_key}"} if self.api_key else {}
         client = httpx.AsyncClient(base_url=self.base_url, headers=headers, timeout=self.timeout,
                                    limits=httpx.Limits(max_connections=128, max_keepalive_connections=32))
@@ -90,6 +100,7 @@ class VLLMBackend:
             raise
         self.client, self.tokenizer, self.manifest, self.model_name = client, tokenizer, verified, model_name
         self.max_model_len = max_model_len
+        self._decoding_policy = decoding_policy
         self._ready, self._last_probe = True, time.monotonic()
         self._probe_task = asyncio.create_task(self._probe_health())
 
@@ -138,11 +149,13 @@ class VLLMBackend:
             await self.client.aclose()
         self.client, self.tokenizer, self.manifest, self.model_name = None, None, None, None
         self.max_model_len = None
+        self._decoding_policy = None
 
     def health(self) -> dict[str, Any]:
         return {"ready": self.client is not None and self._ready and time.monotonic() - self._last_probe < 8.0,
                 "backend": "vllm", "active_requests": len(self._active),
                 "max_model_len": self.max_model_len,
+                "decoding_policy": self._decoding_policy,
                 "runtime_bound": self.manifest is not None, "last_error": self._last_error}
 
     async def stream(self, messages: list[dict[str, str]], config: GenerationConfig,
@@ -151,8 +164,14 @@ class VLLMBackend:
             raise RuntimeError("vLLM backend is not loaded")
         if self.max_model_len is not None and self.count_tokens(messages) + config.max_tokens > self.max_model_len:
             raise ValueError("Input plus output exceeds vLLM runtime context length")
+        if self._decoding_policy is None:
+            raise RuntimeError("vLLM serving decoding policy is not bound")
         payload = {"model": self.model_name, "messages": messages, "max_tokens": config.max_tokens,
                    "temperature": config.temperature, "seed": config.seed, "stream": True,
+                   "top_p": 1.0, "top_k": -1, "min_p": 0.0, "repetition_penalty": 1.0,
+                   "presence_penalty": 0.0, "frequency_penalty": 0.0,
+                   "n": 1, "use_beam_search": False, "min_tokens": 0,
+                   "stop_token_ids": self._decoding_policy["eos_token_ids"], "ignore_eos": False,
                    "stream_options": {"include_usage": True}}
         if config.stop:
             payload["stop"] = list(config.stop)
