@@ -6,6 +6,9 @@
 *.toml text eol=lf
 *.yml text eol=lf
 *.lock text eol=lf
+docker/Dockerfile.* text eol=lf
+# Dependency inventories are hash-bound evidence; keep identical bytes on every OS.
+requirements/** -text
 # Hash-bound data/evidence override every extension rule, including source snapshots.
 data/** -text
 evidence/** -text

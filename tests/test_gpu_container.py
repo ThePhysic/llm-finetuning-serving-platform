@@ -9,6 +9,7 @@ from pathlib import Path
 import subprocess
 
 import pytest
+from packaging.requirements import Requirement
 
 SCRIPT = Path(__file__).resolve().parents[1] / "scripts/verify_gpu_container.py"
 spec = importlib.util.spec_from_file_location("verify_gpu_container", SCRIPT)
@@ -149,3 +150,26 @@ def test_existing_output_is_never_overwritten(tmp_path):
     with pytest.raises(FileExistsError):
         harness.fresh_output(output)
     assert marker.read_text() == "original"
+
+
+def test_container_lock_preserves_every_linux_pin_except_incompatible_numpy():
+    root = SCRIPT.parents[1]
+    environment = {"python_version": "3.11", "python_full_version": "3.11.11", "sys_platform": "linux",
+                   "platform_machine": "x86_64", "os_name": "posix", "platform_system": "Linux"}
+    def pins(path):
+        parsed = {}
+        for line in path.read_text(encoding="utf-8").splitlines():
+            if not line or not line[0].isalnum() or "==" not in line:
+                continue
+            value = Requirement(line.removesuffix(" \\"))
+            if value.marker is None or value.marker.evaluate(environment):
+                parsed[value.name] = str(value.specifier)
+        return parsed
+    original = pins(root / "requirements/cpu.lock")
+    variant_input = pins(root / "requirements/gpu-container-cpu-py311.in")
+    variant_lock = pins(root / "requirements/gpu-container-cpu-py311.lock")
+    assert original["numpy"] == "==2.5.4"
+    assert variant_input == variant_lock
+    assert {name for name in original.keys() | variant_lock.keys() if original.get(name) != variant_lock.get(name)} == {"numpy"}
+    assert variant_lock["numpy"] == "==2.4.6"
+    assert "gpu-container-cpu-py311.lock" in (root / "docker/Dockerfile.gpu").read_text()
